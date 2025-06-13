@@ -32,6 +32,20 @@ public class NewAlarmActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_alarm);
 
+//        Intent intent = getIntent();
+//        String time = intent.getStringExtra("time");
+//        String label = intent.getStringExtra("label");
+//        boolean enabled = intent.getBooleanExtra("enabled", false);
+//
+//        // Update UI with the alarm details
+//        TextView timeView = findViewById(R.id.detail_time);
+//        TextView labelView = findViewById(R.id.detail_label);
+//        TextView statusView = findViewById(R.id.detail_status);
+//
+//        timeView.setText(time);
+//        labelView.setText(label);
+//        statusView.setText(enabled ? "Enabled" : "Disabled");
+
         this.header = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(header);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
@@ -59,41 +73,41 @@ public class NewAlarmActivity extends AppCompatActivity {
 
 
     // OnToggleClicked() method implements the time functionality
-    public void onToggleClicked(View view) {
-        long time;
-        if (((ToggleButton) view).isChecked()) {
-            Toast.makeText(NewAlarmActivity.this, "ALARM ON", Toast.LENGTH_SHORT).show();
-            Calendar calendar = Calendar.getInstance();
-
-            // calendar is called to get current time in hour minute
-            calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getHour());
-            calendar.set(Calendar.MINUTE, alarmTimePicker.getMinute());
-
-            // using intent i have class AlarmReceiver class which inherits BroadcasterReceiver
-            Intent intent = new Intent(this, AlarmReceiver.class);
-
-            // we call broadcast using pendingIntent
-            pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-
-            time = (calendar.getTimeInMillis() - (calendar.getTimeInMillis()%60000));
-            if (System.currentTimeMillis() > time) {
-                int amPm = calendar.get(Calendar.AM_PM);
-                time = amPm == Calendar.AM ? time + (1000 *60 * 60 * 12) : time + (1000 *60 * 60 * 24);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-                } else {
-                    Toast.makeText(this, "Exact alarms not allowed. Please enable in system settings.", Toast.LENGTH_LONG).show();
-                }
-            } else {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-            }
-        } else {
-            alarmManager.cancel(pendingIntent);
-            Toast.makeText(NewAlarmActivity.this, "ALARM OFF", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    public void onToggleClicked(View view) {
+//        long time;
+//        if (((ToggleButton) view).isChecked()) {
+//            Toast.makeText(NewAlarmActivity.this, "ALARM ON", Toast.LENGTH_SHORT).show();
+//            Calendar calendar = Calendar.getInstance();
+//
+//            // calendar is called to get current time in hour minute
+//            calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getHour());
+//            calendar.set(Calendar.MINUTE, alarmTimePicker.getMinute());
+//
+//            // using intent i have class AlarmReceiver class which inherits BroadcasterReceiver
+//            Intent intent = new Intent(this, AlarmReceiver.class);
+//
+//            // we call broadcast using pendingIntent
+//            pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+//
+//            time = (calendar.getTimeInMillis() - (calendar.getTimeInMillis()%60000));
+//            if (System.currentTimeMillis() > time) {
+//                int amPm = calendar.get(Calendar.AM_PM);
+//                time = amPm == Calendar.AM ? time + (1000 *60 * 60 * 12) : time + (1000 *60 * 60 * 24);
+//            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                if (alarmManager.canScheduleExactAlarms()) {
+//                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+//                } else {
+//                    Toast.makeText(this, "Exact alarms not allowed. Please enable in system settings.", Toast.LENGTH_LONG).show();
+//                }
+//            } else {
+//                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+//            }
+//        } else {
+//            alarmManager.cancel(pendingIntent);
+//            Toast.makeText(NewAlarmActivity.this, "ALARM OFF", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
     public void showExitDialog() {
         new AlertDialog.Builder(this)
@@ -117,9 +131,9 @@ public class NewAlarmActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        showExitDialog();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        showExitDialog();
+//    }
 
 }

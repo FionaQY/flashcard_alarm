@@ -12,7 +12,8 @@ public class Alarm {
     // cards. possible file to list of flashcards
     private int numberOfSnoozes;
     private int lengthOfSnooze; // in minutes
-    private boolean enabled;
+    private boolean isEnabled;
+    private boolean isOneTime;
     private List<Boolean> daysOfTheWeek = null;
 
     public void setTime(LocalTime time) {
@@ -20,7 +21,12 @@ public class Alarm {
     }
 
     public boolean isEnabled() {
-        return this.enabled;
+        return this.isEnabled;
+    }
+
+    public void setStatus(boolean b) {
+        this.isEnabled = b;
+        // updated the storage when app closes?
     }
 
     public int getHour() {
@@ -41,5 +47,9 @@ public class Alarm {
             return this.ringtone;
         }
         return null;
+    }
+
+    public String getTime() {
+        return this.time.toString();
     }
 }

@@ -33,7 +33,7 @@ public class AlarmScheduler {
     public static List<Alarm> loadAlarms(Context ctx) {
         SharedPreferences preferences = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String strJson = preferences.getString(ALARMS_KEY,null);
-        if (strJson != null) {
+        if (strJson == null) {
             return new ArrayList<Alarm>();
         }
         return new Gson().fromJson(strJson, new TypeToken<List<Alarm>>(){}.getType());
