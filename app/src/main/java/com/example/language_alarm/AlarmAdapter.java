@@ -1,19 +1,18 @@
-package com.example.myapplication;
+package com.example.language_alarm;
 
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.activities.NewAlarmActivity;
-import com.example.myapplication.models.Alarm;
+import com.example.language_alarm.activities.NewAlarmActivity;
+import com.example.language_alarm.models.Alarm;
 
 import java.util.List;
 
@@ -21,7 +20,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
     private Context ctx;
     private List<Alarm> alarmList;
 
-    public AlarmAdapter(List<Alarm> alarms) {
+    public AlarmAdapter(Context ctx, List<Alarm> alarms) {
+        this.ctx = ctx;
         this.alarmList = alarms;
     }
 
@@ -33,6 +33,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             super(itemView);
             timeTextView = (TextView) itemView.findViewById(R.id.alarm_time);
             labelTextView = (TextView) itemView.findViewById(R.id.alarm_label);
+            labelTextView.setText("bbb"); // set this value
             toggleSwitch = (SwitchCompat) itemView.findViewById(R.id.alarm_toggle);
         }
     }
@@ -59,6 +60,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             Intent intent = new Intent(ctx, NewAlarmActivity.class);
             intent.putExtra("time", alarm.getTime());
             intent.putExtra("enabled", alarm.isEnabled());
+            ctx.startActivity(intent);
         });
     }
 

@@ -27,7 +27,7 @@
             android:textColor="#666" />
     </LinearLayout>
 
-    <SwitchCompat
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/alarm_toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

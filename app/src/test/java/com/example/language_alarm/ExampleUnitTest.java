@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.language_alarm;
 
 import org.junit.Test;
 

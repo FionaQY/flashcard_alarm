@@ -63,13 +63,27 @@
         android:timePickerMode="spinner"/>
 
     <!-- Toggle Button (bottom-end corner) -->
-    <ToggleButton
-        android:id="@+id/toggleButton"
-        android:layout_width="wrap_content"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/saveButton"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:checked="false"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:text="Save Alarm"
+        android:textColor="@android:color/white"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:paddingVertical="12dp"
+        app:icon="@drawable/outline_alarm_24"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@android:color/white"
+        app:cornerRadius="8dp"
+        app:backgroundTint="?attr/colorPrimary"
+        app:rippleColor="@color/colorPrimaryDark"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="20dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
