@@ -41,26 +41,37 @@
     </androidx.appcompat.widget.Toolbar>
 
 <!--Header: back button < with a confirmation, Ring in "..."-->
-<!--Scrollable alarm setter-->
-
 <!--daily checkbox  + SMTWTFS-->
-
-<!--set german cards-->
-
 <!--loudness, vibration checkbox, custome sound (ringtone), snooze (number ,duration)-->
-    <!--    Alarm wallpaper-->
-    <!--Added Time picker just to pick the alarm time-->
-    <!--gravity is aligned to center-->
+<!--Alarm wallpaper-->
     <TimePicker
         android:id="@+id/timePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintBottom_toTopOf="@+id/toggleButton"
+        app:layout_constraintBottom_toTopOf="@+id/dayPicker_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"
         android:timePickerMode="spinner"/>
+
+    <LinearLayout
+        android:id="@+id/dayPicker_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/saveButton"
+        android:layout_centerHorizontal="true"
+        app:layout_constraintTop_toBottomOf="@+id/timePicker"
+        app:layout_constraintBottom_toTopOf="@+id/saveButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" >
+
+        <include
+            android:id="@+id/dayPicker"
+            layout="@layout/day_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <!-- Toggle Button (bottom-end corner) -->
     <com.google.android.material.button.MaterialButton
@@ -82,6 +93,7 @@
         app:cornerRadius="8dp"
         app:backgroundTint="?attr/colorPrimary"
         app:rippleColor="@color/colorPrimaryDark"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

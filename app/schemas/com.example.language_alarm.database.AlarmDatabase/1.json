@@ -63,10 +63,46 @@
             "notNull": true
           },
           {
-            "fieldPath": "daysOfTheWeek",
-            "columnName": "daysOfTheWeek",
-            "affinity": "TEXT",
-            "notNull": false
+            "fieldPath": "monday",
+            "columnName": "monday",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tuesday",
+            "columnName": "tuesday",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wednesday",
+            "columnName": "wednesday",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thursday",
+            "columnName": "thursday",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "friday",
+            "columnName": "friday",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saturday",
+            "columnName": "saturday",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sunday",
+            "columnName": "sunday",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {

@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.example.language_alarm'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.example.language_alarm"
         minSdk 27
-        targetSdk 35
+        targetSdk 36
         versionCode 1
         versionName "1.0"
 
@@ -34,11 +34,9 @@ android {
 }
 
 dependencies {
-    def room_version = "2.6.1"
-
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    implementation "androidx.room:room-ktx:$room_version" // For coroutines support
+    implementation libs.room.runtime
+    implementation libs.room.ktx
+    annotationProcessor libs.room.compiler
 
     implementation libs.appcompat
     implementation libs.material

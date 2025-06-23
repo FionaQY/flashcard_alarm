@@ -1,150 +1,176 @@
 package com.example.language_alarm.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverter;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 @Entity(tableName = "alarms")
-public class Alarm {
+public class Alarm implements Parcelable {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private int hour;  // Store hour separately
     private int minute;
     private String ringtone;
     private String wallpaper;
-    // cards. possible file to list of flashcards
     private int numberOfSnoozes;
     private int lengthOfSnooze; // in minutes
     private boolean isEnabled = true;
     private boolean isOneTime;
-    private String daysOfTheWeek = null;
+
+    private boolean monday;
+    private boolean tuesday;
+    private boolean wednesday;
+    private boolean thursday;
+    private boolean friday;
+    private boolean saturday;
+    private boolean sunday;
 
     public Alarm() {}
+
     public Alarm(int hour, int minute, int numSnoozes, int lenSnooze,
-                 boolean isOneTime, ArrayList<Boolean> days) {
+                 boolean isOneTime, boolean monday, boolean tuesday, boolean wednesday,
+                 boolean thursday, boolean friday, boolean saturday, boolean sunday) {
         this.hour = hour;
         this.minute = minute;
         this.numberOfSnoozes = numSnoozes;
         this.lengthOfSnooze = lenSnooze;
         this.isOneTime = isOneTime;
-        setDaysOfWeek(days);
+        this.monday = monday;
+        this.tuesday = tuesday;
+        this.wednesday = wednesday;
+        this.thursday = thursday;
+        this.friday = friday;
+        this.saturday = saturday;
+        this.sunday = sunday;
     }
 
-    public String getDaysOfTheWeek() {
-        return this.daysOfTheWeek;
+    protected Alarm(Parcel in) {
+        id = in.readInt();
+        hour = in.readInt();
+        minute = in.readInt();
+        ringtone = in.readString();
+        wallpaper = in.readString();
+        numberOfSnoozes = in.readInt();
+        lengthOfSnooze = in.readInt();
+        isEnabled = in.readByte() != 0;
+        isOneTime = in.readByte() != 0;
+        monday = in.readByte() != 0;
+        tuesday = in.readByte() != 0;
+        wednesday = in.readByte() != 0;
+        thursday = in.readByte() != 0;
+        friday = in.readByte() != 0;
+        saturday = in.readByte() != 0;
+        sunday = in.readByte() != 0;
     }
 
-    public List<Boolean> getParsedDaysOfTheWeek() {
-        if (daysOfTheWeek == null) return new ArrayList<>();
-        return new Gson().fromJson(daysOfTheWeek, new TypeToken<List<Boolean>>(){}.getType());
-    }
-
-    public void setDaysOfTheWeek(String daysOfTheWeek) {
-        this.daysOfTheWeek = daysOfTheWeek;
-    }
-
-    public void setDaysOfWeek(List<Boolean> days) {
-        this.daysOfTheWeek = new Gson().toJson(days);
-    }
-
-    public Calendar getCalendar() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, minute);
-        cal.set(Calendar.SECOND, 0);
-        return cal;
-    }
-
-    public void setId(int i) {
-        this.id = i;
-    }
-    public int getId() {
-        return this.id;
-    }
-
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
-    }
-
-    public void setStatus(boolean b) {
-        this.isEnabled = b;
-        // updated the storage when app closes?
-    }
-
-    public void setHour(int hour) {
-        this.hour = hour;
-    }
-
-    public int getHour() {
-        return this.hour;
-    }
-
-    public void setMinute(int minute) {
-        this.minute = minute;
-    }
-
-    public int getMinute() {
-        return this.minute;
-    }
-
-    public void setRingtone(String ringtone) {
-        this.ringtone = ringtone;
-    }
-
-    public String getRingtone() {
-        if (this.ringtone != null) {
-            return this.ringtone;
+    public static final Creator<Alarm> CREATOR = new Creator<>() {
+        @Override
+        public Alarm createFromParcel(Parcel in) {
+            return new Alarm(in);
         }
-        return null;
-    }
+
+        @Override
+        public Alarm[] newArray(int size) {
+            return new Alarm[size];
+        }
+    };
+
+    // Getters and setters for all fields
+    public boolean isMonday() { return monday; }
+    public void setMonday(boolean monday) { this.monday = monday; }
+
+    public boolean isTuesday() { return tuesday; }
+    public void setTuesday(boolean tuesday) { this.tuesday = tuesday; }
+
+    public boolean isWednesday() { return wednesday; }
+    public void setWednesday(boolean wednesday) { this.wednesday = wednesday; }
+
+    public boolean isThursday() { return thursday; }
+    public void setThursday(boolean thursday) { this.thursday = thursday; }
+
+    public boolean isFriday() { return friday; }
+    public void setFriday(boolean friday) { this.friday = friday; }
+
+    public boolean isSaturday() { return saturday; }
+    public void setSaturday(boolean saturday) { this.saturday = saturday; }
+
+    public boolean isSunday() { return sunday; }
+    public void setSunday(boolean sunday) { this.sunday = sunday; }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public int getHour() { return hour; }
+    public void setHour(int hour) { this.hour = hour; }
+
+    public int getMinute() { return minute; }
+    public void setMinute(int minute) { this.minute = minute; }
+
+    public String getRingtone() { return ringtone; }
+    public void setRingtone(String ringtone) { this.ringtone = ringtone; }
+
+    public String getWallpaper() { return wallpaper; }
+    public void setWallpaper(String wallpaper) { this.wallpaper = wallpaper; }
+
+    public int getNumberOfSnoozes() { return numberOfSnoozes; }
+    public void setNumberOfSnoozes(int numberOfSnoozes) { this.numberOfSnoozes = numberOfSnoozes; }
+
+    public int getLengthOfSnooze() { return lengthOfSnooze; }
+    public void setLengthOfSnooze(int lengthOfSnooze) { this.lengthOfSnooze = lengthOfSnooze; }
+
+    public boolean isEnabled() { return isEnabled; }
+    public void setEnabled(boolean enabled) { isEnabled = enabled; }
+
+    public boolean isOneTime() { return isOneTime; }
+    public void setOneTime(boolean oneTime) { isOneTime = oneTime; }
 
     public String getTime() {
-        return String.format(Locale.US, "%02d:%02d", this.getHour(), this.getMinute());
+        return String.format(Locale.US, "%02d:%02d", hour, minute);
     }
 
-    public void setWallpaper(String wallpaper) {
-        this.wallpaper = wallpaper;
+    public String getDescription() {
+        if (isOneTime) return "One time alarm";
+        StringBuilder sb = new StringBuilder();
+        if (monday) sb.append("Mon ");
+        if (tuesday) sb.append("Tue ");
+        if (wednesday) sb.append("Wed ");
+        if (thursday) sb.append("Thu ");
+        if (friday) sb.append("Fri ");
+        if (saturday) sb.append("Sat ");
+        if (sunday) sb.append("Sun ");
+        return sb.toString().trim();
     }
 
-    public String getWallpaper() {
-        return this.wallpaper;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setOneTime(boolean oneTime) {
-        isOneTime = oneTime;
-    }
-
-    public boolean isOneTime() {
-        return isOneTime;
-    }
-
-    public void setLengthOfSnooze(int lengthOfSnooze) {
-        this.lengthOfSnooze = lengthOfSnooze;
-    }
-
-    public int getLengthOfSnooze() {
-        return lengthOfSnooze;
-    }
-
-    public void setNumberOfSnoozes(int numberOfSnoozes) {
-        this.numberOfSnoozes = numberOfSnoozes;
-    }
-
-    public int getNumberOfSnoozes() {
-        return numberOfSnoozes;
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeInt(hour);
+        dest.writeInt(minute);
+        dest.writeString(ringtone);
+        dest.writeString(wallpaper);
+        dest.writeInt(numberOfSnoozes);
+        dest.writeInt(lengthOfSnooze);
+        dest.writeByte((byte) (isEnabled ? 1 : 0));
+        dest.writeByte((byte) (isOneTime ? 1 : 0));
+        dest.writeByte((byte) (monday ? 1 : 0));
+        dest.writeByte((byte) (tuesday ? 1 : 0));
+        dest.writeByte((byte) (wednesday ? 1 : 0));
+        dest.writeByte((byte) (thursday ? 1 : 0));
+        dest.writeByte((byte) (friday ? 1 : 0));
+        dest.writeByte((byte) (saturday ? 1 : 0));
+        dest.writeByte((byte) (sunday ? 1 : 0));
     }
 
     public static class Converters {
@@ -156,17 +182,6 @@ public class Alarm {
         @TypeConverter
         public static String localTimeToString(LocalTime time) {
             return time == null ? null : time.toString();
-        }
-
-        @TypeConverter
-        public static String fromDaysOfWeek(List<Boolean> days) {
-            return new Gson().toJson(days);
-        }
-
-        @TypeConverter
-        public static List<Boolean> toDaysOfWeek(String json) {
-            if (json == null) return new ArrayList<>();
-            return new Gson().fromJson(json, new TypeToken<List<Boolean>>(){}.getType());
         }
     }
 

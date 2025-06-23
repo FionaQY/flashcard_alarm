@@ -13,7 +13,7 @@ import com.example.language_alarm.R;
 import com.example.language_alarm.utils.AlarmScheduler;
 
 public class MainActivity extends AppCompatActivity {
-    private RecyclerView recyclerView = null;
+    private AlarmAdapter adapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,18 +21,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AlarmScheduler.rescheduleAll(this);
-        recyclerView = findViewById(R.id.alarm_list);
+        RecyclerView recyclerView = findViewById(R.id.alarm_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        AlarmAdapter adapter = new AlarmAdapter(this, AlarmScheduler.loadAlarms(this));
-        System.out.println(AlarmScheduler.loadAlarms(this));
+        adapter = new AlarmAdapter(this, AlarmScheduler.loadAlarms(this));
         recyclerView.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        AlarmAdapter adapter = new AlarmAdapter(this, AlarmScheduler.loadAlarms(this));
-        recyclerView.setAdapter(adapter);
+        adapter.setAlarms(AlarmScheduler.loadAlarms(this));
+        adapter.notifyDataSetChanged();
     }
 
     public void onToggleNewAlarm(View view) {

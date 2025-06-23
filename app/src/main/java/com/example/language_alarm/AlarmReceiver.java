@@ -12,7 +12,6 @@ import android.os.Build;
 //import android.os.Vibrator;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -22,17 +21,14 @@ public class AlarmReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
-        createNotificationChannel(ctx);
-        vibrate(ctx);
+        String action = intent.getAction();
 
-        Toast.makeText(ctx, "Alarm! Waky waky", Toast.LENGTH_LONG).show();
-        Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        if (alarmUri == null) {
-            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+            createNotificationChannel(ctx);
+            vibrate(ctx);
+            playRingtone(ctx, intent);
+            showNotification(ctx);
         }
-
-        Ringtone ringtone = RingtoneManager.getRingtone(ctx, alarmUri);
-        ringtone.play();
     }
 
     private void createNotificationChannel(Context ctx) {

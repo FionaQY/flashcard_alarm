@@ -1,6 +1,5 @@
 package com.example.language_alarm.database;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -25,7 +24,7 @@ public interface AlarmDao {
     @Query("SELECT * FROM alarms ORDER BY hour, minute")
     List<Alarm> getAllAlarms();
 
-    @Query("SELECT * FROM alarms WHERE id = :id")
-    LiveData<Alarm> getAlarmById(int id);
+//    @Query("SELECT * FROM alarms WHERE id = :id")
+//    LiveData<Alarm> getAlarmById(int id);
     
 }

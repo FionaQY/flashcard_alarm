@@ -15,14 +15,14 @@
             android:id="@+id/alarm_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="07:00 AM"
+            android:text="@string/default_time"
             android:textSize="20sp" />
 
         <TextView
             android:id="@+id/alarm_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Morning Alarm"
+            android:text=""
             android:textSize="16sp"
             android:textColor="#666" />
     </LinearLayout>

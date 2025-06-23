@@ -7,4 +7,13 @@
     </style>
 
     <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
+
+    <style name="Widget.Button.Toggle" parent="android:Widget">
+        <item name="android:background">@drawable/toggle_bg</item>
+    </style>
+
+    <style name="toggleButton" parent="Base.Theme.MyApplication">
+        <item name="android:buttonStyleToggle">@style/Widget.Button.Toggle</item>
+        <item name="android:textColor">@drawable/toggle_text_color</item>
+    </style>
 </resources>
