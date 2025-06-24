@@ -1,8 +1,8 @@
 package com.example.language_alarm.activities;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.app.AlarmManager;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 
-public class NewAlarmActivity extends AppCompatActivity {
+public class NewLessonActivity extends AppCompatActivity {
     Toolbar header;
     TimePicker alarmTimePicker;
     AlarmManager alarmManager;
@@ -48,7 +48,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         if (alarmToEdit != null) {
             alarmTimePicker.setHour(alarmToEdit.getHour());
             alarmTimePicker.setMinute(alarmToEdit.getMinute());
-            toolbarTitle.setText(String.format(Locale.US, "Edit Alarm %02d:%02d", alarmToEdit.getHour(), alarmToEdit.getMinute()));
             getSupportActionBar().setTitle(String.format(Locale.US, "Edit Alarm %02d:%02d", alarmToEdit.getHour(), alarmToEdit.getMinute()));
             this.alarmToEdit = alarmToEdit;
         }

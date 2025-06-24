@@ -41,17 +41,6 @@ public class AlarmScheduler {
         });
     }
 
-    // blocking
-    public static List<Alarm> loadAlarms(Context ctx) {
-        try {
-            return Executors.newSingleThreadExecutor()
-                    .submit(() -> getAlarmDao(ctx).getAllAlarms()
-            ).get();
-        } catch (Exception e) {
-            return new ArrayList<>();
-        }
-    }
-
     public static void scheduleAlarm(Context ctx, Alarm alarm) {
         if (!alarm.isEnabled()) return;
 
@@ -119,13 +108,6 @@ public class AlarmScheduler {
     private static void rescheduleAlarm(Context ctx, Alarm alarm) {
         cancelAlarm(ctx, alarm);
         scheduleAlarm(ctx, alarm);
-    }
-
-    public static void rescheduleAll(Context ctx) {
-        List<Alarm> alarms = loadAlarms(ctx);
-        for (Alarm alarm: alarms) {
-            rescheduleAlarm(ctx, alarm);
-        }
     }
 
     public static void deleteAlarm(Context ctx, Alarm alarm) {

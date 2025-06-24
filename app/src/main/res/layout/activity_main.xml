@@ -3,22 +3,46 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="8dp">
 
+    <!-- RecyclerView with inner padding for breathing room -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/alarm_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"/>
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="80dp"
+    android:scrollbars="vertical" />
 
+    <!-- FAB: Bottom end -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addAlarmFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_margin="20dp"
         android:contentDescription="@string/add_alarm"
         android:src="@drawable/baseline_add_alarm_24"
+        app:backgroundTint="@color/colorPrimary"
+        app:tint="@android:color/white"
+        android:elevation="6dp"
+        android:onClick="onToggleNewAlarm" />
+
+    <!-- FAB: Bottom start -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addAlarmFab2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="20dp"
+        android:contentDescription="@string/add_alarm"
+        android:src="@drawable/baseline_add_alarm_24"
+        app:backgroundTint="@color/colorPrimary"
+        app:tint="@android:color/white"
+        android:elevation="6dp"
         android:onClick="onToggleNewAlarm" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
