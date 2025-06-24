@@ -3,12 +3,15 @@ package com.example.language_alarm.activities;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.app.AlarmManager;
+import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -18,6 +21,7 @@ import com.example.language_alarm.utils.AlarmScheduler;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewAlarmActivity extends AppCompatActivity {
@@ -25,43 +29,29 @@ public class NewAlarmActivity extends AppCompatActivity {
     TimePicker alarmTimePicker;
     AlarmManager alarmManager;
     Alarm alarmToEdit = null; // if editing alarm instead
+    private ToggleButton isSun, isMon, isTues, isWed, isThurs, isFri, isSat;
+    private CheckBox oneTimeCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_alarm);
 
-        this.header = findViewById(R.id.toolbar);
-        setSupportActionBar(header);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
-
-        TextView toolbarTitle = findViewById(R.id.toolbar_title);
-        toolbarTitle.setText("");
-
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Next alarm not yet set.");
-
-        alarmTimePicker = findViewById(R.id.timePicker);
+        initializeViews();
+        setupToolbar();
 
         Alarm alarmToEdit = getIntent().getParcelableExtra("alarm");
         if (alarmToEdit != null) {
-            alarmTimePicker.setHour(alarmToEdit.getHour());
-            alarmTimePicker.setMinute(alarmToEdit.getMinute());
-            toolbarTitle.setText(String.format(Locale.US, "Edit Alarm %02d:%02d", alarmToEdit.getHour(), alarmToEdit.getMinute()));
-            getSupportActionBar().setTitle(String.format(Locale.US, "Edit Alarm %02d:%02d", alarmToEdit.getHour(), alarmToEdit.getMinute()));
             this.alarmToEdit = alarmToEdit;
+            populateAlarmData();
         }
 
-        alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> {
-            String amPm = hourOfDay < 12 ? "AM" : "PM";
-            int displayHour = hourOfDay > 12 ? hourOfDay - 12 : hourOfDay;
-            getSupportActionBar().setTitle(String.format(Locale.US, "Alarm set for %d:%02d %s", displayHour, minute, amPm));
-        });
+        alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
 
         findViewById(R.id.saveButton).setOnClickListener(v -> saveAlarm());
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
+        findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {
                     @Override
@@ -69,6 +59,53 @@ public class NewAlarmActivity extends AppCompatActivity {
                         showExitDialog();
                     }
                 });
+    }
+
+    private void initializeViews() {
+        header = findViewById(R.id.toolbar);
+        alarmTimePicker = findViewById(R.id.timePicker);
+
+        // Initialize toggle buttons
+        isSun = findViewById(R.id.isSun);
+        isMon = findViewById(R.id.isMon);
+        isTues = findViewById(R.id.isTues);
+        isWed = findViewById(R.id.isWed);
+        isThurs = findViewById(R.id.isThurs);
+        isFri = findViewById(R.id.isFri);
+        isSat = findViewById(R.id.isSat);
+
+        oneTimeCheckBox = findViewById(R.id.oneTime);
+    }
+
+    private void setupToolbar() {
+        setSupportActionBar(header);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+        TextView toolbarTitle = findViewById(R.id.toolbar_title);
+        toolbarTitle.setText("");
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("Next alarm not yet set.");
+    }
+
+    private void populateAlarmData() {
+        alarmTimePicker.setHour(alarmToEdit.getHour());
+        alarmTimePicker.setMinute(alarmToEdit.getMinute());
+
+        updateToolbarTitle(alarmToEdit.getHour(), alarmToEdit.getMinute());
+
+        isSun.setChecked(alarmToEdit.isSunday());
+        isMon.setChecked(alarmToEdit.isMonday());
+        isTues.setChecked(alarmToEdit.isTuesday());
+        isWed.setChecked(alarmToEdit.isWednesday());
+        isThurs.setChecked(alarmToEdit.isThursday());
+        isFri.setChecked(alarmToEdit.isFriday());
+        isSat.setChecked(alarmToEdit.isSaturday());
+    }
+
+    private void updateToolbarTitle(int hourOfDay, int minute) {
+        String amPm = hourOfDay < 12 ? "AM" : "PM";
+        int displayHour = hourOfDay > 12 ? hourOfDay - 12 : hourOfDay;
+        Objects.requireNonNull(getSupportActionBar()).setTitle(String.format(Locale.US, "Alarm set for %d:%02d %s", displayHour, minute, amPm));
     }
 
     private void saveAlarm() {
@@ -80,23 +117,8 @@ public class NewAlarmActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        ToggleButton isSun = findViewById(R.id.isSun);
-        ToggleButton isMon = findViewById(R.id.isMon);
-        ToggleButton isTues = findViewById(R.id.isTues);
-        ToggleButton isWed = findViewById(R.id.isWed);
-        ToggleButton isThurs = findViewById(R.id.isThurs);
-        ToggleButton isFri = findViewById(R.id.isFri);
-        ToggleButton isSat = findViewById(R.id.isSat);
 
-        Alarm newAlarm = new Alarm(
-                hour, minute,
-                0, 5, true,
-                isSun.isChecked(), isMon.isChecked(), isTues.isChecked(), isWed.isChecked(),
-                isThurs.isChecked(), isFri.isChecked(), isSat.isChecked()
-        );
-        if (this.alarmToEdit != null) {
-            newAlarm.setId(this.alarmToEdit.getId());
-        }
+        Alarm newAlarm = createAlarm(hour, minute);
 
         AlarmScheduler.scheduleAlarm(this, newAlarm);
         Executors.newSingleThreadExecutor().execute(() -> {
@@ -118,6 +140,35 @@ public class NewAlarmActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show());
             }
         });
+    }
+
+    @NonNull
+    private Alarm createAlarm(int hour, int minute) {
+        Alarm newAlarm = new Alarm(
+                hour, minute,
+                0, 5, oneTimeCheckBox.isChecked(),
+                isMon.isChecked() && isMon.isEnabled(),
+                isTues.isChecked() && isTues.isEnabled(),
+                isWed.isChecked() && isWed.isEnabled(),
+                isThurs.isChecked() && isThurs.isEnabled(),
+                isFri.isChecked() && isFri.isEnabled(),
+                isSat.isChecked() && isSat.isEnabled(),
+                isSun.isChecked() && isSun.isEnabled()
+                );
+        if (this.alarmToEdit != null) {
+            newAlarm.setId(this.alarmToEdit.getId());
+        }
+        return newAlarm;
+    }
+
+    protected void onClickOneTime(View v) {
+        if (v instanceof CheckBox) {
+            CheckBox box = (CheckBox) v;
+            ToggleButton[] buttons = {isSat, isSun, isMon, isTues, isWed, isThurs, isFri};
+            for (ToggleButton button: buttons) {
+                button.setEnabled(!box.isChecked());
+            }
+        }
     }
 
     public void showExitDialog() {

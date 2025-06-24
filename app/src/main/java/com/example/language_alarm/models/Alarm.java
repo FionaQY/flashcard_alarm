@@ -10,6 +10,7 @@ import androidx.room.TypeConverter;
 
 import java.time.LocalTime;
 import java.util.Locale;
+import java.util.Objects;
 
 @Entity(tableName = "alarms")
 public class Alarm implements Parcelable {
@@ -23,7 +24,6 @@ public class Alarm implements Parcelable {
     private int lengthOfSnooze; // in minutes
     private boolean isEnabled = true;
     private boolean isOneTime;
-
     private boolean monday;
     private boolean tuesday;
     private boolean wednesday;
@@ -138,14 +138,41 @@ public class Alarm implements Parcelable {
     public String getDescription() {
         if (isOneTime) return "One time alarm";
         StringBuilder sb = new StringBuilder();
+        if (sunday) sb.append("Sun ");
         if (monday) sb.append("Mon ");
         if (tuesday) sb.append("Tue ");
         if (wednesday) sb.append("Wed ");
         if (thursday) sb.append("Thu ");
         if (friday) sb.append("Fri ");
         if (saturday) sb.append("Sat ");
-        if (sunday) sb.append("Sun ");
         return sb.toString().trim();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Alarm otherAlarm = (Alarm) obj;
+        return hour == otherAlarm.hour &&
+                minute == otherAlarm.minute &&
+                (Objects.equals(ringtone, otherAlarm.ringtone)) &&
+                (Objects.equals(wallpaper, otherAlarm.wallpaper)) &&
+                numberOfSnoozes == otherAlarm.numberOfSnoozes &&
+                lengthOfSnooze == otherAlarm.lengthOfSnooze &&
+                isEnabled == otherAlarm.isEnabled &&
+                isOneTime == otherAlarm.isOneTime &&
+                monday == otherAlarm.monday &&
+                tuesday == otherAlarm.tuesday &&
+                wednesday == otherAlarm.wednesday &&
+                thursday == otherAlarm.thursday &&
+                friday == otherAlarm.friday &&
+                saturday == otherAlarm.saturday &&
+                sunday == otherAlarm.sunday;
     }
 
     @Override

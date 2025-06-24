@@ -9,11 +9,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.activities.NewAlarmActivity;
 import com.example.language_alarm.models.Alarm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHolder> {
@@ -25,8 +27,39 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
         this.alarmList = alarms;
     }
 
-    public void setAlarms(List<Alarm> alarms) {
-        this.alarmList = alarms;
+    public void setAlarms(List<Alarm> newAlarms) {
+        if (alarmList == null) {
+            this.alarmList = new ArrayList<>();
+            alarmList.addAll(newAlarms);
+            notifyDataSetChanged();
+        } else {
+            DiffUtil.Callback diffCallback = new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return alarmList.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newAlarms.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return alarmList.get(oldItemPosition).getId() == newAlarms.get(newItemPosition).getId();
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    return alarmList.get(oldItemPosition).equals(newAlarms.get(newItemPosition));
+                }
+            };
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+            alarmList.clear();
+            alarmList.addAll(newAlarms);
+            diffResult.dispatchUpdatesTo(this);
+        }
     }
 
     public static class AlarmViewHolder extends RecyclerView.ViewHolder{

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
         AlarmViewModel alarmViewModel = new ViewModelProvider(this).get(AlarmViewModel.class);
         alarmViewModel.getAllAlarms().observe(this, alarms -> {
             adapter.setAlarms(alarms);
-            adapter.notifyDataSetChanged();
         });
+
     }
 
     public void onToggleNewAlarm(View view) {
