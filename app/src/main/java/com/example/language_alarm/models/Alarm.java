@@ -6,9 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.room.TypeConverter;
 
-import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -200,16 +198,6 @@ public class Alarm implements Parcelable {
         dest.writeByte((byte) (sunday ? 1 : 0));
     }
 
-    public static class Converters {
-        @TypeConverter
-        public static LocalTime fromString(String val) {
-            return val == null ? null : LocalTime.parse(val);
-        }
 
-        @TypeConverter
-        public static String localTimeToString(LocalTime time) {
-            return time == null ? null : time.toString();
-        }
-    }
 
 }

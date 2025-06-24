@@ -2,21 +2,19 @@ package com.example.language_alarm.utils;
 
 import static android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.example.language_alarm.AlarmReceiver;
 import com.example.language_alarm.activities.NewAlarmActivity;
 import com.example.language_alarm.database.AlarmDao;
 import com.example.language_alarm.database.AlarmDatabase;
 import com.example.language_alarm.models.Alarm;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.concurrent.Executors;
 
 
@@ -42,7 +40,7 @@ public class AlarmScheduler {
     }
 
     public static void scheduleAlarm(Context ctx, Alarm alarm) {
-        if (!alarm.isEnabled()) return;
+        if (alarm == null || !alarm.isEnabled()) return;
 
         int requestCode = alarm.getId();
 
@@ -59,6 +57,7 @@ public class AlarmScheduler {
         }
 
         Intent intent = new Intent(ctx, AlarmReceiver.class);
+        intent.setAction(AlarmReceiver.ACTION_ALARM_TRIGGER);
         intent.putExtra(RINGTONE_STR, alarm.getRingtone());
         intent.putExtra("alarm_id", requestCode);
 
@@ -81,8 +80,11 @@ public class AlarmScheduler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             AlarmManager newAlarmManager = ctx.getSystemService(AlarmManager.class);
             if (!newAlarmManager.canScheduleExactAlarms()) {
-                // Launch intent to request permission
                 Intent permissionIntent = new Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                // Add flag if context is not an Activity
+                if (!(ctx instanceof Activity)) {
+                    permissionIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
                 ctx.startActivity(permissionIntent);
                 return;
             }

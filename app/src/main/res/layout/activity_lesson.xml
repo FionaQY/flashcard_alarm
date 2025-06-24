@@ -6,43 +6,29 @@
     android:layout_height="match_parent"
     android:padding="8dp">
 
-    <!-- RecyclerView with inner padding for breathing room -->
+    <!-- RecyclerView for the list of lessons -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/alarm_list"
+        android:id="@+id/lesson_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="80dp"
-    android:scrollbars="vertical" />
+        android:scrollbars="vertical" />
 
-    <!-- FAB: Bottom end -->
+    <!-- FAB: Add new lesson (bottom end) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addAlarmFab"
+        android:id="@+id/addLessonFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
-        android:contentDescription="@string/add_alarm"
+        android:contentDescription="Add new Flashcard Set"
         android:src="@drawable/baseline_add_alarm_24"
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white"
         android:elevation="6dp"
-        android:onClick="onToggleNewAlarm" />
-
-    <!-- FAB: Bottom start -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addAlarmFab2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="20dp"
-        android:contentDescription="@string/add_alarm"
-        android:src="@drawable/baseline_add_alarm_24"
-        app:backgroundTint="@color/colorPrimary"
-        app:tint="@android:color/white"
-        android:elevation="6dp"
-        android:onClick="onToggleNewFlashCard" />
+        android:onClick="onAddLessonClicked" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

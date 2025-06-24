@@ -1,4 +1,4 @@
-package com.example.language_alarm;
+package com.example.language_alarm.utils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +12,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.language_alarm.R;
 import com.example.language_alarm.activities.NewAlarmActivity;
 import com.example.language_alarm.models.Alarm;
 

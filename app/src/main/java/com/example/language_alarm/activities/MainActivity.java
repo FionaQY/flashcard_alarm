@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.language_alarm.AlarmAdapter;
+import com.example.language_alarm.utils.AlarmAdapter;
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.AlarmViewModel;
 
@@ -29,9 +29,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         AlarmViewModel alarmViewModel = new ViewModelProvider(this).get(AlarmViewModel.class);
-        alarmViewModel.getAllAlarms().observe(this, alarms -> {
-            adapter.setAlarms(alarms);
-        });
+        alarmViewModel.getAllAlarms().observe(this, alarms -> adapter.setAlarms(alarms));
 
     }
 
@@ -41,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onToggleNewFlashCard(View view) {
-        Intent intent = new Intent(this, NewAlarmActivity.class);
+        Intent intent = new Intent(this, LessonsActivity.class);
         startActivity(intent);
     }
 }

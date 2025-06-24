@@ -1,4 +1,4 @@
-package com.example.language_alarm;
+package com.example.language_alarm.utils;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,8 +15,11 @@ import android.os.Vibrator;
 
 import androidx.core.app.NotificationCompat;
 
+import com.example.language_alarm.R;
+
 public class AlarmReceiver extends BroadcastReceiver{
     private static final String CHANNEL_ID = "alarm_channel";
+    public static final String ACTION_ALARM_TRIGGER = "com.example.language_alarm.ACTION_ALARM_TRIGGER";
     private static Ringtone ringtone = null;
 
     @Override
@@ -25,8 +28,13 @@ public class AlarmReceiver extends BroadcastReceiver{
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             createNotificationChannel(ctx);
+//            vibrate(ctx);
+//            playRingtone(ctx, intent);
+//            showNotification(ctx);
+        } else if (ACTION_ALARM_TRIGGER.equals(action)){
+            createNotificationChannel(ctx);
             vibrate(ctx);
-            playRingtone(ctx, intent);
+//            playRingtone(ctx, intent);
             showNotification(ctx);
         }
     }
