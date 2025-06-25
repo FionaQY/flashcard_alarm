@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void onToggleNewFlashCard(View view) {
+    public void onToggleLessons(View view) {
         Intent intent = new Intent(this, LessonsActivity.class);
         startActivity(intent);
     }

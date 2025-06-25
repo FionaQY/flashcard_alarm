@@ -2,33 +2,66 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lessons_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp">
+    android:background="@color/design_default_color_background"
+    tools:context=".activities.LessonsActivity">
 
-    <!-- RecyclerView for the list of lessons -->
+    <!-- AppBar with title -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            app:title="@string/lessons_title"
+            app:titleTextColor="@android:color/white"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Grid of lesson cards -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lesson_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
+        android:paddingTop="8dp"
         android:paddingBottom="80dp"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"
+        tools:listitem="@layout/lesson_item" />
 
-    <!-- FAB: Add new lesson (bottom end) -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!-- Empty state view -->
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/no_lessons_found"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <!-- Add Lesson FAB -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/addLessonFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
-        android:contentDescription="Add new Flashcard Set"
-        android:src="@drawable/baseline_add_alarm_24"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/add_new_lesson"
+        android:text="@string/add_new_lesson"
+        android:icon="@drawable/baseline_library_add_24"
+        android:textColor="@android:color/white"
         app:backgroundTint="@color/colorPrimary"
-        app:tint="@android:color/white"
-        android:elevation="6dp"
-        android:onClick="onAddLessonClicked" />
+        app:iconTint="@android:color/white"
+        android:onClick="onToggleAddLesson"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

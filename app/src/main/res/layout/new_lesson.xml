@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.NewLessonActivity">
+
+    <!-- Material Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:titleTextColor="@android:color/white"
+            app:navigationIcon="@drawable/outline_arrow_back_24"
+            app:title="@string/lessons_title"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Prompt Text -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_flashcards_prompt"
+            android:textSize="18sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Main Add Flashcards Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddFlashcards"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_flashcards"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:icon="@drawable/baseline_library_add_24"
+            app:iconGravity="start"
+            app:iconPadding="8dp"
+            app:iconTint="?attr/colorPrimary"
+            app:strokeColor="?attr/colorPrimary"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Options Container (initially hidden) -->
+        <LinearLayout
+            android:id="@+id/optionsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="24dp">
+
+            <!-- Manual Add Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnManualAdd"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/manual_add"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:icon="@drawable/baseline_edit_24"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="?attr/colorPrimary"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="1dp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- CSV Import Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCsvImport"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/import_csv"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:icon="@drawable/baseline_library_add_24"
+                app:iconGravity="start"
+                app:iconPadding="8dp"
+                app:iconTint="?attr/colorPrimary"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="1dp"/>
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            android:layout_marginVertical="16dp"/>
+
+        <!-- Preferences Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPreferences"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_preferences"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:icon="@drawable/twotone_app_settings_alt_24"
+            app:iconGravity="start"
+            app:iconPadding="8dp"
+            app:iconTint="?attr/colorPrimary"
+            app:strokeColor="?attr/colorPrimary"
+            app:strokeWidth="1dp"
+            android:layout_marginBottom="24dp"/>
+    </LinearLayout>
+
+    <!-- Save Button (fixed at bottom) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSaveLesson"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:text="@string/save_lesson"
+        android:textColor="@android:color/white"
+        app:backgroundTint="?attr/colorPrimary"
+        app:cornerRadius="8dp"
+        app:iconTint="@android:color/white"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

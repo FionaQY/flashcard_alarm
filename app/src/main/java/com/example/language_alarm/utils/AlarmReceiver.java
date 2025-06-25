@@ -12,6 +12,7 @@ import android.os.Build;
 //import android.os.Vibrator;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -24,6 +25,7 @@ public class AlarmReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
+        Log.d("AlarmReceiver", "onReceive triggered: action=" + intent.getAction());
         String action = intent.getAction();
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
@@ -36,6 +38,7 @@ public class AlarmReceiver extends BroadcastReceiver{
             vibrate(ctx);
 //            playRingtone(ctx, intent);
             showNotification(ctx);
+
         }
     }
 

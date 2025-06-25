@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:padding="8dp">
 
-    <!-- RecyclerView with inner padding for breathing room -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/alarm_list"
         android:layout_width="match_parent"
@@ -17,7 +16,6 @@
         android:paddingBottom="80dp"
     android:scrollbars="vertical" />
 
-    <!-- FAB: Bottom end -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addAlarmFab"
         android:layout_width="wrap_content"
@@ -31,9 +29,8 @@
         android:elevation="6dp"
         android:onClick="onToggleNewAlarm" />
 
-    <!-- FAB: Bottom start -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addAlarmFab2"
+        android:id="@+id/addLessonFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
@@ -43,6 +40,6 @@
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white"
         android:elevation="6dp"
-        android:onClick="onToggleNewFlashCard" />
+        android:onClick="onToggleLessons" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

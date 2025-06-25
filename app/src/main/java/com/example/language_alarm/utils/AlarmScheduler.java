@@ -27,6 +27,9 @@ public class AlarmScheduler {
 
     public static void saveAlarm(Context ctx, Alarm alarm) {
         Executors.newSingleThreadExecutor().execute(() -> {
+            if (alarm == null) {
+                return;
+            }
             if (alarm.getId() == 0) {
                 // new alarm
                 long id = getAlarmDao(ctx).insert(alarm);
@@ -116,10 +119,7 @@ public class AlarmScheduler {
         cancelAlarm(ctx, alarm);
         Executors.newSingleThreadExecutor().execute(() -> {
             // Runnable
-            if (alarm.getId() == 0) {
-                // no id
-                return;
-            } else {
+            if (alarm.getId() != 0) {
                 getAlarmDao(ctx).delete(alarm);
             }
         });
