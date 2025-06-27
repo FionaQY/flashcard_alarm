@@ -1,0 +1,63 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "b9de2121d03a8db571782d96fd5999e1",
+    "entities": [
+      {
+        "tableName": "lessons",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lessonName` TEXT, `isPunctSensitive` INTEGER NOT NULL, `isCaseSensitive` INTEGER NOT NULL, `headers` TEXT, `foreignIndexes` TEXT, `flashcards` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lessonName",
+            "columnName": "lessonName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isPunctSensitive",
+            "columnName": "isPunctSensitive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCaseSensitive",
+            "columnName": "isCaseSensitive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "headers",
+            "columnName": "headers",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "foreignIndexes",
+            "columnName": "foreignIndexes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "flashcards",
+            "columnName": "flashcards",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b9de2121d03a8db571782d96fd5999e1')"
+    ]
+  }
+}

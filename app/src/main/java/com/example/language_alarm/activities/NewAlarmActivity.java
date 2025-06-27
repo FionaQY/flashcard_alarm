@@ -68,7 +68,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         header = findViewById(R.id.toolbar);
         alarmTimePicker = findViewById(R.id.timePicker);
 
-        // Initialize toggle buttons
         ToggleButton isSun = findViewById(R.id.isSun);
         ToggleButton isMon = findViewById(R.id.isMon);
         ToggleButton isTues = findViewById(R.id.isTues);
@@ -147,10 +146,8 @@ public class NewAlarmActivity extends AppCompatActivity {
         AlarmScheduler.scheduleAlarm(this, newAlarm);
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                // Save first
                 AlarmScheduler.saveAlarm(this, newAlarm);
 
-                // Then schedule
                 runOnUiThread(() -> {
                     AlarmScheduler.scheduleAlarm(this, newAlarm);
                     Toast.makeText(this,

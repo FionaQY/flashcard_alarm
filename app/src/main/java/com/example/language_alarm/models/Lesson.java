@@ -23,27 +23,31 @@ public class Lesson implements Parcelable {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String lessonName;
-    private boolean careAboutPunctuation = true;
-    private boolean careAboutCapitalisation = true;
+    private boolean isPunctSensitive = true;
+    private boolean isCaseSensitive = true;
     private List<String> headers;
-    private List<Integer> englishIndexes;
-    private List<Integer> germanIndexes;
+    private List<Boolean> foreignIndexes = null;
     @TypeConverters(Converters.class)
     private List<Flashcard> flashcards = null;
     public Lesson() {
         this.headers = new ArrayList<>();
-        this.englishIndexes = new ArrayList<>();
-        this.germanIndexes = new ArrayList<>();
     }
 
-    public Lesson(String name, List<Flashcard> les, boolean punct, boolean capt, List<String> headers, List<Integer> engIdx, List<Integer> deInd) {
+    public Lesson(String name, List<Flashcard> les, boolean punct, boolean capt, List<String> headers, List<Boolean> foreignVals) {
         this.lessonName = name;
         this.flashcards = les;
-        this.careAboutCapitalisation = capt;
-        this.careAboutPunctuation = punct;
+        this.isCaseSensitive = capt;
+        this.isPunctSensitive = punct;
         this.headers = headers;
-        this.englishIndexes = engIdx;
-        this.germanIndexes = deInd;
+        this.foreignIndexes = foreignVals;
+    }
+
+    public void AddFlashcards(List<Flashcard> cards) {
+        if (this.flashcards == null) {
+            this.flashcards = cards;
+        } else {
+            this.flashcards.addAll(cards);
+        }
     }
 
     public static final Creator<Lesson> CREATOR = new Creator<>() {
@@ -62,13 +66,11 @@ public class Lesson implements Parcelable {
         id = in.readInt();
         lessonName = in.readString();
         flashcards = in.createTypedArrayList(Flashcard.CREATOR);
-        careAboutPunctuation = in.readByte() != 0;
-        careAboutCapitalisation = in.readByte() != 0;
+        isPunctSensitive = in.readByte() != 0;
+        isCaseSensitive = in.readByte() != 0;
         headers = in.createStringArrayList();
-        englishIndexes = new ArrayList<>();
-        in.readList(englishIndexes, Integer.class.getClassLoader());
-        germanIndexes = new ArrayList<>();
-        in.readList(germanIndexes, Integer.class.getClassLoader());
+        foreignIndexes = new ArrayList<>();
+        in.readList(foreignIndexes, Integer.class.getClassLoader());
     }
 
     public int getId() { return id; }
@@ -90,28 +92,20 @@ public class Lesson implements Parcelable {
         return this.flashcards;
     }
 
-    public boolean isCareAboutCapitalisation() {
-        return careAboutCapitalisation;
+    public boolean isCaseSensitive() {
+        return isCaseSensitive;
     }
 
-    public void setCareAboutCapitalisation(boolean careAboutCapitalisation) {
-        this.careAboutCapitalisation = careAboutCapitalisation;
+    public void setIsCaseSensitive(boolean isCaseSensitive) {
+        this.isCaseSensitive = isCaseSensitive;
     }
 
-    public boolean isCareAboutPunctuation() {
-        return careAboutPunctuation;
+    public boolean isPunctSensitive() {
+        return isPunctSensitive;
     }
 
-    public void setCareAboutPunctuation(boolean careAboutPunctuation) {
-        this.careAboutPunctuation = careAboutPunctuation;
-    }
-
-    public List<Integer> getEnglishIndexes() {
-        return englishIndexes;
-    }
-
-    public void setEnglishIndexes(List<Integer> englishIndexes) {
-        this.englishIndexes = englishIndexes;
+    public void setIsPunctSensitive(boolean isPunctSensitive) {
+        this.isPunctSensitive = isPunctSensitive;
     }
 
     public List<String> getHeaders() {
@@ -122,12 +116,12 @@ public class Lesson implements Parcelable {
         this.headers = headers;
     }
 
-    public List<Integer> getGermanIndexes() {
-        return germanIndexes;
+    public List<Boolean> getForeignIndexes() {
+        return foreignIndexes;
     }
 
-    public void setGermanIndexes(List<Integer> germanIndexes) {
-        this.germanIndexes = germanIndexes;
+    public void setForeignIndexes(List<Boolean> foreignIndexes) {
+        this.foreignIndexes = foreignIndexes;
     }
 
     public String getHeadersString() {
@@ -145,12 +139,11 @@ public class Lesson implements Parcelable {
 
         Lesson otherLesson = (Lesson) obj;
         return Objects.equals(this.lessonName, otherLesson.lessonName) &&
-                this.careAboutPunctuation == otherLesson.isCareAboutPunctuation() &&
-                this.careAboutCapitalisation == otherLesson.isCareAboutCapitalisation() &&
+                this.isPunctSensitive == otherLesson.isPunctSensitive() &&
+                this.isCaseSensitive == otherLesson.isCaseSensitive() &&
                 Objects.equals(this.flashcards, otherLesson.flashcards) &&
-                Objects.equals(this.englishIndexes, otherLesson.getEnglishIndexes()) &&
                 Objects.equals(this.headers, otherLesson.getHeaders()) &&
-                Objects.equals(this.germanIndexes, otherLesson.getGermanIndexes());
+                Objects.equals(this.foreignIndexes, otherLesson.getForeignIndexes());
     }
 
     @Override
@@ -163,11 +156,10 @@ public class Lesson implements Parcelable {
         dest.writeInt(id);
         dest.writeString(lessonName);
         dest.writeTypedList(flashcards);
-        dest.writeByte((byte) (careAboutPunctuation ? 1 : 0));
-        dest.writeByte((byte) (careAboutCapitalisation ? 1 : 0));
+        dest.writeByte((byte) (isPunctSensitive ? 1 : 0));
+        dest.writeByte((byte) (isCaseSensitive ? 1 : 0));
         dest.writeStringList(headers);
-        dest.writeList(englishIndexes);
-        dest.writeList(germanIndexes);
+        dest.writeList(foreignIndexes);
     }
 
     public static class Converters {
@@ -196,13 +188,13 @@ public class Lesson implements Parcelable {
         }
 
         @TypeConverter
-        public static String fromIntegerList(List<Integer> list) {
+        public static String fromBooleanList(List<Boolean> list) {
             return new Gson().toJson(list);
         }
 
         @TypeConverter
-        public static List<Integer> toIntegerList(String data) {
-            Type listType = new TypeToken<List<Integer>>() {}.getType();
+        public static List<Boolean> toBooleanList(String data) {
+            Type listType = new TypeToken<List<Boolean>>() {}.getType();
             return new Gson().fromJson(data, listType);
         }
     }

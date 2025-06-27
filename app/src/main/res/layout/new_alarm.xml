@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Toolbar (Header with back button) -->
+    <!--Header: back button < with a confirmation, TODO: Ring in "..."-->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -40,10 +40,6 @@
         </FrameLayout>
     </androidx.appcompat.widget.Toolbar>
 
-<!--Header: back button < with a confirmation, Ring in "..."-->
-<!--daily checkbox  + SMTWTFS-->
-<!--loudness, vibration checkbox, custome sound (ringtone), snooze (number ,duration)-->
-<!--Alarm wallpaper-->
     <TimePicker
         android:id="@+id/timePicker"
         android:layout_width="wrap_content"
@@ -72,6 +68,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
+
+    <!--TODO: load lessons and assign using id-->
+    <!--loudness, vibration checkbox, custom sound (ringtone), snooze (number ,duration)-->
+    <!--Alarm wallpaper-->
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"

@@ -29,6 +29,7 @@ public class Alarm implements Parcelable {
     private boolean friday;
     private boolean saturday;
     private boolean sunday;
+    private int lessonId;
 
     public Alarm() {}
 
@@ -66,6 +67,7 @@ public class Alarm implements Parcelable {
         friday = in.readByte() != 0;
         saturday = in.readByte() != 0;
         sunday = in.readByte() != 0;
+        lessonId = in.readInt();
     }
 
     public static final Creator<Alarm> CREATOR = new Creator<>() {
@@ -133,6 +135,14 @@ public class Alarm implements Parcelable {
         return String.format(Locale.US, "%02d:%02d", hour, minute);
     }
 
+    public int getLessonId() {
+        return this.lessonId;
+    }
+
+    public void setLessonId(int lessonId) {
+        this.lessonId = lessonId;
+    }
+
     public String getDescription() {
         if (isOneTime) return "One time alarm";
         StringBuilder sb = new StringBuilder();
@@ -143,6 +153,7 @@ public class Alarm implements Parcelable {
         if (thursday) sb.append("Thu ");
         if (friday) sb.append("Fri ");
         if (saturday) sb.append("Sat ");
+        if (this.lessonId != 0) sb.append("Lesson not yet set");
         return sb.toString().trim();
     }
 
@@ -156,21 +167,22 @@ public class Alarm implements Parcelable {
         }
 
         Alarm otherAlarm = (Alarm) obj;
-        return hour == otherAlarm.hour &&
-                minute == otherAlarm.minute &&
-                (Objects.equals(ringtone, otherAlarm.ringtone)) &&
-                (Objects.equals(wallpaper, otherAlarm.wallpaper)) &&
-                numberOfSnoozes == otherAlarm.numberOfSnoozes &&
-                lengthOfSnooze == otherAlarm.lengthOfSnooze &&
-                isEnabled == otherAlarm.isEnabled &&
-                isOneTime == otherAlarm.isOneTime &&
-                monday == otherAlarm.monday &&
-                tuesday == otherAlarm.tuesday &&
-                wednesday == otherAlarm.wednesday &&
-                thursday == otherAlarm.thursday &&
-                friday == otherAlarm.friday &&
-                saturday == otherAlarm.saturday &&
-                sunday == otherAlarm.sunday;
+        return hour == otherAlarm.getHour() &&
+                minute == otherAlarm.getMinute() &&
+                (Objects.equals(ringtone, otherAlarm.getRingtone())) &&
+                (Objects.equals(wallpaper, otherAlarm.getWallpaper())) &&
+                numberOfSnoozes == otherAlarm.getNumberOfSnoozes() &&
+                lengthOfSnooze == otherAlarm.getLengthOfSnooze() &&
+                isEnabled == otherAlarm.isEnabled() &&
+                isOneTime == otherAlarm.isOneTime() &&
+                monday == otherAlarm.isMonday() &&
+                tuesday == otherAlarm.isTuesday() &&
+                wednesday == otherAlarm.isWednesday() &&
+                thursday == otherAlarm.isThursday() &&
+                friday == otherAlarm.isFriday() &&
+                saturday == otherAlarm.isSaturday() &&
+                sunday == otherAlarm.isSunday() &&
+                lessonId == otherAlarm.getLessonId();
     }
 
     @Override
@@ -196,6 +208,7 @@ public class Alarm implements Parcelable {
         dest.writeByte((byte) (friday ? 1 : 0));
         dest.writeByte((byte) (saturday ? 1 : 0));
         dest.writeByte((byte) (sunday ? 1 : 0));
+        dest.writeInt(lessonId);
     }
 
 

@@ -11,9 +11,7 @@ import java.util.List;
 public class Flashcard implements Parcelable {
     private List<String> values;
 
-    public Flashcard() {}
-
-    public Flashcard(ArrayList<String> cards) {
+    public Flashcard(List<String> cards) {
         this.values = new ArrayList<>(cards);
     }
 
