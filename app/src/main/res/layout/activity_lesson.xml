@@ -9,7 +9,6 @@
     android:background="@color/design_default_color_background"
     tools:context=".activities.LessonsActivity">
 
-    <!-- AppBar with title -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
