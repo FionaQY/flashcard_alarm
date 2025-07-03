@@ -22,7 +22,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +29,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.utils.ToolbarHelper;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
@@ -47,7 +48,6 @@ import java.util.concurrent.Executors;
 public class NewLessonActivity extends AppCompatActivity {
     private MaterialButton btnAddFlashcards;
     private LinearLayout optionsContainer;
-    private Toolbar toolbar;
     private Lesson tempLesson = null;
     private List<String> currentHeaders = new ArrayList<>();
     private List<Boolean> foreignIndexes = new ArrayList<>();
@@ -85,15 +85,13 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        ToolbarHelper.setupToolbar(toolbar, "New Lesson", true, this::showExitDialog);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(R.string.lessons_title);
-        }
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
     }
 
     private void setupViews() {
-        toolbar = findViewById(R.id.toolbar);
         btnAddFlashcards = findViewById(R.id.btnAddFlashcards);
         MaterialButton btnManualAdd = findViewById(R.id.btnManualAdd);
         MaterialButton btnCsvImport = findViewById(R.id.btnCsvImport);
@@ -343,7 +341,6 @@ public class NewLessonActivity extends AppCompatActivity {
         englishRecycler.setAdapter(englishAdapter);
         germanRecycler.setAdapter(germanAdapter);
 
-        // Set up drag and drop
         setupDragAndDrop(englishRecycler, germanRecycler, englishAdapter, germanAdapter);
     }
 

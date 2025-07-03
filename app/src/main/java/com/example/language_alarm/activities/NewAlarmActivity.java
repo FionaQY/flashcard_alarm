@@ -16,18 +16,19 @@ import android.widget.ToggleButton;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.utils.AlarmScheduler;
+import com.example.language_alarm.utils.ToolbarHelper;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class NewAlarmActivity extends AppCompatActivity {
-    private Toolbar header;
+    private MaterialToolbar header;
     private TimePicker alarmTimePicker;
     private AlarmManager alarmManager;
     private Alarm alarmToEdit = null; // if editing alarm instead
@@ -40,8 +41,8 @@ public class NewAlarmActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_alarm);
 
-        initializeViews();
         setupToolbar();
+        initializeViews();
 
         Alarm alarmToEdit = getIntent().getParcelableExtra("alarm");
         if (alarmToEdit != null) {
@@ -65,7 +66,6 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        header = findViewById(R.id.toolbar);
         alarmTimePicker = findViewById(R.id.timePicker);
 
         ToggleButton isSun = findViewById(R.id.isSun);
@@ -81,13 +81,10 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
+        header = findViewById(R.id.toolbar);
+        ToolbarHelper.setupToolbar(header, "new Alarm", true, this::showExitDialog);
         setSupportActionBar(header);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
-        TextView toolbarTitle = findViewById(R.id.toolbar_title);
-        toolbarTitle.setText("");
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Next alarm not yet set.");
     }
 
     private void populateAlarmData() {
@@ -114,7 +111,12 @@ public class NewAlarmActivity extends AppCompatActivity {
     private void updateToolbarTitle(int hourOfDay, int minute) {
         String amPm = hourOfDay < 12 ? "AM" : "PM";
         int displayHour = hourOfDay > 12 ? hourOfDay - 12 : hourOfDay;
-        Objects.requireNonNull(getSupportActionBar()).setTitle(String.format(Locale.US, "Alarm set for %d:%02d %s", displayHour, minute, amPm));
+        String title = String.format(Locale.US, "Alarm set for %d:%02d %s", displayHour, minute, amPm);
+
+        TextView titleView = header.findViewById(R.id.toolbar_title);
+        if (titleView != null) {
+            titleView.setText(title);
+        }
     }
 
     private void checkPermissionAndSave() {
