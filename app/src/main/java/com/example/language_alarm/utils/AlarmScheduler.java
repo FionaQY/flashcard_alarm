@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import com.example.language_alarm.activities.NewAlarmActivity;
 import com.example.language_alarm.database.AlarmDao;
 import com.example.language_alarm.database.AlarmDatabase;
 import com.example.language_alarm.models.Alarm;
@@ -45,44 +44,81 @@ public class AlarmScheduler {
     public static void scheduleAlarm(Context ctx, Alarm alarm) {
         if (alarm == null || !alarm.isEnabled()) return;
 
-        int requestCode = alarm.getId();
-
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
 
+        if (alarm.isOneTime()) {
+            scheduleOneTimeAlarm(ctx, alarmManager, alarm);
+        } else {
+            scheduleRecurringAlarm(ctx, alarmManager, alarm);
+        }
+    }
+
+    private static void scheduleOneTimeAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm) {
+        Intent intent = createAlarmIntent(ctx, alarm);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                ctx,
+                alarm.getId(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         Calendar calendar = Calendar.getInstance();
-        // calendar is called to get current time in hour minute
+        calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.HOUR_OF_DAY, alarm.getHour());
         calendar.set(Calendar.MINUTE, alarm.getMinute());
         calendar.set(Calendar.SECOND, 0);
 
         if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1); //set for next day
+            calendar.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
         }
+        setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
+    }
 
+    private static void scheduleRecurringAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm) {
+        if (alarm.isSunday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.SUNDAY);
+        if (alarm.isMonday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.MONDAY);
+        if (alarm.isTuesday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.TUESDAY);
+        if (alarm.isWednesday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.WEDNESDAY);
+        if (alarm.isThursday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.THURSDAY);
+        if (alarm.isFriday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.FRIDAY);
+        if (alarm.isSaturday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.SATURDAY);
+    }
+
+    private static int getRequestCode(Alarm alarm, int dayOfWeek) {
+        return 10 * alarm.getId() + dayOfWeek;
+    }
+
+    private static void scheduleDayAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm, int dayOfWeek) {
+        Intent intent = createAlarmIntent(ctx, alarm);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                ctx,
+                getRequestCode(alarm, dayOfWeek),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        calendar.set(Calendar.HOUR_OF_DAY, alarm.getHour());
+        calendar.set(Calendar.MINUTE, alarm.getMinute());
+        calendar.set(Calendar.SECOND, 0);
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+        }
+        setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
+    }
+
+    private static Intent createAlarmIntent(Context ctx, Alarm alarm) {
         Intent intent = new Intent(ctx, AlarmReceiver.class);
         intent.setAction(AlarmReceiver.ACTION_ALARM_TRIGGER);
         intent.putExtra(RINGTONE_STR, alarm.getRingtone());
-        intent.putExtra("alarm_id", requestCode);
+        intent.putExtra("alarm_id", alarm.getId());
+        return intent;
+    }
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                ctx,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        // Create showIntent for the alarm clock Info (what happens when user taps notif);
-        Intent showIntent = new Intent(ctx, NewAlarmActivity.class);
-        PendingIntent showPendingIntent = PendingIntent.getActivity(
-                ctx,
-                requestCode,
-                showIntent,
-                PendingIntent.FLAG_IMMUTABLE
-        );
-
+    private static void setExactAlarm(Context ctx, AlarmManager alarmManager, long triggerAttMills, PendingIntent pendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            AlarmManager newAlarmManager = ctx.getSystemService(AlarmManager.class);
-            if (!newAlarmManager.canScheduleExactAlarms()) {
+            if (!alarmManager.canScheduleExactAlarms()) {
                 Intent permissionIntent = new Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
                 // Add flag if context is not an Activity
                 if (!(ctx instanceof Activity)) {
@@ -95,19 +131,31 @@ public class AlarmScheduler {
 
         // For API 21+ use setAlarmClock which shows in status bar and gives priority
         AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(
-                calendar.getTimeInMillis(),
-                showPendingIntent
+                triggerAttMills,
+                pendingIntent
         );
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
     }
-
     public static void cancelAlarm(Context ctx, Alarm alarm) {
-        int requestCode = alarm.getId();
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        if (alarm.isOneTime()) {
+            cancelSingleAlarm(ctx, alarm.getId(), alarmManager);
+        } else {
+            if (alarm.isSunday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.SUNDAY), alarmManager);
+            if (alarm.isMonday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.MONDAY), alarmManager);
+            if (alarm.isTuesday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.TUESDAY), alarmManager);
+            if (alarm.isWednesday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.WEDNESDAY), alarmManager);
+            if (alarm.isThursday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.THURSDAY), alarmManager);
+            if (alarm.isFriday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.FRIDAY), alarmManager);
+            if (alarm.isSaturday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.SATURDAY), alarmManager);
+        }
+    }
+
+    private static void cancelSingleAlarm(Context ctx, int requestCode, AlarmManager alarmManager) {
         Intent intent = new Intent(ctx, AlarmReceiver.class);
-        intent.putExtra(RINGTONE_STR, alarm.getRingtone());
         PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         alarmManager.cancel(pendingIntent);
+        pendingIntent.cancel();
     }
 
     private static void rescheduleAlarm(Context ctx, Alarm alarm) {
@@ -120,6 +168,7 @@ public class AlarmScheduler {
         Executors.newSingleThreadExecutor().execute(() -> {
             // Runnable
             if (alarm.getId() != 0) {
+                cancelAlarm(ctx, alarm);
                 getAlarmDao(ctx).delete(alarm);
             }
         });

@@ -372,15 +372,7 @@ public class NewLessonActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAbsoluteAdapterPosition();
-                HeaderItem removedItem = germanAdapter.getItems().get(position);
-                germanAdapter.notifyItemRemoved(position);
-
-                int insertPosition = findInsertPosition(englishAdapter.getItems(), removedItem.getOriginalIndex());
-                englishAdapter.getItems().add(insertPosition, removedItem);
-                englishAdapter.notifyItemInserted(insertPosition);
-            }
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
 
         }).attachToRecyclerView(germanRecycler);
 
@@ -392,6 +384,16 @@ public class NewLessonActivity extends AppCompatActivity {
             int insertPosition = findInsertPosition(germanAdapter.getItems(), item.getOriginalIndex());
             germanAdapter.getItems().add(insertPosition, item);
             germanAdapter.notifyItemInserted(insertPosition);
+        });
+
+        germanAdapter.setOnItemClickListener((view, position) -> {
+            HeaderItem item = germanAdapter.getItems().get(position);
+            germanAdapter.getItems().remove(position);
+            germanAdapter.notifyItemRemoved(position);
+
+            int insertPosition = findInsertPosition(englishAdapter.getItems(), item.getOriginalIndex());
+            englishAdapter.getItems().add(insertPosition, item);
+            englishAdapter.notifyItemInserted(insertPosition);
         });
     }
 

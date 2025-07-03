@@ -36,10 +36,11 @@ public class AlarmReceiver extends BroadcastReceiver{
         } else if (ACTION_ALARM_TRIGGER.equals(action)){
             createNotificationChannel(ctx);
             vibrate(ctx);
-//            playRingtone(ctx, intent);
+            playRingtone(ctx, intent);
             showNotification(ctx);
 
         }
+        // TODO: if alarm is not one time, schedule again
     }
 
     private void createNotificationChannel(Context ctx) {

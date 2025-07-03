@@ -19,7 +19,6 @@
     <string name="import_csv">Import CSV file</string>
     <string name="manual_add">Manually Add Flashcard</string>
     <string name="add_flashcards">Add Flashcards</string>
-    <string name="add_flashcards_prompt">Looking very empty</string>
     <string name="settings">Settings</string>
     <string name="care_about_capitalisation">Care about Capitalisation?</string>
     <string name="care_about_punctuation">Care about Punctuation?</string>
