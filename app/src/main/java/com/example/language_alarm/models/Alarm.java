@@ -35,7 +35,7 @@ public class Alarm implements Parcelable {
 
     public Alarm(int hour, int minute, int numSnoozes, int lenSnooze,
                  boolean isOneTime, boolean monday, boolean tuesday, boolean wednesday,
-                 boolean thursday, boolean friday, boolean saturday, boolean sunday) {
+                 boolean thursday, boolean friday, boolean saturday, boolean sunday, String uri) {
         this.hour = hour;
         this.minute = minute;
         this.numberOfSnoozes = numSnoozes;
@@ -48,6 +48,7 @@ public class Alarm implements Parcelable {
         this.friday = friday;
         this.saturday = saturday;
         this.sunday = sunday;
+        this.ringtone = uri;
     }
 
     protected Alarm(Parcel in) {

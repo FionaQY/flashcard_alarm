@@ -2,6 +2,7 @@ package com.example.language_alarm.utils;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,30 +18,41 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.activities.AlarmRingingActivity;
+import com.example.language_alarm.models.Alarm;
 
 public class AlarmReceiver extends BroadcastReceiver{
     private static final String CHANNEL_ID = "alarm_channel";
     public static final String ACTION_ALARM_TRIGGER = "com.example.language_alarm.ACTION_ALARM_TRIGGER";
     private static Ringtone ringtone = null;
+    private static final String TAG = "AlarmReceiver";
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
-        Log.d("AlarmReceiver", "onReceive triggered: action=" + intent.getAction());
+        Log.d(TAG, "onReceive triggered: action=" + intent.getAction());
         String action = intent.getAction();
+        Alarm alarm = intent.getParcelableExtra("alarm");
+
+        if (alarm == null) {
+            Log.w(TAG, "Attempted to ring a null alarm");
+            return;
+        }
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             createNotificationChannel(ctx);
-//            vibrate(ctx);
-//            playRingtone(ctx, intent);
-//            showNotification(ctx);
         } else if (ACTION_ALARM_TRIGGER.equals(action)){
             createNotificationChannel(ctx);
             vibrate(ctx);
-            playRingtone(ctx, intent);
-            showNotification(ctx);
+            playRingtone(ctx, alarm.getRingtone());
+            showNotification(ctx, alarm);
 
         }
         // TODO: if alarm is not one time, schedule again
+        Intent alarmIntent = new Intent(ctx, AlarmRingingActivity.class);
+        alarmIntent.putExtra("alarm", alarm);
+        alarmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        ctx.startActivity(alarmIntent);
+
     }
 
     private void createNotificationChannel(Context ctx) {
@@ -69,8 +81,8 @@ public class AlarmReceiver extends BroadcastReceiver{
         }
     }
 
-    private void playRingtone(Context ctx, Intent intent) {
-        String ringtoneUriString = intent.getStringExtra("ringtone");
+    private void playRingtone(Context ctx, String ringtoneUriString) {
+        stopAlarm();
         Uri alarmUri;
 
         if (ringtoneUriString != null) {
@@ -88,16 +100,24 @@ public class AlarmReceiver extends BroadcastReceiver{
         }
     }
 
-    private void showNotification(Context ctx) {
+    private void showNotification(Context ctx, Alarm alarm) {
+        Intent alarmIntent = new Intent(ctx, AlarmRingingActivity.class);
+        alarmIntent.putExtra("alarm", alarm);
+        alarmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                ctx, alarm.getId(), alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_add_alarm_24)
                 .setContentTitle("Alarm")
                 .setContentText("yo wake your ass up")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true);
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setOngoing(true);
 
         NotificationManager notifManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-        notifManager.notify(1, builder.build());
+        notifManager.notify(alarm.getId(), builder.build());
     }
 
     public void stopAlarm() {

@@ -80,7 +80,7 @@ public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonView
     @Override
     public LessonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.alarm_item, parent, false);
+                .inflate(R.layout.lesson_item, parent, false);
         return new LessonViewHolder(view);
     }
 

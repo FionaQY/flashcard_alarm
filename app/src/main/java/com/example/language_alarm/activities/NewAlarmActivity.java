@@ -2,9 +2,13 @@ package com.example.language_alarm.activities;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.AlarmManager;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.CheckBox;
@@ -14,12 +18,16 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.utils.AlarmScheduler;
+import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -32,9 +40,11 @@ public class NewAlarmActivity extends AppCompatActivity {
     private TimePicker alarmTimePicker;
     private AlarmManager alarmManager;
     private Alarm alarmToEdit = null; // if editing alarm instead
-    private Alarm pendingAlarmToSave = null; // if permissions not granded
+    private Alarm pendingAlarmToSave = null; // if permissions not granted
     private ToggleButton[] buttons = null;
     private CheckBox oneTimeCheckBox;
+    private Uri selectedAudio;
+    private ActivityResultLauncher<Intent> audioPickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +54,8 @@ public class NewAlarmActivity extends AppCompatActivity {
         setupToolbar();
         initializeViews();
 
-        Alarm alarmToEdit = getIntent().getParcelableExtra("alarm");
+        this.alarmToEdit = getIntent().getParcelableExtra("alarm");
         if (alarmToEdit != null) {
-            this.alarmToEdit = alarmToEdit;
             populateAlarmData();
         }
 
@@ -56,6 +65,12 @@ public class NewAlarmActivity extends AppCompatActivity {
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
+
+        audioPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::handleRingtoneSelection
+        );
+
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {
                     @Override
@@ -82,17 +97,17 @@ public class NewAlarmActivity extends AppCompatActivity {
 
     private void setupToolbar() {
         header = findViewById(R.id.toolbar);
-        ToolbarHelper.setupToolbar(header, "new Alarm", true, this::showExitDialog);
+        ToolbarHelper.setupToolbar(header, "New Alarm", true, this::showExitDialog);
         setSupportActionBar(header);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
     }
 
     private void populateAlarmData() {
+        Objects.requireNonNull(buttons);
         alarmTimePicker.setHour(alarmToEdit.getHour());
         alarmTimePicker.setMinute(alarmToEdit.getMinute());
 
         updateToolbarTitle(alarmToEdit.getHour(), alarmToEdit.getMinute());
-        if (this.buttons == null) return;
         boolean[] alarmDays = {
                 alarmToEdit.isSunday(),
                 alarmToEdit.isMonday(),
@@ -106,11 +121,15 @@ public class NewAlarmActivity extends AppCompatActivity {
         for (int i = 0; i < buttons.length; i++) {
             buttons[i].setChecked(alarmDays[i]);
         }
+
+        if (alarmToEdit.getRingtone() != null) {
+            selectedAudio = Uri.parse(alarmToEdit.getRingtone());
+        }
     }
 
     private void updateToolbarTitle(int hourOfDay, int minute) {
         String amPm = hourOfDay < 12 ? "AM" : "PM";
-        int displayHour = hourOfDay > 12 ? hourOfDay - 12 : hourOfDay;
+        int displayHour = hourOfDay % 12 == 0 ? 12 : hourOfDay % 12;
         String title = String.format(Locale.US, "Alarm set for %d:%02d %s", displayHour, minute, amPm);
 
         TextView titleView = header.findViewById(R.id.toolbar_title);
@@ -142,10 +161,10 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         saveAlarm(newAlarm);
     }
+
     private void saveAlarm(Alarm newAlarm) {
         if (newAlarm == null) return;
 
-        AlarmScheduler.scheduleAlarm(this, newAlarm);
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 AlarmScheduler.saveAlarm(this, newAlarm);
@@ -165,7 +184,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         });
     }
 
-    @NonNull
     private Alarm createAlarm(int hour, int minute) {
         boolean noneSelected = true;
         for (ToggleButton btn : this.buttons) {
@@ -178,11 +196,12 @@ public class NewAlarmActivity extends AppCompatActivity {
             daysChecked[i] = this.buttons[i].isChecked() && this.buttons[i].isEnabled();
         }
 
+        String ringtone = selectedAudio == null ? "" : selectedAudio.toString();
         Alarm newAlarm = new Alarm(
                 hour, minute,
                 0, 5, isOneTime,
                 daysChecked[1], daysChecked[2],  daysChecked[3], daysChecked[4],
-                daysChecked[5],  daysChecked[6], daysChecked[0]
+                daysChecked[5],  daysChecked[6], daysChecked[0], ringtone
                 );
         if (this.alarmToEdit != null) {
             newAlarm.setId(this.alarmToEdit.getId());
@@ -196,6 +215,73 @@ public class NewAlarmActivity extends AppCompatActivity {
 
             for (ToggleButton button: buttons) {
                 button.setEnabled(!box.isChecked());
+            }
+        }
+    }
+
+    public void onSelectToneClick(View view) {
+        selectAlarmTone();
+    }
+
+    private void handleRingtoneSelection(ActivityResult result) {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            Uri uri = result.getData().getData();
+            if (uri != null) {
+                selectedAudio = uri;
+                String filename = getFileName(selectedAudio);
+//                TextView toneText = findViewById(R.id.selectToneButton);
+//                toneText.setText(String.format("Selected: %s", filename));
+            }
+        }
+    }
+
+    private void selectAlarmTone() {
+        if (!PermissionUtils.hasStoragePermission(this)) {
+            PermissionUtils.requestStoragePermission(this);
+            return;
+        }
+        // Proceed with tone selection
+        openAudioPicker();
+    }
+
+    private void openAudioPicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("audio/*");
+        audioPickerLauncher.launch(Intent.createChooser(intent, "Select Alarm Tone"));
+    }
+
+    private String getFileName(Uri uri) {
+        String res = null;
+        if (Objects.equals(uri.getScheme(), "content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    res = index >= 0 ?  cursor.getString(index) : null;
+                }
+            }
+
+        }
+        return res != null ? res : uri.getPath();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PermissionUtils.REQUEST_CODE_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                selectAlarmTone();
+            } else {
+                Toast.makeText(this, "Permission required to select alarm tones",
+                        Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(this)
+                        .setTitle("No Permission")
+                        .setMessage("Use default alarm tone instead?")
+                        .setPositiveButton("Yes", (d, w) -> selectedAudio = null)
+                        .setNegativeButton("Cancel", null)
+                        .show();
             }
         }
     }
@@ -235,5 +321,4 @@ public class NewAlarmActivity extends AppCompatActivity {
         showExitDialog();
         return true;
     }
-
 }

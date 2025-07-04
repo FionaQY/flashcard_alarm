@@ -34,7 +34,7 @@
         android:layout_below="@+id/saveButton"
         android:layout_centerHorizontal="true"
         app:layout_constraintTop_toBottomOf="@+id/timePicker"
-        app:layout_constraintBottom_toTopOf="@+id/saveButton"
+        app:layout_constraintBottom_toTopOf="@+id/selectToneButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" >
 
@@ -45,9 +45,36 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <!--TODO: delete button-->
     <!--TODO: load lessons and assign using id-->
     <!--loudness, vibration checkbox, custom sound (ringtone), snooze (number ,duration)-->
     <!--Alarm wallpaper-->
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/selectToneButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:text="@string/select_ringtone"
+        android:textColor="@android:color/white"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:paddingVertical="12dp"
+        app:icon="@drawable/outline_alarm_24"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@android:color/white"
+        app:cornerRadius="8dp"
+        app:backgroundTint="?attr/colorPrimary"
+        app:rippleColor="@color/colorPrimaryDark"
+        app:layout_constraintTop_toBottomOf="@+id/dayPicker_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="saveButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:onClick="onSelectToneClick"/>
+
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
@@ -68,7 +95,7 @@
         app:cornerRadius="8dp"
         app:backgroundTint="?attr/colorPrimary"
         app:rippleColor="@color/colorPrimaryDark"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/selectToneButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
