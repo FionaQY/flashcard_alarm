@@ -9,6 +9,7 @@ import com.example.language_alarm.models.Alarm;
 
 public class AlarmRingingActivity extends AppCompatActivity {
     Alarm alarm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

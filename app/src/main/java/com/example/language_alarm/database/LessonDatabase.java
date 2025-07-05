@@ -11,9 +11,7 @@ import com.example.language_alarm.models.Lesson;
 
 @Database(entities = {Lesson.class}, version = 1)
 @TypeConverters({Lesson.Converters.class})
-public abstract class LessonDatabase extends RoomDatabase{
-    public abstract LessonDao lessonDao();
-
+public abstract class LessonDatabase extends RoomDatabase {
     private static volatile LessonDatabase INSTANCE;
 
     public static LessonDatabase getDatabase(final Context ctx) {
@@ -22,10 +20,10 @@ public abstract class LessonDatabase extends RoomDatabase{
                 if (INSTANCE == null) {
                     String databaseName = "lesson_database";
                     INSTANCE = Room.databaseBuilder(
-                            ctx.getApplicationContext(),
-                            LessonDatabase.class,
+                                    ctx.getApplicationContext(),
+                                    LessonDatabase.class,
                                     databaseName
-                    )
+                            )
                             .fallbackToDestructiveMigration()
                             .build();
                 }
@@ -33,4 +31,6 @@ public abstract class LessonDatabase extends RoomDatabase{
         }
         return INSTANCE;
     }
+
+    public abstract LessonDao lessonDao();
 }

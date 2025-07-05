@@ -20,36 +20,6 @@ import java.util.Objects;
 @TypeConverters(Lesson.Converters.class)
 @Entity(tableName = "lessons")
 public class Lesson implements Parcelable {
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-    private String lessonName;
-    private boolean isPunctSensitive = true;
-    private boolean isCaseSensitive = true;
-    private List<String> headers;
-    private List<Boolean> foreignIndexes = null;
-    @TypeConverters(Converters.class)
-    private List<Flashcard> flashcards = null;
-    public Lesson() {
-        this.headers = new ArrayList<>();
-    }
-
-    public Lesson(String name, List<Flashcard> les, boolean punct, boolean capt, List<String> headers, List<Boolean> foreignVals) {
-        this.lessonName = name;
-        this.flashcards = les;
-        this.isCaseSensitive = capt;
-        this.isPunctSensitive = punct;
-        this.headers = headers;
-        this.foreignIndexes = foreignVals;
-    }
-
-    public void AddFlashcards(List<Flashcard> cards) {
-        if (this.flashcards == null) {
-            this.flashcards = cards;
-        } else {
-            this.flashcards.addAll(cards);
-        }
-    }
-
     public static final Creator<Lesson> CREATOR = new Creator<>() {
         @Override
         public Lesson createFromParcel(Parcel in) {
@@ -61,6 +31,27 @@ public class Lesson implements Parcelable {
             return new Lesson[size];
         }
     };
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    private String lessonName;
+    private boolean isPunctSensitive = true;
+    private boolean isCaseSensitive = true;
+    private List<String> headers = new ArrayList<>();
+    private List<Boolean> foreignIndexes = new ArrayList<>();
+    @TypeConverters(Converters.class)
+    private List<Flashcard> flashcards = null;
+
+    public Lesson() {
+    }
+
+    public Lesson(String name, List<Flashcard> les, boolean punctuation, boolean capt, List<String> headers, List<Boolean> foreignVals) {
+        this.lessonName = name;
+        this.flashcards = les;
+        this.isCaseSensitive = capt;
+        this.isPunctSensitive = punctuation;
+        this.headers = headers;
+        this.foreignIndexes = foreignVals;
+    }
 
     protected Lesson(Parcel in) {
         id = in.readInt();
@@ -73,8 +64,21 @@ public class Lesson implements Parcelable {
         in.readList(foreignIndexes, Integer.class.getClassLoader());
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public void AddFlashcards(List<Flashcard> cards) {
+        if (this.flashcards == null) {
+            this.flashcards = cards;
+        } else {
+            this.flashcards.addAll(cards);
+        }
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getLessonName() {
         return this.lessonName;
@@ -84,12 +88,12 @@ public class Lesson implements Parcelable {
         this.lessonName = name;
     }
 
-    public void setFlashcards(List<Flashcard> flashcards) {
-        this.flashcards = flashcards;
-    }
-
     public List<Flashcard> getFlashcards() {
         return this.flashcards;
+    }
+
+    public void setFlashcards(List<Flashcard> flashcards) {
+        this.flashcards = flashcards;
     }
 
     public boolean isCaseSensitive() {
@@ -172,7 +176,8 @@ public class Lesson implements Parcelable {
         @TypeConverter
         public static ArrayList<Flashcard> toFlashcardList(String data) {
             Gson gson = new Gson();
-            Type listType = new TypeToken<ArrayList<Flashcard>>() {}.getType();
+            Type listType = new TypeToken<ArrayList<Flashcard>>() {
+            }.getType();
             return gson.fromJson(data, listType);
         }
 
@@ -183,7 +188,8 @@ public class Lesson implements Parcelable {
 
         @TypeConverter
         public static List<String> toStringList(String data) {
-            Type listType = new TypeToken<List<String>>() {}.getType();
+            Type listType = new TypeToken<List<String>>() {
+            }.getType();
             return new Gson().fromJson(data, listType);
         }
 
@@ -194,7 +200,8 @@ public class Lesson implements Parcelable {
 
         @TypeConverter
         public static List<Boolean> toBooleanList(String data) {
-            Type listType = new TypeToken<List<Boolean>>() {}.getType();
+            Type listType = new TypeToken<List<Boolean>>() {
+            }.getType();
             return new Gson().fromJson(data, listType);
         }
     }

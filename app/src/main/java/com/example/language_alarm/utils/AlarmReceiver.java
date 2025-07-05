@@ -10,7 +10,6 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-//import android.os.Vibrator;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -21,11 +20,11 @@ import com.example.language_alarm.R;
 import com.example.language_alarm.activities.AlarmRingingActivity;
 import com.example.language_alarm.models.Alarm;
 
-public class AlarmReceiver extends BroadcastReceiver{
-    private static final String CHANNEL_ID = "alarm_channel";
+public class AlarmReceiver extends BroadcastReceiver {
     public static final String ACTION_ALARM_TRIGGER = "com.example.language_alarm.ACTION_ALARM_TRIGGER";
-    private static Ringtone ringtone = null;
+    private static final String CHANNEL_ID = "alarm_channel";
     private static final String TAG = "AlarmReceiver";
+    private static Ringtone ringtone = null;
 
     @Override
     public void onReceive(Context ctx, Intent intent) {
@@ -40,7 +39,7 @@ public class AlarmReceiver extends BroadcastReceiver{
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             createNotificationChannel(ctx);
-        } else if (ACTION_ALARM_TRIGGER.equals(action)){
+        } else if (ACTION_ALARM_TRIGGER.equals(action)) {
             createNotificationChannel(ctx);
             vibrate(ctx);
             playRingtone(ctx, alarm.getRingtone());
@@ -105,7 +104,7 @@ public class AlarmReceiver extends BroadcastReceiver{
         alarmIntent.putExtra("alarm", alarm);
         alarmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                ctx, alarm.getId(), alarmIntent,PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                ctx, alarm.getId(), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_add_alarm_24)

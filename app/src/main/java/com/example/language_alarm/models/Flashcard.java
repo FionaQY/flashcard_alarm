@@ -9,24 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Flashcard implements Parcelable {
-    private List<String> values;
-
-    public Flashcard(List<String> cards) {
-        this.values = new ArrayList<>(cards);
-    }
-
-    protected Flashcard(Parcel in) {
-        values = in.createStringArrayList();
-    }
-
-    public List<String> getVals() {
-        return values;
-    }
-
-    public void setVals(List<String> values) {
-        this.values = values;
-    }
-
     public static final Creator<Flashcard> CREATOR = new Creator<>() {
         @Override
         public Flashcard createFromParcel(Parcel in) {
@@ -38,6 +20,27 @@ public class Flashcard implements Parcelable {
             return new Flashcard[size];
         }
     };
+    private List<String> values;
+
+    public Flashcard(List<String> cards) {
+        this.values = new ArrayList<>(cards);
+    }
+
+    protected Flashcard(Parcel in) {
+        values = in.createStringArrayList();
+    }
+
+    public String getValsString() {
+        return android.text.TextUtils.join("\n", this.values);
+    }
+
+    public List<String> getVals() {
+        return values;
+    }
+
+    public void setVals(List<String> values) {
+        this.values = values;
+    }
 
     @Override
     public int describeContents() {

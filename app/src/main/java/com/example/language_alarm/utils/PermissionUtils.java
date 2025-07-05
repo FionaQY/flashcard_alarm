@@ -1,15 +1,17 @@
 // PermissionUtils.java
 package com.example.language_alarm.utils;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.READ_MEDIA_AUDIO;
+
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
+
 import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.READ_MEDIA_AUDIO;
 
 public class PermissionUtils {
     public static final int REQUEST_CODE_STORAGE_PERMISSION = 100;

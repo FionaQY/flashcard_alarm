@@ -1,5 +1,6 @@
 package com.example.language_alarm.activities;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -7,7 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.AlarmManager;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.view.View;
@@ -18,13 +18,11 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.models.ActivityResultHelper;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.PermissionUtils;
@@ -44,7 +42,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     private ToggleButton[] buttons = null;
     private CheckBox oneTimeCheckBox;
     private Uri selectedAudio;
-    private ActivityResultLauncher<Intent> audioPickerLauncher;
+    private ActivityResultHelper audioPickerHelper = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +64,12 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
 
-        audioPickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                this::handleRingtoneSelection
-        );
+        audioPickerHelper = new ActivityResultHelper(this, uri -> {
+            selectedAudio = uri;
+            String filename = getFileName(selectedAudio);
+//                TextView toneText = findViewById(R.id.selectToneButton);
+//                toneText.setText(String.format("Selected: %s", filename));
+        });
 
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {
@@ -178,8 +178,8 @@ public class NewAlarmActivity extends AppCompatActivity {
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> Toast.makeText(this,
-                            "Failed to set alarm: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show());
+                        "Failed to set alarm: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -189,7 +189,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         for (ToggleButton btn : this.buttons) {
             if (btn.isChecked()) noneSelected = false;
         }
-        boolean isOneTime =  oneTimeCheckBox.isChecked() || noneSelected;
+        boolean isOneTime = oneTimeCheckBox.isChecked() || noneSelected;
 
         boolean[] daysChecked = new boolean[7];
         for (int i = 0; i < this.buttons.length; i++) {
@@ -199,10 +199,10 @@ public class NewAlarmActivity extends AppCompatActivity {
         String ringtone = selectedAudio == null ? "" : selectedAudio.toString();
         Alarm newAlarm = new Alarm(
                 hour, minute,
-                0, 5, isOneTime,  daysChecked[0],
-                daysChecked[1], daysChecked[2],  daysChecked[3], daysChecked[4],
-                daysChecked[5],  daysChecked[6], ringtone
-                );
+                0, 5, isOneTime, daysChecked[0],
+                daysChecked[1], daysChecked[2], daysChecked[3], daysChecked[4],
+                daysChecked[5], daysChecked[6], ringtone
+        );
         if (this.alarmToEdit != null) {
             newAlarm.setId(this.alarmToEdit.getId());
         }
@@ -213,7 +213,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         if (v instanceof CheckBox) {
             CheckBox box = (CheckBox) v;
 
-            for (ToggleButton button: buttons) {
+            for (ToggleButton button : buttons) {
                 button.setEnabled(!box.isChecked());
             }
         }
@@ -223,31 +223,16 @@ public class NewAlarmActivity extends AppCompatActivity {
         selectAlarmTone();
     }
 
-    private void handleRingtoneSelection(ActivityResult result) {
-        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-            Uri uri = result.getData().getData();
-            if (uri != null) {
-                selectedAudio = uri;
-                String filename = getFileName(selectedAudio);
-//                TextView toneText = findViewById(R.id.selectToneButton);
-//                toneText.setText(String.format("Selected: %s", filename));
-            }
-        }
-    }
-
     private void selectAlarmTone() {
         if (!PermissionUtils.hasStoragePermission(this)) {
             PermissionUtils.requestStoragePermission(this);
             return;
         }
-        // Proceed with tone selection
         openAudioPicker();
     }
 
     private void openAudioPicker() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/*");
-        audioPickerLauncher.launch(Intent.createChooser(intent, "Select Alarm Tone"));
+        audioPickerHelper.launchAudioPicker();
     }
 
     private String getFileName(Uri uri) {
@@ -256,7 +241,7 @@ public class NewAlarmActivity extends AppCompatActivity {
             try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
                     int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    res = index >= 0 ?  cursor.getString(index) : null;
+                    res = index >= 0 ? cursor.getString(index) : null;
                 }
             }
 

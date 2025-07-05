@@ -69,9 +69,8 @@
         app:cornerRadius="8dp"
         app:backgroundTint="?attr/colorPrimary"
         app:rippleColor="@color/colorPrimaryDark"
-        app:layout_constraintTop_toBottomOf="@+id/dayPicker_layout"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="saveButton"
+        app:layout_constraintTop_toBottomOf="@id/dayPicker_layout"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:onClick="onSelectToneClick"/>
 

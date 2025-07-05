@@ -108,7 +108,7 @@ public class AlarmHandler {
                 getRequestCode(alarm, dayOfWeek),
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                );
+        );
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
@@ -149,18 +149,26 @@ public class AlarmHandler {
         );
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
     }
+
     public static void cancelAlarm(Context ctx, Alarm alarm) {
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         if (alarm.isOneTime()) {
             cancelSingleAlarm(ctx, alarm.getId(), alarmManager, alarm);
         } else {
-            if (alarm.isSunday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.SUNDAY), alarmManager, alarm);
-            if (alarm.isMonday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.MONDAY), alarmManager, alarm);
-            if (alarm.isTuesday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.TUESDAY), alarmManager, alarm);
-            if (alarm.isWednesday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.WEDNESDAY), alarmManager, alarm);
-            if (alarm.isThursday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.THURSDAY), alarmManager, alarm);
-            if (alarm.isFriday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.FRIDAY), alarmManager, alarm);
-            if (alarm.isSaturday()) cancelSingleAlarm(ctx, getRequestCode(alarm,  Calendar.SATURDAY), alarmManager, alarm);
+            if (alarm.isSunday())
+                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.SUNDAY), alarmManager, alarm);
+            if (alarm.isMonday())
+                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.MONDAY), alarmManager, alarm);
+            if (alarm.isTuesday())
+                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.TUESDAY), alarmManager, alarm);
+            if (alarm.isWednesday())
+                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.WEDNESDAY), alarmManager, alarm);
+            if (alarm.isThursday())
+                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.THURSDAY), alarmManager, alarm);
+            if (alarm.isFriday())
+                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.FRIDAY), alarmManager, alarm);
+            if (alarm.isSaturday())
+                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.SATURDAY), alarmManager, alarm);
         }
     }
 
@@ -183,7 +191,7 @@ public class AlarmHandler {
         if (alarmList == null) return;
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                for (Alarm alarm: alarmList) {
+                for (Alarm alarm : alarmList) {
                     rescheduleAlarm(appContext, alarm);
                 }
             } catch (Exception e) {

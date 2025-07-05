@@ -12,6 +12,17 @@ import java.util.Objects;
 
 @Entity(tableName = "alarms")
 public class Alarm implements Parcelable {
+    public static final Creator<Alarm> CREATOR = new Creator<>() {
+        @Override
+        public Alarm createFromParcel(Parcel in) {
+            return new Alarm(in);
+        }
+
+        @Override
+        public Alarm[] newArray(int size) {
+            return new Alarm[size];
+        }
+    };
     @PrimaryKey(autoGenerate = true)
     private int id;
     private int hour;  // Store hour separately
@@ -31,7 +42,8 @@ public class Alarm implements Parcelable {
     private boolean sunday;
     private int lessonId;
 
-    public Alarm() {}
+    public Alarm() {
+    }
 
     public Alarm(int hour, int minute, int numSnoozes, int lenSnooze,
                  boolean isOneTime, boolean monday, boolean tuesday, boolean wednesday,
@@ -71,66 +83,134 @@ public class Alarm implements Parcelable {
         lessonId = in.readInt();
     }
 
-    public static final Creator<Alarm> CREATOR = new Creator<>() {
-        @Override
-        public Alarm createFromParcel(Parcel in) {
-            return new Alarm(in);
-        }
-
-        @Override
-        public Alarm[] newArray(int size) {
-            return new Alarm[size];
-        }
-    };
-
     // Getters and setters for all fields
-    public boolean isMonday() { return monday; }
-    public void setMonday(boolean monday) { this.monday = monday; }
+    public boolean isMonday() {
+        return monday;
+    }
 
-    public boolean isTuesday() { return tuesday; }
-    public void setTuesday(boolean tuesday) { this.tuesday = tuesday; }
+    public void setMonday(boolean monday) {
+        this.monday = monday;
+    }
 
-    public boolean isWednesday() { return wednesday; }
-    public void setWednesday(boolean wednesday) { this.wednesday = wednesday; }
+    public boolean isTuesday() {
+        return tuesday;
+    }
 
-    public boolean isThursday() { return thursday; }
-    public void setThursday(boolean thursday) { this.thursday = thursday; }
+    public void setTuesday(boolean tuesday) {
+        this.tuesday = tuesday;
+    }
 
-    public boolean isFriday() { return friday; }
-    public void setFriday(boolean friday) { this.friday = friday; }
+    public boolean isWednesday() {
+        return wednesday;
+    }
 
-    public boolean isSaturday() { return saturday; }
-    public void setSaturday(boolean saturday) { this.saturday = saturday; }
+    public void setWednesday(boolean wednesday) {
+        this.wednesday = wednesday;
+    }
 
-    public boolean isSunday() { return sunday; }
-    public void setSunday(boolean sunday) { this.sunday = sunday; }
+    public boolean isThursday() {
+        return thursday;
+    }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public void setThursday(boolean thursday) {
+        this.thursday = thursday;
+    }
 
-    public int getHour() { return hour; }
-    public void setHour(int hour) { this.hour = hour; }
+    public boolean isFriday() {
+        return friday;
+    }
 
-    public int getMinute() { return minute; }
-    public void setMinute(int minute) { this.minute = minute; }
+    public void setFriday(boolean friday) {
+        this.friday = friday;
+    }
 
-    public String getRingtone() { return ringtone; }
-    public void setRingtone(String ringtone) { this.ringtone = ringtone; }
+    public boolean isSaturday() {
+        return saturday;
+    }
 
-    public String getWallpaper() { return wallpaper; }
-    public void setWallpaper(String wallpaper) { this.wallpaper = wallpaper; }
+    public void setSaturday(boolean saturday) {
+        this.saturday = saturday;
+    }
 
-    public int getNumberOfSnoozes() { return numberOfSnoozes; }
-    public void setNumberOfSnoozes(int numberOfSnoozes) { this.numberOfSnoozes = numberOfSnoozes; }
+    public boolean isSunday() {
+        return sunday;
+    }
 
-    public int getLengthOfSnooze() { return lengthOfSnooze; }
-    public void setLengthOfSnooze(int lengthOfSnooze) { this.lengthOfSnooze = lengthOfSnooze; }
+    public void setSunday(boolean sunday) {
+        this.sunday = sunday;
+    }
 
-    public boolean isEnabled() { return isEnabled; }
-    public void setEnabled(boolean enabled) { isEnabled = enabled; }
+    public int getId() {
+        return id;
+    }
 
-    public boolean isOneTime() { return isOneTime; }
-    public void setOneTime(boolean oneTime) { isOneTime = oneTime; }
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getHour() {
+        return hour;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
+    public int getMinute() {
+        return minute;
+    }
+
+    public void setMinute(int minute) {
+        this.minute = minute;
+    }
+
+    public String getRingtone() {
+        return ringtone;
+    }
+
+    public void setRingtone(String ringtone) {
+        this.ringtone = ringtone;
+    }
+
+    public String getWallpaper() {
+        return wallpaper;
+    }
+
+    public void setWallpaper(String wallpaper) {
+        this.wallpaper = wallpaper;
+    }
+
+    public int getNumberOfSnoozes() {
+        return numberOfSnoozes;
+    }
+
+    public void setNumberOfSnoozes(int numberOfSnoozes) {
+        this.numberOfSnoozes = numberOfSnoozes;
+    }
+
+    public int getLengthOfSnooze() {
+        return lengthOfSnooze;
+    }
+
+    public void setLengthOfSnooze(int lengthOfSnooze) {
+        this.lengthOfSnooze = lengthOfSnooze;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
+    }
+
+    public boolean isOneTime() {
+        return isOneTime;
+    }
+
+    public void setOneTime(boolean oneTime) {
+        isOneTime = oneTime;
+    }
 
     public String getTime() {
         return String.format(Locale.US, "%02d:%02d", hour, minute);
@@ -211,7 +291,4 @@ public class Alarm implements Parcelable {
         dest.writeByte((byte) (sunday ? 1 : 0));
         dest.writeInt(lessonId);
     }
-
-
-
 }

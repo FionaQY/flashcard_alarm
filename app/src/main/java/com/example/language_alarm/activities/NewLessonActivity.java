@@ -1,7 +1,6 @@
 package com.example.language_alarm.activities;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,19 +16,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.models.ActivityResultHelper;
 import com.example.language_alarm.models.Flashcard;
+import com.example.language_alarm.models.FlashcardViewModel;
 import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.utils.FlashcardAdapter;
 import com.example.language_alarm.utils.LessonHandler;
+import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -47,14 +48,16 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 
 public class NewLessonActivity extends AppCompatActivity {
+    Handler handler = new Handler(Looper.getMainLooper());
+    Runnable headersUpdateRunnable;
     private MaterialButton btnAddFlashcards;
     private LinearLayout optionsContainer;
     private Lesson tempLesson = null;
     private List<String> currentHeaders = new ArrayList<>();
     private List<Boolean> foreignIndexes = new ArrayList<>();
-    private ActivityResultLauncher<Intent> csvFilePickerLauncher;
-    Handler handler = new Handler(Looper.getMainLooper());
-    Runnable headersUpdateRunnable;
+    private FlashcardViewModel flashcardViewModel = null;
+    private ActivityResultHelper csvPickerHelper = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +74,17 @@ public class NewLessonActivity extends AppCompatActivity {
             populateLessonData(tempLesson);
         }
 
-        // Initialise csv picking launcher
-        csvFilePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                this::handleCsvFileSelection
-        );
+        csvPickerHelper = new ActivityResultHelper(this, this::showCsvImportProgress);
+
+        RecyclerView recyclerView = findViewById(R.id.flashcard_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        FlashcardAdapter adapter = new FlashcardAdapter(this, new ArrayList<>());
+        recyclerView.setAdapter(adapter);
+
+        flashcardViewModel = new ViewModelProvider(this).get(FlashcardViewModel.class);
+        flashcardViewModel.setFlashcards(tempLesson.getFlashcards());
+
+        flashcardViewModel.getFlashcards().observe(this, adapter::setFlashcards);
 
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {
@@ -118,24 +127,15 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void importFromCsv() {
-        if (this.currentHeaders == null || currentHeaders.isEmpty()) {
-            Toast.makeText(this, "As you have not set the headers in settings, the headers will be derived form the first row of the CSV file", Toast.LENGTH_SHORT).show();
+        if (!PermissionUtils.hasStoragePermission(this)) {
+            PermissionUtils.requestStoragePermission(this);
+            return;
         }
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("text/*");
-        String[] mimetypes = { "text/csv", "text/comma-separated-values", "application/csv" };
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        csvFilePickerLauncher.launch(intent);
-    }
 
-    private void handleCsvFileSelection(ActivityResult result) {
-        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-            Uri uri = result.getData().getData();
-            if (uri != null) {
-                showCsvImportProgress(uri);
-            }
+        if (this.currentHeaders == null || currentHeaders.isEmpty()) {
+            Toast.makeText(this, "As you have not set the headers in settings, the headers will be derived form the first row of the CSV file", Toast.LENGTH_LONG).show();
         }
+        csvPickerHelper.launchCsvPicker();
     }
 
     private void showCsvImportProgress(Uri uri) {
@@ -159,14 +159,16 @@ public class NewLessonActivity extends AppCompatActivity {
                     if (line.trim().isEmpty()) continue;
                     List<String> values = parseCsvLine(line);
                     if (lineNum == 1) {
-                        if (currentHeaders == null) {
+                        if (currentHeaders == null || currentHeaders.isEmpty()) {
                             currentHeaders = values;
+                            continue;
+                        } else {
+                            while (currentHeaders.size() < values.size()) {
+                                currentHeaders.add("No name");
+                            }
                         }
-                        continue;
                     }
-                    if (values.size() == currentHeaders.size()) {
-                        importedCards.add(new Flashcard(values));
-                    }
+                    importedCards.add(new Flashcard(values));
                 }
                 reader.close();
 
@@ -200,7 +202,9 @@ public class NewLessonActivity extends AppCompatActivity {
         if (tempLesson == null) {
             tempLesson = new Lesson();
         }
+        tempLesson.setHeaders(currentHeaders);
         tempLesson.AddFlashcards(cards);
+        flashcardViewModel.setFlashcards(tempLesson.getFlashcards());
 
         new AlertDialog.Builder(this)
                 .setTitle("Import Successful")
@@ -213,6 +217,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private List<String> parseCsvLine(String line) {
+        boolean isTabDelimited = line.contains("\t");
         List<String> values = new ArrayList<>();
         boolean inQuotes = false;
         StringBuilder sb = new StringBuilder();
@@ -221,7 +226,7 @@ public class NewLessonActivity extends AppCompatActivity {
             char ch = line.charAt(i);
             if (ch == '"') {
                 inQuotes = !inQuotes;
-            } else if (ch == ',' && !inQuotes) {
+            } else if ((ch == ',' || (isTabDelimited && ch == '\t')) && !inQuotes) {
                 values.add(sb.toString().trim());
                 sb.setLength(0);
             } else {
@@ -266,7 +271,8 @@ public class NewLessonActivity extends AppCompatActivity {
 
         editHeaders.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -284,7 +290,8 @@ public class NewLessonActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) { }
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
@@ -367,7 +374,8 @@ public class NewLessonActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            }
 
         }).attachToRecyclerView(englishRecycler);
 
@@ -382,7 +390,8 @@ public class NewLessonActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            }
 
         }).attachToRecyclerView(germanRecycler);
 
@@ -481,6 +490,10 @@ public class NewLessonActivity extends AppCompatActivity {
         }
     }
 
+    private interface OnItemClickListener {
+        void onItemClick(View view, int position);
+    }
+
     private static class HeaderItem {
         private final String text;
         private final int originalIndex;
@@ -489,12 +502,14 @@ public class NewLessonActivity extends AppCompatActivity {
             this.text = text;
             this.originalIndex = originalIndex;
         }
-        public String getText() { return text; }
-        public int getOriginalIndex() { return originalIndex; }
-    }
 
-    private interface OnItemClickListener {
-        void onItemClick(View view, int position);
+        public String getText() {
+            return text;
+        }
+
+        public int getOriginalIndex() {
+            return originalIndex;
+        }
     }
 
     private static class HeaderAdapter extends RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder> {
@@ -526,9 +541,11 @@ public class NewLessonActivity extends AppCompatActivity {
             return items.size();
         }
 
-        public List<HeaderItem> getItems() { return items; }
+        public List<HeaderItem> getItems() {
+            return items;
+        }
 
-        public class HeaderViewHolder extends RecyclerView.ViewHolder{
+        public class HeaderViewHolder extends RecyclerView.ViewHolder {
             private final TextView textView;
 
             public HeaderViewHolder(@NonNull View itemView) {

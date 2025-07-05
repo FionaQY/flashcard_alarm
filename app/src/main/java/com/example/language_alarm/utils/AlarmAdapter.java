@@ -63,18 +63,6 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
         }
     }
 
-    public static class AlarmViewHolder extends RecyclerView.ViewHolder{
-        public TextView timeTextView, labelTextView;
-        public SwitchCompat toggleSwitch;
-
-        public AlarmViewHolder(View itemView) {
-            super(itemView);
-            timeTextView = itemView.findViewById(R.id.alarm_time);
-            labelTextView = itemView.findViewById(R.id.alarm_label);
-            toggleSwitch = itemView.findViewById(R.id.alarm_toggle);
-        }
-    }
-
     @NonNull
     @Override
     public AlarmViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -102,9 +90,21 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
 
     @Override
     public int getItemCount() {
-        if (this.alarmList == null)  {
+        if (this.alarmList == null) {
             return 0;
         }
         return this.alarmList.size();
+    }
+
+    public static class AlarmViewHolder extends RecyclerView.ViewHolder {
+        public TextView timeTextView, labelTextView;
+        public SwitchCompat toggleSwitch;
+
+        public AlarmViewHolder(View itemView) {
+            super(itemView);
+            timeTextView = itemView.findViewById(R.id.alarm_time);
+            labelTextView = itemView.findViewById(R.id.alarm_label);
+            toggleSwitch = itemView.findViewById(R.id.alarm_toggle);
+        }
     }
 }

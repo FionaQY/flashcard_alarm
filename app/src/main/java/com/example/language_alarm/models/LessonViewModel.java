@@ -13,6 +13,7 @@ import java.util.List;
 
 public class LessonViewModel extends AndroidViewModel {
     private final LiveData<List<Lesson>> allLessons;
+
     public LessonViewModel(@NonNull Application application) {
         super(application);
         LessonDao lessonDao = LessonDatabase.getDatabase(application).lessonDao();

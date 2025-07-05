@@ -9,9 +9,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.language_alarm.utils.AlarmAdapter;
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.AlarmViewModel;
+import com.example.language_alarm.utils.AlarmAdapter;
 
 import java.util.ArrayList;
 

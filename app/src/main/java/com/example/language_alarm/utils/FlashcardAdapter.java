@@ -14,96 +14,96 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.activities.NewLessonActivity;
-import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.models.Flashcard;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonViewHolder> {
+public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.FlashcardViewHolder> {
     private final Context ctx;
-    private List<Lesson> lessonList;
+    private List<Flashcard> flashcards;
 
-    public LessonAdapter(Context ctx, List<Lesson> lessons) {
+    public FlashcardAdapter(Context ctx, List<Flashcard> flashcards) {
         this.ctx = ctx;
-        this.lessonList = lessons;
+        this.flashcards = flashcards;
     }
 
-    public void setLessons(List<Lesson> newLessons) {
-        if (lessonList == null) {
-            this.lessonList = new ArrayList<>();
-            lessonList.addAll(newLessons);
+    public void setFlashcards(List<Flashcard> newFlashcards) {
+        if (newFlashcards == null || newFlashcards.isEmpty()) {
+            this.flashcards = new ArrayList<>();
+            notifyDataSetChanged();
+        } else if (flashcards == null || flashcards.isEmpty()) {
+            this.flashcards = new ArrayList<>(newFlashcards);
             notifyDataSetChanged();
         } else {
             DiffUtil.Callback diffCallback = new DiffUtil.Callback() {
                 @Override
                 public int getOldListSize() {
-                    return lessonList.size();
+                    return flashcards.size();
                 }
 
                 @Override
                 public int getNewListSize() {
-                    return newLessons.size();
+                    return newFlashcards.size();
                 }
 
                 @Override
                 public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return lessonList.get(oldItemPosition).getId() == newLessons.get(newItemPosition).getId();
+                    return flashcards.get(oldItemPosition) == newFlashcards.get(newItemPosition);
                 }
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    return lessonList.get(oldItemPosition).equals(newLessons.get(newItemPosition));
+                    return flashcards.get(oldItemPosition).equals(newFlashcards.get(newItemPosition));
                 }
             };
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 
-            lessonList.clear();
-            lessonList.addAll(newLessons);
+            flashcards.clear();
+            flashcards.addAll(newFlashcards);
             diffResult.dispatchUpdatesTo(this);
         }
     }
 
     @NonNull
     @Override
-    public LessonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FlashcardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.lesson_item, parent, false);
-        return new LessonViewHolder(view);
+        return new FlashcardViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(LessonViewHolder holder, int position) {
-        Lesson lesson = this.lessonList.get(position);
-        holder.lessonNameView.setText(lesson.getLessonName());
+    public void onBindViewHolder(FlashcardViewHolder holder, int position) {
+        Flashcard flashcard = this.flashcards.get(position);
+        holder.lessonNameView.setText(flashcard.getValsString());
 
         holder.editButton.setOnClickListener(view -> {
             Intent intent = new Intent(ctx, NewLessonActivity.class);
-            intent.putExtra("lesson", lesson);
+            intent.putExtra("flashcard", flashcard);
             ctx.startActivity(intent);
         });
 
-        // TODO: confirmation dialog
-        holder.deleteButton.setOnClickListener(view -> {
-            Intent intent = new Intent(ctx, NewLessonActivity.class);
-            intent.putExtra("lesson", lesson);
-            ctx.startActivity(intent);
-        });
+//        holder.deleteButton.setOnClickListener(view -> {
+//            intent.putExtra("flashcard", flashcard);
+//            ctx.startActivity(intent);
+//        });
     }
 
     @Override
     public int getItemCount() {
-        if (this.lessonList == null) {
+        if (this.flashcards == null) {
             return 0;
         }
-        return this.lessonList.size();
+        return this.flashcards.size();
     }
 
-    public static class LessonViewHolder extends RecyclerView.ViewHolder {
+    public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
         public TextView lessonNameView;
         public Button editButton;
         public Button deleteButton;
 
-        public LessonViewHolder(View itemView) {
+        public FlashcardViewHolder(View itemView) {
             super(itemView);
             lessonNameView = itemView.findViewById(R.id.lesson_name);
             editButton = itemView.findViewById(R.id.edit_lesson);

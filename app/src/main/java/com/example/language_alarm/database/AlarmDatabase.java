@@ -1,17 +1,15 @@
 package com.example.language_alarm.database;
 
+import android.content.Context;
+
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-import android.content.Context;
-
 import com.example.language_alarm.models.Alarm;
 
 @Database(entities = {Alarm.class}, version = 1)
-public abstract class AlarmDatabase extends RoomDatabase{
-    public abstract AlarmDao alarmDao();
-
+public abstract class AlarmDatabase extends RoomDatabase {
     private static volatile AlarmDatabase INSTANCE;
 
     public static AlarmDatabase getDatabase(final Context ctx) {
@@ -20,10 +18,10 @@ public abstract class AlarmDatabase extends RoomDatabase{
                 if (INSTANCE == null) {
                     String databaseName = "alarm_database";
                     INSTANCE = Room.databaseBuilder(
-                            ctx.getApplicationContext(),
-                            AlarmDatabase.class,
+                                    ctx.getApplicationContext(),
+                                    AlarmDatabase.class,
                                     databaseName
-                    )
+                            )
                             .fallbackToDestructiveMigration()
                             .build();
                 }
@@ -31,4 +29,6 @@ public abstract class AlarmDatabase extends RoomDatabase{
         }
         return INSTANCE;
     }
+
+    public abstract AlarmDao alarmDao();
 }

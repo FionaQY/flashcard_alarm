@@ -6,9 +6,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.material.appbar.MaterialToolbar;
-
 import com.example.language_alarm.R;
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class ToolbarHelper {
 
@@ -17,8 +16,8 @@ public class ToolbarHelper {
                                     boolean showBackButton, @Nullable Runnable backAction) {
         TextView titleView = toolbar.findViewById(R.id.toolbar_title);
         if (titleView != null) {
-            titleView.setText(title != null ? title: "");
-            titleView.setVisibility(title != null ? TextView.VISIBLE: TextView.GONE);
+            titleView.setText(title != null ? title : "");
+            titleView.setVisibility(title != null ? TextView.VISIBLE : TextView.GONE);
         }
 
         toolbar.setNavigationIcon(showBackButton

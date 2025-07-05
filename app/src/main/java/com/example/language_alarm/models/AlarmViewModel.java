@@ -13,6 +13,7 @@ import java.util.List;
 
 public class AlarmViewModel extends AndroidViewModel {
     private final LiveData<List<Alarm>> allAlarms;
+
     public AlarmViewModel(@NonNull Application application) {
         super(application);
         AlarmDao alarmDao = AlarmDatabase.getDatabase(application).alarmDao();
