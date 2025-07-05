@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.utils.LessonHandler;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -63,10 +64,11 @@ public class NewLessonActivity extends AppCompatActivity {
         setupViews();
         setupToolbar();
 
-        Lesson lessonToEdit = getIntent().getParcelableExtra("lesson");
-        if (lessonToEdit != null) {
-            this.tempLesson = lessonToEdit;
-            populateLessonData(lessonToEdit);
+        this.tempLesson = getIntent().getParcelableExtra("lesson");
+        if (tempLesson == null) {
+            this.tempLesson = new Lesson();
+        } else {
+            populateLessonData(tempLesson);
         }
 
         // Initialise csv picking launcher
@@ -117,15 +119,14 @@ public class NewLessonActivity extends AppCompatActivity {
 
     private void importFromCsv() {
         if (this.currentHeaders == null || currentHeaders.isEmpty()) {
-            Toast.makeText(this, "As you have not set the headers in settings, the headers will be drived form the first row of the CSV file", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "As you have not set the headers in settings, the headers will be derived form the first row of the CSV file", Toast.LENGTH_SHORT).show();
         }
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("text/*");
-        String[] mimetypes = { "text/csv", "text/comma-seperated-values", "application/csv" };
+        String[] mimetypes = { "text/csv", "text/comma-separated-values", "application/csv" };
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         csvFilePickerLauncher.launch(intent);
-        Toast.makeText(this, "Flashcards imported from CSV file", Toast.LENGTH_SHORT).show();
     }
 
     private void handleCsvFileSelection(ActivityResult result) {
@@ -173,9 +174,11 @@ public class NewLessonActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     if (!importedCards.isEmpty()) {
                         handleSuccessfulImport(importedCards);
+                    } else {
+                        Toast.makeText(this,
+                                "No valid flashcards found", Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(this,
-                            "No valid flashcards found", Toast.LENGTH_SHORT).show();
+
                 });
             } catch (Exception e) {
                 handler.post(() -> {
@@ -189,15 +192,23 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void handleSuccessfulImport(List<Flashcard> cards) {
+        if (cards.isEmpty()) {
+            Toast.makeText(this, "No valid flashcards found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (tempLesson == null) {
-            tempLesson = createLesson();
+            tempLesson = new Lesson();
         }
         tempLesson.AddFlashcards(cards);
 
         new AlertDialog.Builder(this)
                 .setTitle("Import Successful")
-                .setMessage(String.format(Locale.US, "Imported %d flashcards", cards.size()))
-//                .setPositiveButton("OK", () -> {})
+                .setMessage(String.format(Locale.US,
+                        "Added %d flashcards (Total: %d)",
+                        cards.size(),
+                        tempLesson.getFlashcards().size()))
+                .setPositiveButton("OK", null)
                 .show();
     }
 
@@ -295,7 +306,6 @@ public class NewLessonActivity extends AppCompatActivity {
         if (tempLesson == null) {
             tempLesson = new Lesson();
         }
-
         tempLesson.setIsCaseSensitive(capitalization);
         tempLesson.setIsPunctSensitive(punctuation);
         tempLesson.setLessonName(lessonName);
@@ -407,21 +417,24 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void saveLesson() {
+        if (tempLesson.getLessonName().trim().isEmpty()) {
+            Toast.makeText(this, "Please set a lesson name", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (tempLesson.getHeaders().size() < 2) {
+            Toast.makeText(this, "Please configure at least 2 headers", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (tempLesson.getFlashcards().isEmpty()) {  // Assuming you add flashcards to tempLesson
+            Toast.makeText(this, "Please add at least one flashcard", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        LessonHandler.saveLesson(this, tempLesson);
         Toast.makeText(this, "Lesson saved", Toast.LENGTH_SHORT).show();
         finish();
-    }
-
-
-    private Lesson createLesson() {
-        if (tempLesson == null) { tempLesson = new Lesson(); }
-        String lessonName = tempLesson.getLessonName();
-        List<Flashcard> flashcards = new ArrayList<>(); // TODO: get flashcards
-        boolean punctuation = tempLesson.isPunctSensitive();
-        boolean capitalisation = tempLesson.isCaseSensitive();
-        List<String> headers = tempLesson.getHeaders();
-        List<Boolean> foreignIndexes = tempLesson.getForeignIndexes();
-
-        return new Lesson(lessonName, flashcards, punctuation, capitalisation, headers, foreignIndexes);
     }
 
     private void populateLessonData(Lesson lesson) {

@@ -24,7 +24,6 @@
         android:padding="24dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Prompt Text -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,7 +32,6 @@
             android:textColor="?android:attr/textColorPrimary"
             android:layout_marginBottom="24dp"/>
 
-        <!-- Main Add Flashcards Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddFlashcards"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -50,7 +48,6 @@
             app:strokeWidth="1dp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Options Container (initially hidden) -->
         <LinearLayout
             android:id="@+id/optionsContainer"
             android:layout_width="match_parent"
@@ -59,7 +56,6 @@
             android:visibility="gone"
             android:layout_marginBottom="24dp">
 
-            <!-- Manual Add Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManualAdd"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -76,7 +72,6 @@
                 app:strokeWidth="1dp"
                 android:layout_marginBottom="8dp"/>
 
-            <!-- CSV Import Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCsvImport"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -93,14 +88,6 @@
                 app:strokeWidth="1dp"/>
         </LinearLayout>
 
-        <!-- Divider -->
-<!--        <View-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="1dp"-->
-<!--            android:background="?android:attr/listDivider"-->
-<!--            android:layout_marginVertical="16dp"/>-->
-
-        <!-- Preferences Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPreferences"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"

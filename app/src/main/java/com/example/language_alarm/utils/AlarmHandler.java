@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 
-public class AlarmScheduler {
-    private static final String TAG = "AlarmScheduler";
+public class AlarmHandler {
+    private static final String TAG = "AlarmHandler";
     private static final String RINGTONE_STR = "ringtone";
 
     private static AlarmDao getAlarmDao(Context ctx) {

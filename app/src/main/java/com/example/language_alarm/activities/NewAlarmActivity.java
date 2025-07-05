@@ -26,7 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Alarm;
-import com.example.language_alarm.utils.AlarmScheduler;
+import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -167,10 +167,10 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                AlarmScheduler.saveAlarm(this, newAlarm);
+                AlarmHandler.saveAlarm(this, newAlarm);
 
                 runOnUiThread(() -> {
-                    AlarmScheduler.scheduleAlarm(this, newAlarm);
+                    AlarmHandler.scheduleAlarm(this, newAlarm);
                     Toast.makeText(this,
                             String.format(Locale.US, "Alarm set for %02d:%02d", newAlarm.getHour(), newAlarm.getMinute()),
                             Toast.LENGTH_SHORT).show();
@@ -199,9 +199,9 @@ public class NewAlarmActivity extends AppCompatActivity {
         String ringtone = selectedAudio == null ? "" : selectedAudio.toString();
         Alarm newAlarm = new Alarm(
                 hour, minute,
-                0, 5, isOneTime,
+                0, 5, isOneTime,  daysChecked[0],
                 daysChecked[1], daysChecked[2],  daysChecked[3], daysChecked[4],
-                daysChecked[5],  daysChecked[6], daysChecked[0], ringtone
+                daysChecked[5],  daysChecked[6], ringtone
                 );
         if (this.alarmToEdit != null) {
             newAlarm.setId(this.alarmToEdit.getId());
