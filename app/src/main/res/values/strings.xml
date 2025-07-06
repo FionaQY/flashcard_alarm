@@ -26,11 +26,15 @@
     <string name="english_headers">Mother Tongue</string>
     <string name="german_headers">Foreign</string>
     <string name="cancel">Cancel</string>
-    <string name="save">Save Preferences</string>
+    <string name="save">Save</string>
     <string name="type_lesson_name">Insert name of lesson</string>
     <string name="lesson_title">Lesson Title</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="action_back">Go back to previous page</string>
     <string name="select_ringtone">Select Ringtone</string>
+    <string name="copy_from_google_sheet">Copy from Google Sheet</string>
+    <string name="paste_text_hint">Paste text after copying from Google Sheet/Excel</string>
+    <string name="paste">Paste</string>
+    <string name="clear">Clear</string>
 </resources>

@@ -20,10 +20,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class LessonsActivity extends AppCompatActivity {
-
     private LessonAdapter lessonAdapter = null;
     private TextView emptyView;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +42,6 @@ public class LessonsActivity extends AppCompatActivity {
             lessonAdapter.setLessons(lessons);
             emptyView.setVisibility(lessons.isEmpty() ? View.VISIBLE : View.GONE);
         });
-
     }
 
     private void setupToolbar() {

@@ -64,29 +64,8 @@ public class NewAlarmActivity extends AppCompatActivity {
             });
         }
 
-
-        alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
-
-        findViewById(R.id.saveButton).setOnClickListener(v -> checkPermissionAndSave());
+        setupListeners();
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
-
-
-        audioPickerHelper = new ActivityResultHelper(this, uri -> {
-            selectedAudio = uri;
-            String filename = getFileName(selectedAudio);
-//                TextView toneText = findViewById(R.id.selectToneButton);
-//                toneText.setText(String.format("Selected: %s", filename));
-        });
-
-        getOnBackPressedDispatcher().addCallback(this,
-                new OnBackPressedCallback(true) {
-                    @Override
-                    public void handleOnBackPressed() {
-                        showExitDialog();
-                    }
-                });
     }
 
     private void initializeViews() {
@@ -109,6 +88,27 @@ public class NewAlarmActivity extends AppCompatActivity {
         ToolbarHelper.setupToolbar(header, "New Alarm", true, this::showExitDialog);
         setSupportActionBar(header);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+    }
+
+    private void setupListeners() {
+        findViewById(R.id.saveButton).setOnClickListener(v -> checkPermissionAndSave());
+        findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
+        alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
+
+        audioPickerHelper = new ActivityResultHelper(this, uri -> {
+            selectedAudio = uri;
+            String filename = getFileName(selectedAudio);
+//                TextView toneText = findViewById(R.id.selectToneButton);
+//                toneText.setText(String.format("Selected: %s", filename));
+        });
+
+        getOnBackPressedDispatcher().addCallback(this,
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        showExitDialog();
+                    }
+                });
     }
 
     private void populateAlarmData() {

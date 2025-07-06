@@ -1,6 +1,9 @@
 package com.example.language_alarm.activities;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +37,7 @@ import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.io.BufferedReader;
@@ -72,6 +76,12 @@ public class NewLessonActivity extends AppCompatActivity {
             this.tempLesson = new Lesson();
         } else {
             populateLessonData(tempLesson);
+            FloatingActionButton deleteButt = findViewById(R.id.deleteButton);
+            deleteButt.setVisibility(View.VISIBLE);
+            deleteButt.setOnClickListener(v -> {
+                LessonHandler.deleteAlarm(this, tempLesson);
+                finishAfterTransition();
+            });
         }
 
         csvPickerHelper = new ActivityResultHelper(this, this::showCsvImportProgress);
@@ -106,6 +116,7 @@ public class NewLessonActivity extends AppCompatActivity {
         btnAddFlashcards = findViewById(R.id.btnAddFlashcards);
         MaterialButton btnManualAdd = findViewById(R.id.btnManualAdd);
         MaterialButton btnCsvImport = findViewById(R.id.btnCsvImport);
+        MaterialButton btnCopy = findViewById(R.id.btnCopy);
         MaterialButton btnPreferences = findViewById(R.id.btnPreferences);
         MaterialButton btnSaveLesson = findViewById(R.id.btnSaveLesson);
         optionsContainer = findViewById(R.id.optionsContainer);
@@ -113,6 +124,7 @@ public class NewLessonActivity extends AppCompatActivity {
         btnAddFlashcards.setOnClickListener(v -> showAddOptions());
         btnManualAdd.setOnClickListener(v -> startManualFlashcardCreation());
         btnCsvImport.setOnClickListener(v -> importFromCsv());
+        btnCopy.setOnClickListener(v -> showCopyPasteDialog());
         btnPreferences.setOnClickListener(v -> showPreferencesDialog());
         btnSaveLesson.setOnClickListener(v -> saveLesson());
     }
@@ -123,6 +135,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void startManualFlashcardCreation() {
+        // TODO: create manual input method
         Toast.makeText(this, "Manual flashcard creation", Toast.LENGTH_SHORT).show();
     }
 
@@ -189,6 +202,47 @@ public class NewLessonActivity extends AppCompatActivity {
                             "Error importing CSV: " + e.getMessage(),
                             Toast.LENGTH_LONG).show();
                 });
+            }
+        });
+    }
+
+    private void copyFromGoogleSheet(String pastedText) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                String[] linesArray = pastedText.split("\\R");
+                List<Flashcard> importedCards = new ArrayList<>();
+                for (int lineNum = 0; lineNum < linesArray.length; lineNum++) {
+                    String line = linesArray[lineNum].trim();
+                    if (line.isEmpty()) continue;
+
+                    List<String> values = parseCsvLine(line);
+                    if (lineNum == 0) {
+                        if (currentHeaders == null || currentHeaders.isEmpty()) {
+                            currentHeaders = values;
+                            continue;
+                        } else {
+                            while (currentHeaders.size() < values.size()) {
+                                currentHeaders.add("No name");
+                            }
+                        }
+                    }
+                    importedCards.add(new Flashcard(values));
+                }
+
+                handler.post(() -> {
+                    if (!importedCards.isEmpty()) {
+                        handleSuccessfulImport(importedCards);
+                    } else {
+                        Toast.makeText(this,
+                                "No valid flashcards found", Toast.LENGTH_SHORT).show();
+                    }
+
+                });
+            } catch (Exception e) {
+                handler.post(() -> Toast.makeText(this,
+                        "Error copying from Google Sheet: " + e.getMessage(),
+                        Toast.LENGTH_LONG).show()
+                );
             }
         });
     }
@@ -303,6 +357,34 @@ public class NewLessonActivity extends AppCompatActivity {
                     Objects.requireNonNull(editHeaders.getText()).toString(),
                     recyclerGerman
             );
+            dialog.dismiss();
+        });
+    }
+
+    private void showCopyPasteDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_copy, null);
+        builder.setView(dialogView);
+
+        EditText pasteText = dialogView.findViewById(R.id.pasteText);
+        MaterialButton btnPaste = dialogView.findViewById(R.id.pasteButton);
+        MaterialButton btnClear = dialogView.findViewById(R.id.clearButton);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.cancelButton);
+        MaterialButton btnSave = dialogView.findViewById(R.id.saveButton);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnPaste.setOnClickListener(v -> {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData.Item item = Objects.requireNonNull(clipboard.getPrimaryClip()).getItemAt(0);
+            String pasteData = (String) item.getText();
+            pasteText.setText(pasteData);
+        });
+        btnClear.setOnClickListener(v -> pasteText.setText(""));
+        btnSave.setOnClickListener(v -> {
+            copyFromGoogleSheet(Objects.requireNonNull(pasteText.getText()).toString());
             dialog.dismiss();
         });
     }
@@ -426,7 +508,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void saveLesson() {
-        if (tempLesson.getLessonName().trim().isEmpty()) {
+        if (tempLesson.getLessonName() == null || tempLesson.getLessonName().trim().isEmpty()) {
             Toast.makeText(this, "Please set a lesson name", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -454,7 +536,7 @@ public class NewLessonActivity extends AppCompatActivity {
     public void showExitDialog() {
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setMessage("Cancel this lesson? Current input will not be saved")
+                .setMessage("Cancel this lesson? Changes made will not be saved")
                 .setPositiveButton("Confirm",
                         (dialog, which) -> this.finish())
                 .setNegativeButton("Cancel", null)

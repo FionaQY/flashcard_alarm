@@ -37,7 +37,7 @@
         android:contentDescription="@string/add_alarm"
         android:elevation="6dp"
         android:onClick="onToggleLessons"
-        android:src="@drawable/baseline_add_alarm_24"
+        android:src="@drawable/ic_add_lesson"
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white" />
 

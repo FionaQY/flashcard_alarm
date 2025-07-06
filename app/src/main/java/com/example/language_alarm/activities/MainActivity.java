@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
         AlarmViewModel alarmViewModel = new ViewModelProvider(this).get(AlarmViewModel.class);
         alarmViewModel.getAllAlarms().observe(this, alarms -> adapter.setAlarms(alarms));
-
     }
 
     public void onToggleNewAlarm(View view) {

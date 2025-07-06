@@ -43,7 +43,6 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!--TODO: delete button-->
     <!--TODO: load lessons and assign using id-->
     <!--loudness, vibration checkbox, custom sound (ringtone), snooze (number ,duration)-->
     <!--Alarm wallpaper-->
