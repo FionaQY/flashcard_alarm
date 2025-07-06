@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,7 +13,7 @@
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="80dp"
-    android:scrollbars="vertical" />
+        android:scrollbars="vertical" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addAlarmFab"
@@ -23,11 +22,11 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:contentDescription="@string/add_alarm"
+        android:elevation="6dp"
+        android:onClick="onToggleNewAlarm"
         android:src="@drawable/baseline_add_alarm_24"
         app:backgroundTint="@color/colorPrimary"
-        app:tint="@android:color/white"
-        android:elevation="6dp"
-        android:onClick="onToggleNewAlarm" />
+        app:tint="@android:color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addLessonFab"
@@ -36,10 +35,10 @@
         android:layout_gravity="bottom|start"
         android:layout_margin="20dp"
         android:contentDescription="@string/add_alarm"
+        android:elevation="6dp"
+        android:onClick="onToggleLessons"
         android:src="@drawable/baseline_add_alarm_24"
         app:backgroundTint="@color/colorPrimary"
-        app:tint="@android:color/white"
-        android:elevation="6dp"
-        android:onClick="onToggleLessons" />
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

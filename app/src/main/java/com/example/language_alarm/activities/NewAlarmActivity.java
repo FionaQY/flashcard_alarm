@@ -28,6 +28,7 @@ import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     private MaterialToolbar header;
     private TimePicker alarmTimePicker;
     private AlarmManager alarmManager;
-    private Alarm alarmToEdit = null; // if editing alarm instead
+    private Alarm alarmToEdit = null; // if editing existing alarm instead of creating new alarm
     private Alarm pendingAlarmToSave = null; // if permissions not granted
     private ToggleButton[] buttons = null;
     private CheckBox oneTimeCheckBox;
@@ -55,7 +56,14 @@ public class NewAlarmActivity extends AppCompatActivity {
         this.alarmToEdit = getIntent().getParcelableExtra("alarm");
         if (alarmToEdit != null) {
             populateAlarmData();
+            FloatingActionButton deleteButt = findViewById(R.id.deleteButton);
+            deleteButt.setVisibility(View.VISIBLE);
+            deleteButt.setOnClickListener(v -> {
+                AlarmHandler.deleteAlarm(this, alarmToEdit);
+                finishAfterTransition();
+            });
         }
+
 
         alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
 
@@ -63,6 +71,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
+
 
         audioPickerHelper = new ActivityResultHelper(this, uri -> {
             selectedAudio = uri;
@@ -174,7 +183,7 @@ public class NewAlarmActivity extends AppCompatActivity {
                     Toast.makeText(this,
                             String.format(Locale.US, "Alarm set for %02d:%02d", newAlarm.getHour(), newAlarm.getMinute()),
                             Toast.LENGTH_SHORT).show();
-                    finish();
+                    supportFinishAfterTransition();
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> Toast.makeText(this,
@@ -276,7 +285,7 @@ public class NewAlarmActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .setMessage("Cancel this alarm?")
                 .setPositiveButton("Confirm",
-                        (dialog, which) -> this.finish())
+                        (dialog, which) -> this.supportFinishAfterTransition())
                 .setNegativeButton("Cancel", null)
                 .show();
     }

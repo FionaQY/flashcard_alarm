@@ -2,6 +2,7 @@ package com.example.language_alarm.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -20,17 +21,21 @@ public class ToolbarHelper {
             titleView.setVisibility(title != null ? TextView.VISIBLE : TextView.GONE);
         }
 
-        toolbar.setNavigationIcon(showBackButton
-                ? toolbar.getContext().getDrawable(R.drawable.outline_arrow_back_24)
-                : null);
+        if (showBackButton) {
+            toolbar.setNavigationIcon(R.drawable.outline_arrow_back_24);
+            toolbar.setNavigationContentDescription(R.string.action_back);
+            toolbar.setNavigationOnClickListener(v -> {
+                Log.d("TOOLBAR", "Back button clicked");
+                if (backAction != null) {
+                    backAction.run();
+                } else if (toolbar.getContext() instanceof Activity) {
+                    ((Activity) toolbar.getContext()).onBackPressed();
+                }
+            });
+        } else {
+            toolbar.setNavigationIcon(null);
+        }
 
-        toolbar.setNavigationOnClickListener(v -> {
-            if (backAction != null) {
-                backAction.run();
-            } else if (toolbar.getContext() instanceof Activity) {
-                ((Activity) toolbar.getContext()).onBackPressed();
-            }
-        });
     }
 
     public static void setupToolbar(MaterialToolbar toolbar, String title) {

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/lessons_container"
@@ -14,17 +13,14 @@
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <com.google.android.material.appbar.MaterialToolbar
+        <include
             android:id="@+id/toolbar"
+            layout="@layout/toolbar_main"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            app:title="@string/lessons_title"
-            app:titleTextColor="@android:color/white"/>
-
+            app:layout_scrollFlags="scroll|enterAlways|snap" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Grid of lesson cards -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lesson_list"
         android:layout_width="match_parent"
@@ -33,8 +29,8 @@
         android:paddingTop="8dp"
         android:paddingBottom="80dp"
         android:scrollbars="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:spanCount="2"
         tools:listitem="@layout/lesson_item" />
 
@@ -56,11 +52,11 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/add_new_lesson"
-        android:text="@string/add_new_lesson"
         android:icon="@drawable/baseline_library_add_24"
+        android:onClick="onToggleAddLesson"
+        android:text="@string/add_new_lesson"
         android:textColor="@android:color/white"
         app:backgroundTint="@color/colorPrimary"
-        app:iconTint="@android:color/white"
-        android:onClick="onToggleAddLesson"/>
+        app:iconTint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

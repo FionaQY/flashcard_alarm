@@ -1,34 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.appbar.MaterialToolbar
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
-    app:titleTextColor="@android:color/white"
-    app:navigationIconTint="@android:color/white"
+    android:minHeight="?attr/actionBarSize"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    app:contentInsetStartWithNavigation="16dp"
+    app:navigationContentDescription="@string/action_back"
     app:navigationIcon="@drawable/outline_arrow_back_24"
-    app:navigationContentDescription="@string/action_back">
+    app:navigationIconTint="@android:color/white"
+    app:titleTextColor="@android:color/white">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/toolbar_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textColor="@android:color/white"
+        tools:text="App Title" />
 
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-            android:textColor="@android:color/white"
-            android:maxLines="1"
-            android:ellipsize="end"
-            tools:text=""/>
-
-    </LinearLayout>
 </com.google.android.material.appbar.MaterialToolbar>

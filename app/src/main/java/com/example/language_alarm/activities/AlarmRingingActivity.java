@@ -18,7 +18,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
         alarm = getIntent().getParcelableExtra("alarm");
         if (alarm == null) {
             Log.w("Alarm", "Attempted to ring null alarm");
-            finish();
+            supportFinishAfterTransition();
         }
 
         // TODO: new layout
