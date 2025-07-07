@@ -25,4 +25,7 @@ public interface LessonDao {
     @Query("SELECT * FROM lessons ORDER BY id")
     LiveData<List<Lesson>> getAllLessons();
 
+    @Query("SELECT * FROM lessons WHERE id = :id")
+    LiveData<Lesson> getLessonById(int id);
+
 }

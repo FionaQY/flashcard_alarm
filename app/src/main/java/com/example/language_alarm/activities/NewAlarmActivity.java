@@ -79,7 +79,6 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void setupDropdown() {
-//        TODO: set up for qns dropdown
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
         AutoCompleteTextView lessonsDropdown = findViewById(R.id.lesson_dropdown);
         ArrayAdapter<Lesson> lessonAdapter = new ArrayAdapter<>(this, R.layout.dropdown_item, new ArrayList<>()) {

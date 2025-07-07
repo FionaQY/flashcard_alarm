@@ -22,12 +22,18 @@ public class Flashcard implements Parcelable {
     };
     private List<String> values;
 
+    private boolean isImportant;
+
     public Flashcard(List<String> cards) {
         this.values = new ArrayList<>(cards);
     }
 
     protected Flashcard(Parcel in) {
         values = in.createStringArrayList();
+    }
+
+    public void markImportance(boolean isImportant) {
+        this.isImportant = isImportant;
     }
 
     public String getValsString() {

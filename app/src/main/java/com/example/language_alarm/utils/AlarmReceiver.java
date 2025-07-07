@@ -26,6 +26,12 @@ public class AlarmReceiver extends BroadcastReceiver {
     private static final String TAG = "AlarmReceiver";
     private static Ringtone ringtone = null;
 
+    public static void stopAlarm() {
+        if (ringtone != null && ringtone.isPlaying()) {
+            ringtone.stop();
+        }
+    }
+
     @Override
     public void onReceive(Context ctx, Intent intent) {
         Log.d(TAG, "onReceive triggered: action=" + intent.getAction());
@@ -117,11 +123,5 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         NotificationManager notifManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
         notifManager.notify(alarm.getId(), builder.build());
-    }
-
-    public void stopAlarm() {
-        if (ringtone != null && ringtone.isPlaying()) {
-            ringtone.stop();
-        }
     }
 }

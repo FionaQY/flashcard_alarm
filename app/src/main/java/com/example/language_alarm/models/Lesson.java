@@ -64,7 +64,7 @@ public class Lesson implements Parcelable {
         in.readList(foreignIndexes, Integer.class.getClassLoader());
     }
 
-    public void AddFlashcards(List<Flashcard> cards) {
+    public void addFlashcards(List<Flashcard> cards) {
         if (this.flashcards == null) {
             this.flashcards = cards;
         } else {
@@ -85,7 +85,7 @@ public class Lesson implements Parcelable {
     }
 
     public void setLessonName(String name) {
-        this.lessonName = name;
+        this.lessonName = name == null ? "" : name;
     }
 
     public List<Flashcard> getFlashcards() {
@@ -129,7 +129,7 @@ public class Lesson implements Parcelable {
     }
 
     public String getHeadersString() {
-        return this.headers == null ? "" : String.join(",", this.getHeaders());
+        return this.headers == null ? "" : String.join(", ", this.getHeaders());
     }
 
     @Override

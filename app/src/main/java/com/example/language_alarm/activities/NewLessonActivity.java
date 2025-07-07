@@ -22,7 +22,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -71,18 +70,6 @@ public class NewLessonActivity extends AppCompatActivity {
         setupViews();
         setupToolbar();
 
-        this.tempLesson = getIntent().getParcelableExtra("lesson");
-        if (tempLesson == null) {
-            this.tempLesson = new Lesson();
-        } else {
-            populateLessonData(tempLesson);
-            FloatingActionButton deleteButt = findViewById(R.id.deleteButton);
-            deleteButt.setVisibility(View.VISIBLE);
-            deleteButt.setOnClickListener(v -> {
-                LessonHandler.deleteAlarm(this, tempLesson);
-                finishAfterTransition();
-            });
-        }
 
         csvPickerHelper = new ActivityResultHelper(this, this::showCsvImportProgress);
 
@@ -92,9 +79,21 @@ public class NewLessonActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         flashcardViewModel = new ViewModelProvider(this).get(FlashcardViewModel.class);
-        flashcardViewModel.setFlashcards(tempLesson.getFlashcards());
-
         flashcardViewModel.getFlashcards().observe(this, adapter::setFlashcards);
+
+        this.tempLesson = getIntent().getParcelableExtra("lesson");
+        if (tempLesson == null) {
+            this.tempLesson = new Lesson();
+        } else {
+            // populate stuff at the end or risk null pointer
+            populateLessonData(tempLesson);
+            FloatingActionButton deleteButt = findViewById(R.id.deleteButton);
+            deleteButt.setVisibility(View.VISIBLE);
+            deleteButt.setOnClickListener(v -> {
+                LessonHandler.deleteAlarm(this, tempLesson);
+                finishAfterTransition();
+            });
+        }
 
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {
@@ -257,7 +256,7 @@ public class NewLessonActivity extends AppCompatActivity {
             tempLesson = new Lesson();
         }
         tempLesson.setHeaders(currentHeaders);
-        tempLesson.AddFlashcards(cards);
+        tempLesson.addFlashcards(cards);
         flashcardViewModel.setFlashcards(tempLesson.getFlashcards());
 
         new AlertDialog.Builder(this)
@@ -401,6 +400,12 @@ public class NewLessonActivity extends AppCompatActivity {
         tempLesson.setIsCaseSensitive(capitalization);
         tempLesson.setIsPunctSensitive(punctuation);
         tempLesson.setLessonName(lessonName);
+        if (lessonName != null && !lessonName.trim().isEmpty()) {
+            TextView titleView = findViewById(R.id.toolbar).findViewById(R.id.toolbar_title);
+            if (titleView != null) {
+                titleView.setText(tempLesson.getLessonName());
+            }
+        }
 
         List<String> headers = Arrays.asList(headersString.split("\\s*,\\s*"));
         tempLesson.setHeaders(headers);
@@ -443,43 +448,10 @@ public class NewLessonActivity extends AppCompatActivity {
         englishRecycler.setAdapter(englishAdapter);
         germanRecycler.setAdapter(germanAdapter);
 
-        setupDragAndDrop(englishRecycler, germanRecycler, englishAdapter, germanAdapter);
+        setupPreferencesListeners(englishAdapter, germanAdapter);
     }
 
-    private void setupDragAndDrop(RecyclerView englishRecycler, RecyclerView germanRecycler,
-                                  HeaderAdapter englishAdapter, HeaderAdapter germanAdapter) {
-        // English RecyclerView
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
-                ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView,
-                                  @NonNull RecyclerView.ViewHolder viewHolder,
-                                  @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            }
-
-        }).attachToRecyclerView(englishRecycler);
-
-        // Foreign Language
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
-                ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.START | ItemTouchHelper.END) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView,
-                                  @NonNull RecyclerView.ViewHolder viewHolder,
-                                  @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            }
-
-        }).attachToRecyclerView(germanRecycler);
-
+    private void setupPreferencesListeners(HeaderAdapter englishAdapter, HeaderAdapter germanAdapter) {
         englishAdapter.setOnItemClickListener((view, position) -> {
             HeaderItem item = englishAdapter.getItems().get(position);
             englishAdapter.getItems().remove(position);
@@ -533,7 +505,18 @@ public class NewLessonActivity extends AppCompatActivity {
 
     private void populateLessonData(Lesson lesson) {
         // TODO: set values
-        System.out.println(lesson.toString());
+        if (lesson.getLessonName() != null && !lesson.getLessonName().isEmpty()) {
+            TextView titleView = findViewById(R.id.toolbar).findViewById(R.id.toolbar_title);
+            if (titleView != null) {
+                titleView.setText(lesson.getLessonName());
+            }
+        }
+        this.currentHeaders = new ArrayList<>(lesson.getHeaders());
+        this.foreignIndexes = new ArrayList<>(lesson.getForeignIndexes());
+
+        if (lesson.getFlashcards() != null) {
+            flashcardViewModel.setFlashcards(lesson.getFlashcards());
+        }
     }
 
     public void showExitDialog() {

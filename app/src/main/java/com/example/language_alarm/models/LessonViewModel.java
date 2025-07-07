@@ -12,15 +12,20 @@ import com.example.language_alarm.database.LessonDatabase;
 import java.util.List;
 
 public class LessonViewModel extends AndroidViewModel {
-    private final LiveData<List<Lesson>> allLessons;
+    private final LessonDao lessonDao;
+    private LiveData<List<Lesson>> allLessons;
 
     public LessonViewModel(@NonNull Application application) {
         super(application);
-        LessonDao lessonDao = LessonDatabase.getDatabase(application).lessonDao();
-        allLessons = lessonDao.getAllLessons();
+        lessonDao = LessonDatabase.getDatabase(application).lessonDao();
     }
 
     public LiveData<List<Lesson>> getAllLessons() {
+        if (this.allLessons == null) this.allLessons = lessonDao.getAllLessons();
         return this.allLessons;
+    }
+
+    public LiveData<Lesson> getLesson(int id) {
+        return lessonDao.getLessonById(id);
     }
 }
