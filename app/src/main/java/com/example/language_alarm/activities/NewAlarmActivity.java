@@ -210,7 +210,6 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void checkPermissionAndSave() {
-
         Alarm newAlarm = createAlarm();
         if (newAlarm == null) {
             return;
@@ -233,9 +232,8 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                AlarmHandler.saveAlarm(this, newAlarm);
-
                 runOnUiThread(() -> {
+                    AlarmHandler.saveAlarm(this, newAlarm);
                     AlarmHandler.scheduleAlarm(this, newAlarm);
                     Toast.makeText(this,
                             String.format(Locale.US, "Alarm set for %02d:%02d", newAlarm.getHour(), newAlarm.getMinute()),
@@ -291,9 +289,15 @@ public class NewAlarmActivity extends AppCompatActivity {
         if (v instanceof CheckBox) {
             CheckBox box = (CheckBox) v;
 
+            boolean first = true;
             for (ToggleButton button : buttons) {
+                if (box.isChecked() && button.isChecked() && first) {
+                    first = false;
+                    continue;
+                }
                 button.setEnabled(!box.isChecked());
             }
+
         }
     }
 

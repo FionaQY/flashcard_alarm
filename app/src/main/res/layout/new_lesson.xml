@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".activities.NewLessonActivity">
 
+    <!--    TODO: star to indicate which flashcards are important-->
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar_main"
@@ -24,13 +25,13 @@
         android:layout_marginBottom="24dp"
         android:contentDescription="@string/delete"
         android:src="@drawable/baseline_delete_24"
-        app:backgroundTint="@color/error_red_light"
+        app:backgroundTint="@color/colorErrorLight"
         app:borderWidth="0dp"
         app:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:rippleColor="@color/error_red_dark"
-        app:tint="@color/error_red" />
+        app:rippleColor="@color/colorErrorDark"
+        app:tint="@color/colorError" />
 
     <LinearLayout
         android:layout_width="match_parent"

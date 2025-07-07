@@ -16,12 +16,15 @@ import com.example.language_alarm.models.Alarm;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
 public class AlarmHandler {
     private static final String TAG = "AlarmHandler";
     private static final String RINGTONE_STR = "ringtone";
+    private static final ExecutorService alarmExecutor = Executors.newSingleThreadExecutor();
 
     private static AlarmDao getAlarmDao(Context ctx) {
         return AlarmDatabase.getDatabase(ctx).alarmDao();
@@ -29,7 +32,7 @@ public class AlarmHandler {
 
     public static void saveAlarm(Context ctx, Alarm alarm) {
         Context appContext = ctx.getApplicationContext();
-        Executors.newSingleThreadExecutor().execute(() -> {
+        alarmExecutor.execute(() -> {
             try {
                 if (alarm == null) {
                     Log.w(TAG, "Attempted to save null alarm");
@@ -67,6 +70,10 @@ public class AlarmHandler {
     }
 
     private static void scheduleOneTimeAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm) {
+        if (alarm.hasDaysSelected()) {
+            scheduleRecurringAlarm(ctx, alarmManager, alarm);
+            return;
+        }
         Intent intent = createAlarmIntent(ctx, alarm);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 ctx,
@@ -88,17 +95,11 @@ public class AlarmHandler {
     }
 
     private static void scheduleRecurringAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm) {
-        if (alarm.isSunday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.SUNDAY);
-        if (alarm.isMonday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.MONDAY);
-        if (alarm.isTuesday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.TUESDAY);
-        if (alarm.isWednesday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.WEDNESDAY);
-        if (alarm.isThursday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.THURSDAY);
-        if (alarm.isFriday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.FRIDAY);
-        if (alarm.isSaturday()) scheduleDayAlarm(ctx, alarmManager, alarm, Calendar.SATURDAY);
+        alarm.forEachEnabledDay(day -> scheduleDayAlarm(ctx, alarmManager, alarm, day));
     }
 
     private static int getRequestCode(Alarm alarm, int dayOfWeek) {
-        return 10 * alarm.getId() + dayOfWeek;
+        return Objects.hash(alarm.getId(), dayOfWeek);
     }
 
     private static void scheduleDayAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm, int dayOfWeek) {
@@ -152,23 +153,11 @@ public class AlarmHandler {
 
     public static void cancelAlarm(Context ctx, Alarm alarm) {
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        if (alarm.isOneTime()) {
+        if (!alarm.hasDaysSelected()) {
             cancelSingleAlarm(ctx, alarm.getId(), alarmManager, alarm);
         } else {
-            if (alarm.isSunday())
-                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.SUNDAY), alarmManager, alarm);
-            if (alarm.isMonday())
-                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.MONDAY), alarmManager, alarm);
-            if (alarm.isTuesday())
-                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.TUESDAY), alarmManager, alarm);
-            if (alarm.isWednesday())
-                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.WEDNESDAY), alarmManager, alarm);
-            if (alarm.isThursday())
-                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.THURSDAY), alarmManager, alarm);
-            if (alarm.isFriday())
-                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.FRIDAY), alarmManager, alarm);
-            if (alarm.isSaturday())
-                cancelSingleAlarm(ctx, getRequestCode(alarm, Calendar.SATURDAY), alarmManager, alarm);
+            alarm.forEachEnabledDay(day -> cancelSingleAlarm(ctx,
+                    getRequestCode(alarm, day), alarmManager, alarm));
         }
     }
 
@@ -204,7 +193,7 @@ public class AlarmHandler {
 
     public static void deleteAlarm(Context ctx, Alarm alarm) {
         Context appContext = ctx.getApplicationContext();
-        Executors.newSingleThreadExecutor().execute(() -> {
+        alarmExecutor.execute(() -> {
             try {
                 if (alarm.getId() == 0) {
                     Log.w(TAG, "Attempted to delete null alarm");

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -225,8 +226,8 @@ public class Alarm implements Parcelable {
     }
 
     public String getDescription() {
-        if (isOneTime) return "One time alarm";
         StringBuilder sb = new StringBuilder();
+        if (isOneTime) sb.append("One time alarm: ");
         if (sunday) sb.append("Sun ");
         if (monday) sb.append("Mon ");
         if (tuesday) sb.append("Tue ");
@@ -236,6 +237,21 @@ public class Alarm implements Parcelable {
         if (saturday) sb.append("Sat ");
         if (this.lessonId == 0) sb.append("Lesson not yet set");
         return sb.toString().trim();
+    }
+
+    public boolean hasDaysSelected() {
+        return this.isSaturday() || this.isFriday() || this.isThursday() || this.isWednesday()
+                || this.isTuesday() || this.isMonday() || this.isSunday();
+    }
+
+    public void forEachEnabledDay(DayConsumer consumer) {
+        if (isSunday()) consumer.accept(Calendar.SUNDAY);
+        if (isMonday()) consumer.accept(Calendar.MONDAY);
+        if (isTuesday()) consumer.accept(Calendar.TUESDAY);
+        if (isWednesday()) consumer.accept(Calendar.WEDNESDAY);
+        if (isThursday()) consumer.accept(Calendar.THURSDAY);
+        if (isFriday()) consumer.accept(Calendar.FRIDAY);
+        if (isSaturday()) consumer.accept(Calendar.SATURDAY);
     }
 
     @Override
@@ -290,5 +306,9 @@ public class Alarm implements Parcelable {
         dest.writeByte((byte) (saturday ? 1 : 0));
         dest.writeByte((byte) (sunday ? 1 : 0));
         dest.writeInt(lessonId);
+    }
+
+    public interface DayConsumer {
+        void accept(int dayOfWeek);
     }
 }
