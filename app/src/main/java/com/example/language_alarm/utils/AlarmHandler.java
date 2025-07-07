@@ -180,7 +180,7 @@ public class AlarmHandler {
         Log.i(TAG, "Cancelled alarm: " + alarm.getId());
     }
 
-    private static void rescheduleAlarm(Context ctx, Alarm alarm) {
+    public static void rescheduleAlarm(Context ctx, Alarm alarm) {
         cancelAlarm(ctx, alarm);
         scheduleAlarm(ctx, alarm);
     }

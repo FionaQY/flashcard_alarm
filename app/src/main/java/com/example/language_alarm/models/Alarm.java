@@ -46,8 +46,8 @@ public class Alarm implements Parcelable {
     }
 
     public Alarm(int hour, int minute, int numSnoozes, int lenSnooze,
-                 boolean isOneTime, boolean monday, boolean tuesday, boolean wednesday,
-                 boolean thursday, boolean friday, boolean saturday, boolean sunday, String uri) {
+                 boolean isOneTime, boolean sunday, boolean monday, boolean tuesday, boolean wednesday,
+                 boolean thursday, boolean friday, boolean saturday, String uri) {
         this.hour = hour;
         this.minute = minute;
         this.numberOfSnoozes = numSnoozes;
@@ -234,7 +234,7 @@ public class Alarm implements Parcelable {
         if (thursday) sb.append("Thu ");
         if (friday) sb.append("Fri ");
         if (saturday) sb.append("Sat ");
-        if (this.lessonId != 0) sb.append("Lesson not yet set");
+        if (this.lessonId == 0) sb.append("Lesson not yet set");
         return sb.toString().trim();
     }
 

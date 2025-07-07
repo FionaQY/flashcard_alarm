@@ -37,4 +37,6 @@
     <string name="paste_text_hint">Paste text after copying from Google Sheet/Excel</string>
     <string name="paste">Paste</string>
     <string name="clear">Clear</string>
+    <string name="choose_lesson">Pick a lesson</string>
+    <string name="pick_qns_num">Pick number of questions</string>
 </resources>

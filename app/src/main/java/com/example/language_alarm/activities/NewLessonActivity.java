@@ -378,9 +378,12 @@ public class NewLessonActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnPaste.setOnClickListener(v -> {
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData.Item item = Objects.requireNonNull(clipboard.getPrimaryClip()).getItemAt(0);
-            String pasteData = (String) item.getText();
-            pasteText.setText(pasteData);
+            if (clipboard.getPrimaryClip() != null) {
+                ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+                String pasteData = (String) item.getText();
+                pasteText.setText(pasteData);
+            }
+
         });
         btnClear.setOnClickListener(v -> pasteText.setText(""));
         btnSave.setOnClickListener(v -> {

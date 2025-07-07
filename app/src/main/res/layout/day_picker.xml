@@ -2,19 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="16dp"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="5dp">
 
     <CheckBox
         android:id="@+id/oneTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:checked="false"
         android:gravity="start|center_vertical"
-        android:paddingEnd="5dp"
         android:paddingStart="5dp"
+        android:paddingEnd="5dp"
         android:text="@string/one_time"
         android:textSize="12sp" />
 

@@ -71,14 +71,23 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
         return new AlarmViewHolder(view);
     }
 
+    private void changeStatusOfAlarm(boolean isChecked, Alarm alarm) {
+        alarm.setEnabled(isChecked);
+        if (isChecked) {
+            AlarmHandler.rescheduleAlarm(this.ctx, alarm);
+        } else {
+            AlarmHandler.cancelAlarm(this.ctx, alarm);
+        }
+    }
+
     @Override
     public void onBindViewHolder(AlarmViewHolder holder, int position) {
         Alarm alarm = this.alarmList.get(position);
         holder.timeTextView.setText(alarm.getTime());
         holder.labelTextView.setText(alarm.getDescription());
         holder.toggleSwitch.setChecked(alarm.isEnabled());
-//        holder.toggleSwitch.setOnCheckedChangeListener(
-//                (buttonView, isChecked) -> alarm.setStatus(isChecked));
+        holder.toggleSwitch.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> changeStatusOfAlarm(isChecked, alarm));
 
         // go to alarm page when click (maybe have edit button)
         holder.itemView.setOnClickListener(view -> {

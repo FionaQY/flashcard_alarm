@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -19,17 +22,22 @@ import android.widget.ToggleButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.ActivityResultHelper;
 import com.example.language_alarm.models.Alarm;
+import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.models.LessonViewModel;
 import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -44,6 +52,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     private CheckBox oneTimeCheckBox;
     private Uri selectedAudio;
     private ActivityResultHelper audioPickerHelper = null;
+    private Lesson selectedLesson = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +75,63 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         setupListeners();
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        setupDropdown();
+    }
+
+    private void setupDropdown() {
+//        TODO: set up for qns dropdown
+        LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
+        AutoCompleteTextView lessonsDropdown = findViewById(R.id.lesson_dropdown);
+        ArrayAdapter<Lesson> lessonAdapter = new ArrayAdapter<>(this, R.layout.dropdown_item, new ArrayList<>()) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                TextView view = (TextView) super.getView(position, convertView, parent);
+                Lesson selectedLesson = getItem(position);
+                view.setText(selectedLesson == null ? "Null lesson" : selectedLesson.getLessonName());
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                TextView view = (TextView) super.getDropDownView(position, convertView, parent);
+                Lesson selectedLesson = getItem(position);
+                view.setText(selectedLesson == null ? "Null lesson" : selectedLesson.getLessonName());
+                return view;
+            }
+        };
+
+        lessonsDropdown.setAdapter(lessonAdapter);
+        lessonsDropdown.setOnItemClickListener((p, v, pos, id) -> {
+            selectedLesson = lessonAdapter.getItem(pos);
+            if (selectedLesson != null) {
+                lessonsDropdown.setText(selectedLesson.getLessonName(), false);
+            }
+        });
+
+        lessonViewModel.getAllLessons().observe(this, lessons -> {
+            lessonAdapter.clear();
+            if (lessons == null || lessons.isEmpty()) {
+                lessonsDropdown.setHint("No lessons available");
+                return;
+            }
+            lessonAdapter.addAll(lessons);
+            if (alarmToEdit != null && alarmToEdit.getLessonId() > 0) {
+                for (Lesson les : lessons) {
+                    if (les.getId() == alarmToEdit.getLessonId()) {
+                        lessonsDropdown.post(() -> {
+                            lessonsDropdown.setText(les.getLessonName(), false);
+                            selectedLesson = les;
+                        });
+                        break;
+                    }
+                }
+            }
+        });
     }
 
     private void initializeViews() {
         alarmTimePicker = findViewById(R.id.timePicker);
-
         ToggleButton isSun = findViewById(R.id.isSun);
         ToggleButton isMon = findViewById(R.id.isMon);
         ToggleButton isTues = findViewById(R.id.isTues);
@@ -79,7 +140,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         ToggleButton isFri = findViewById(R.id.isFri);
         ToggleButton isSat = findViewById(R.id.isSat);
         this.buttons = new ToggleButton[]{isSun, isMon, isTues, isWed, isThurs, isFri, isSat};
-
         oneTimeCheckBox = findViewById(R.id.oneTime);
     }
 
@@ -93,14 +153,10 @@ public class NewAlarmActivity extends AppCompatActivity {
     private void setupListeners() {
         findViewById(R.id.saveButton).setOnClickListener(v -> checkPermissionAndSave());
         findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
+        findViewById(R.id.selectToneButton).setOnClickListener(v -> selectAlarmTone());
         alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
 
-        audioPickerHelper = new ActivityResultHelper(this, uri -> {
-            selectedAudio = uri;
-            String filename = getFileName(selectedAudio);
-//                TextView toneText = findViewById(R.id.selectToneButton);
-//                toneText.setText(String.format("Selected: %s", filename));
-        });
+        audioPickerHelper = new ActivityResultHelper(this, this::handleAudioSelection);
 
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {
@@ -109,6 +165,13 @@ public class NewAlarmActivity extends AppCompatActivity {
                         showExitDialog();
                     }
                 });
+    }
+
+    private void handleAudioSelection(Uri uri) {
+        selectedAudio = uri;
+        String filename = getFileName(selectedAudio);
+//                TextView toneText = findViewById(R.id.selectToneButton);
+//                toneText.setText(String.format("Selected: %s", filename));
     }
 
     private void populateAlarmData() {
@@ -148,16 +211,11 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void checkPermissionAndSave() {
-        int hour = alarmTimePicker.getHour();
-        int minute = alarmTimePicker.getMinute();
 
-        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-            Toast.makeText(this, "Invalid time",
-                    Toast.LENGTH_SHORT).show();
+        Alarm newAlarm = createAlarm();
+        if (newAlarm == null) {
             return;
         }
-
-        Alarm newAlarm = createAlarm(hour, minute);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -193,27 +251,39 @@ public class NewAlarmActivity extends AppCompatActivity {
         });
     }
 
-    private Alarm createAlarm(int hour, int minute) {
-        boolean noneSelected = true;
-        for (ToggleButton btn : this.buttons) {
-            if (btn.isChecked()) noneSelected = false;
-        }
-        boolean isOneTime = oneTimeCheckBox.isChecked() || noneSelected;
+    private Alarm createAlarm() {
+        int hour = alarmTimePicker.getHour();
+        int minute = alarmTimePicker.getMinute();
 
+        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+            Toast.makeText(this, "Invalid time",
+                    Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        boolean noneSelected = true;
         boolean[] daysChecked = new boolean[7];
         for (int i = 0; i < this.buttons.length; i++) {
+            if (this.buttons[i].isChecked()) {
+                noneSelected = false;
+            }
             daysChecked[i] = this.buttons[i].isChecked() && this.buttons[i].isEnabled();
         }
+
+        boolean isOneTime = oneTimeCheckBox.isChecked() || noneSelected;
 
         String ringtone = selectedAudio == null ? "" : selectedAudio.toString();
         Alarm newAlarm = new Alarm(
                 hour, minute,
-                0, 5, isOneTime, daysChecked[0],
-                daysChecked[1], daysChecked[2], daysChecked[3], daysChecked[4],
-                daysChecked[5], daysChecked[6], ringtone
+                0, 5, isOneTime,
+                daysChecked[0], daysChecked[1], daysChecked[2], daysChecked[3],
+                daysChecked[4], daysChecked[5], daysChecked[6], ringtone
         );
         if (this.alarmToEdit != null) {
             newAlarm.setId(this.alarmToEdit.getId());
+        }
+        if (selectedLesson != null) {
+            newAlarm.setLessonId(selectedLesson.getId());
         }
         return newAlarm;
     }
@@ -228,9 +298,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         }
     }
 
-    public void onSelectToneClick(View view) {
-        selectAlarmTone();
-    }
 
     private void selectAlarmTone() {
         if (!PermissionUtils.hasStoragePermission(this)) {
@@ -266,7 +333,7 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         if (requestCode == PermissionUtils.REQUEST_CODE_STORAGE_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                selectAlarmTone();
+                openAudioPicker();
             } else {
                 Toast.makeText(this, "Permission required to select alarm tones",
                         Toast.LENGTH_SHORT).show();
@@ -315,4 +382,5 @@ public class NewAlarmActivity extends AppCompatActivity {
         showExitDialog();
         return true;
     }
+
 }

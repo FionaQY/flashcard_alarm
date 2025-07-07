@@ -43,14 +43,6 @@ public class LessonHandler {
         });
     }
 
-//    private static Intent createAlarmIntent(Context ctx, Lesson lesson) {
-//        Intent intent = new Intent(ctx, AlarmReceiver.class);
-//        intent.setAction(AlarmReceiver.ACTION_ALARM_TRIGGER);
-//        intent.putExtra(RINGTONE_STR, lesson.getRingtone());
-//        intent.putExtra("lesson", lesson);
-//        return intent;
-//    }
-
     public static void deleteAlarm(Context ctx, Lesson lesson) {
         Context appContext = ctx.getApplicationContext();
         Executors.newSingleThreadExecutor().execute(() -> {
