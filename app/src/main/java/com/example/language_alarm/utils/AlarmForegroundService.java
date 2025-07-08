@@ -9,6 +9,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -28,13 +30,20 @@ import com.example.language_alarm.models.Alarm;
 import java.io.IOException;
 
 public class AlarmForegroundService extends Service {
-    // TODO: make alarm have sound
     // to ensure the ringtone plays even if system tries to disrupt
     private static final String TAG = "AlarmForegroundService";
     private static final String CHANNEL_ID = "alarm_foreground_channel";
     private static final int NOTIFICATION_ID = 123;
     private Ringtone ringtone = null;
     private Vibrator vibrator = null;
+    private AudioManager audioManager;
+    private MediaPlayer mediaPlayer;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -79,6 +88,9 @@ public class AlarmForegroundService extends Service {
         if (ringtone != null && ringtone.isPlaying()) {
             ringtone.stop();
         }
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
         if (vibrator != null) {
             vibrator.cancel();
             vibrator = null;
@@ -92,6 +104,8 @@ public class AlarmForegroundService extends Service {
                 CHANNEL_ID, "Alarm Service Channel",
                 NotificationManager.IMPORTANCE_HIGH);
         channel.setDescription("Keeps the alarm running in the foreground");
+        channel.setSound(null, null); // We handle sound separately
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
@@ -110,10 +124,12 @@ public class AlarmForegroundService extends Service {
                 .setSmallIcon(R.drawable.baseline_add_alarm_24)
                 .setContentTitle("Alarm")
                 .setContentText("Time to wake up!")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .addAction(R.drawable.outline_alarm_24, "Stop", pendingIntent)
                 .setAutoCancel(true)
                 .setOngoing(true)
+                .setSound(null)
+                .setFullScreenIntent(pendingIntent, true)
                 .build();
     }
 
@@ -141,20 +157,35 @@ public class AlarmForegroundService extends Service {
 
     private void playRingtone(Alarm alarm) {
         stopAlarm();
+
         Uri alarmUri = getValidAlarmUri(alarm.getRingtone());
-        MediaPlayer player = new MediaPlayer();
-        try {
-            player.setDataSource(this, alarmUri);
-        } catch (IOException e) {
-            Log.e("error: ", String.valueOf(e));
-        }
 
         try {
+            // Modern approach with AudioAttributes
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+
+            Log.d(TAG, "Attempting to play URI: " + alarmUri);
+            Log.d(TAG, "AudioManager alarm volume: " +
+                    audioManager.getStreamVolume(AudioManager.STREAM_ALARM));
+
+            try {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(this, alarmUri);
+                mediaPlayer.setAudioAttributes(audioAttributes);
+                mediaPlayer.setLooping(true);
+                mediaPlayer.setVolume(1.0f, 1.0f);
+                mediaPlayer.setOnPreparedListener(MediaPlayer::start);
+                mediaPlayer.prepareAsync();
+                return;
+            } catch (IOException e) {
+                Log.e(TAG, "MediaPlayer failed, falling back to Ringtone", e);
+            }
             ringtone = RingtoneManager.getRingtone(this, alarmUri);
             if (ringtone != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    ringtone.setLooping(true);
-                }
+                ringtone.setAudioAttributes(audioAttributes);
                 ringtone.play();
             } else {
                 playDefaultRingtone();
@@ -177,16 +208,33 @@ public class AlarmForegroundService extends Service {
     }
 
     private void playDefaultRingtone() {
+
+        Uri defaultUri = getDefaultAlarmUri();
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+
         try {
-            Uri defaultUri = getDefaultAlarmUri();
+
+            ringtone = RingtoneManager.getRingtone(this, defaultUri);
+            try {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(this, defaultUri);
+                mediaPlayer.setAudioAttributes(audioAttributes);
+                mediaPlayer.setLooping(true);
+                mediaPlayer.setVolume(1.0f, 1.0f);
+                mediaPlayer.setOnPreparedListener(MediaPlayer::start);
+                mediaPlayer.prepareAsync();
+                return;
+            } catch (IOException e) {
+                Log.e(TAG, "MediaPlayer failed for default ringtone", e);
+            }
             ringtone = RingtoneManager.getRingtone(this, defaultUri);
             if (ringtone != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    ringtone.setLooping(true);
-                }
+                ringtone.setAudioAttributes(audioAttributes);
                 ringtone.play();
-            } else {
-                Log.e(TAG, "Couldn't get default ringtone");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error playing default ringtone", e);
