@@ -39,4 +39,6 @@
     <string name="clear">Clear</string>
     <string name="choose_lesson">Pick a lesson</string>
     <string name="pick_qns_num">Pick number of questions</string>
+    <string name="proceed_to_learn">Proceed to learn</string>
+    <string name="snooze">Snooze</string>
 </resources>

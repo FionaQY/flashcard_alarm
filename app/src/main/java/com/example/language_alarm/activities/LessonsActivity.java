@@ -38,6 +38,8 @@ public class LessonsActivity extends AppCompatActivity {
         recyclerView.setAdapter(lessonAdapter);
 
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
+        // TODO: search bar
+        // TODO: delete lesson option
         lessonViewModel.getAllLessons().observe(this, lessons -> {
             lessonAdapter.setLessons(lessons);
             emptyView.setVisibility(lessons.isEmpty() ? View.VISIBLE : View.GONE);

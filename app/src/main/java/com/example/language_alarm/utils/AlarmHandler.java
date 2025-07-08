@@ -94,6 +94,26 @@ public class AlarmHandler {
         setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
     }
 
+    public static void snoozeAlarm(Context ctx, Alarm alarm) {
+        cancelAlarm(ctx, alarm);
+
+        AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = createAlarmIntent(ctx, alarm);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                ctx,
+                alarm.getId(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.add(Calendar.MINUTE, alarm.getLengthOfSnooze());
+        calendar.set(Calendar.SECOND, 0);
+
+        setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
+    }
+
     private static void scheduleRecurringAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm) {
         alarm.forEachEnabledDay(day -> scheduleDayAlarm(ctx, alarmManager, alarm, day));
     }

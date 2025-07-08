@@ -38,6 +38,7 @@ public class Lesson implements Parcelable {
     private boolean isCaseSensitive = true;
     private List<String> headers = new ArrayList<>();
     private List<Boolean> foreignIndexes = new ArrayList<>();
+    // TODO: set hint
     @TypeConverters(Converters.class)
     private List<Flashcard> flashcards = null;
 
