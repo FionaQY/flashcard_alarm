@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.Calendar;
@@ -30,7 +31,7 @@ public class Alarm implements Parcelable {
     private int minute;
     private String ringtone;
     private String wallpaper;
-    private int numberOfSnoozes;
+    private int snoozeNum;
     private int lengthOfSnooze; // in minutes
     private boolean isEnabled = true;
     private boolean isOneTime;
@@ -42,6 +43,10 @@ public class Alarm implements Parcelable {
     private boolean saturday;
     private boolean sunday;
     private int lessonId;
+    private int qnNum;
+
+    @Ignore
+    private int snoozesSoFat = 0;
 
     public Alarm() {
     }
@@ -51,7 +56,7 @@ public class Alarm implements Parcelable {
                  boolean thursday, boolean friday, boolean saturday, String uri) {
         this.hour = hour;
         this.minute = minute;
-        this.numberOfSnoozes = numSnoozes;
+        this.snoozeNum = numSnoozes;
         this.lengthOfSnooze = lenSnooze;
         this.isOneTime = isOneTime;
         this.sunday = sunday;
@@ -70,7 +75,7 @@ public class Alarm implements Parcelable {
         minute = in.readInt();
         ringtone = in.readString();
         wallpaper = in.readString();
-        numberOfSnoozes = in.readInt();
+        snoozeNum = in.readInt();
         lengthOfSnooze = in.readInt();
         isEnabled = in.readByte() != 0;
         isOneTime = in.readByte() != 0;
@@ -82,6 +87,19 @@ public class Alarm implements Parcelable {
         saturday = in.readByte() != 0;
         sunday = in.readByte() != 0;
         lessonId = in.readInt();
+        qnNum = in.readInt();
+    }
+
+    public void incrementSnoozeCount() {
+        snoozesSoFat += 1;
+    }
+
+    public void resetSnoozeCount() {
+        snoozesSoFat = 0;
+    }
+
+    public boolean allowSnooze() {
+        return this.snoozesSoFat < this.snoozeNum;
     }
 
     // Getters and setters for all fields
@@ -181,12 +199,12 @@ public class Alarm implements Parcelable {
         this.wallpaper = wallpaper;
     }
 
-    public int getNumberOfSnoozes() {
-        return numberOfSnoozes;
+    public int getSnoozeNum() {
+        return snoozeNum;
     }
 
-    public void setNumberOfSnoozes(int numberOfSnoozes) {
-        this.numberOfSnoozes = numberOfSnoozes;
+    public void setSnoozeNum(int snoozeNum) {
+        this.snoozeNum = snoozeNum;
     }
 
     public int getLengthOfSnooze() {
@@ -223,6 +241,14 @@ public class Alarm implements Parcelable {
 
     public void setLessonId(int lessonId) {
         this.lessonId = lessonId;
+    }
+
+    public int getQnNum() {
+        return this.qnNum;
+    }
+
+    public void setQnNum(int qnNum) {
+        this.qnNum = qnNum;
     }
 
     public String getDescription() {
@@ -268,7 +294,7 @@ public class Alarm implements Parcelable {
                 minute == otherAlarm.getMinute() &&
                 (Objects.equals(ringtone, otherAlarm.getRingtone())) &&
                 (Objects.equals(wallpaper, otherAlarm.getWallpaper())) &&
-                numberOfSnoozes == otherAlarm.getNumberOfSnoozes() &&
+                snoozeNum == otherAlarm.getSnoozeNum() &&
                 lengthOfSnooze == otherAlarm.getLengthOfSnooze() &&
                 isEnabled == otherAlarm.isEnabled() &&
                 isOneTime == otherAlarm.isOneTime() &&
@@ -279,7 +305,8 @@ public class Alarm implements Parcelable {
                 friday == otherAlarm.isFriday() &&
                 saturday == otherAlarm.isSaturday() &&
                 sunday == otherAlarm.isSunday() &&
-                lessonId == otherAlarm.getLessonId();
+                lessonId == otherAlarm.getLessonId() &&
+                qnNum == otherAlarm.getQnNum();
     }
 
     @Override
@@ -294,7 +321,7 @@ public class Alarm implements Parcelable {
         dest.writeInt(minute);
         dest.writeString(ringtone);
         dest.writeString(wallpaper);
-        dest.writeInt(numberOfSnoozes);
+        dest.writeInt(snoozeNum);
         dest.writeInt(lengthOfSnooze);
         dest.writeByte((byte) (isEnabled ? 1 : 0));
         dest.writeByte((byte) (isOneTime ? 1 : 0));
@@ -306,6 +333,7 @@ public class Alarm implements Parcelable {
         dest.writeByte((byte) (saturday ? 1 : 0));
         dest.writeByte((byte) (sunday ? 1 : 0));
         dest.writeInt(lessonId);
+        dest.writeInt(qnNum);
     }
 
     public interface DayConsumer {

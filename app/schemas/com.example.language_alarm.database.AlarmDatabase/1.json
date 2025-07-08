@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7387ea08e11409bdfa2ff97c938bc872",
+    "identityHash": "428a0c57b1d5169fa02001291fa1d1be",
     "entities": [
       {
         "tableName": "alarms",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hour` INTEGER NOT NULL, `minute` INTEGER NOT NULL, `ringtone` TEXT, `wallpaper` TEXT, `numberOfSnoozes` INTEGER NOT NULL, `lengthOfSnooze` INTEGER NOT NULL, `isEnabled` INTEGER NOT NULL, `isOneTime` INTEGER NOT NULL, `monday` INTEGER NOT NULL, `tuesday` INTEGER NOT NULL, `wednesday` INTEGER NOT NULL, `thursday` INTEGER NOT NULL, `friday` INTEGER NOT NULL, `saturday` INTEGER NOT NULL, `sunday` INTEGER NOT NULL, `lessonId` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hour` INTEGER NOT NULL, `minute` INTEGER NOT NULL, `ringtone` TEXT, `wallpaper` TEXT, `snoozeNum` INTEGER NOT NULL, `lengthOfSnooze` INTEGER NOT NULL, `isEnabled` INTEGER NOT NULL, `isOneTime` INTEGER NOT NULL, `monday` INTEGER NOT NULL, `tuesday` INTEGER NOT NULL, `wednesday` INTEGER NOT NULL, `thursday` INTEGER NOT NULL, `friday` INTEGER NOT NULL, `saturday` INTEGER NOT NULL, `sunday` INTEGER NOT NULL, `lessonId` INTEGER NOT NULL, `qnNum` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -37,8 +37,8 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "numberOfSnoozes",
-            "columnName": "numberOfSnoozes",
+            "fieldPath": "snoozeNum",
+            "columnName": "snoozeNum",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -107,6 +107,12 @@
             "columnName": "lessonId",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "qnNum",
+            "columnName": "qnNum",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -119,7 +125,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7387ea08e11409bdfa2ff97c938bc872')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '428a0c57b1d5169fa02001291fa1d1be')"
     ]
   }
 }

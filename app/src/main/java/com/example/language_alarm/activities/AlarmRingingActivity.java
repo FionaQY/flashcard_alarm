@@ -3,6 +3,7 @@ package com.example.language_alarm.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,6 +12,7 @@ import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.utils.AlarmForegroundService;
 import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.AlarmReceiver;
+import com.google.android.material.button.MaterialButton;
 
 public class AlarmRingingActivity extends AppCompatActivity {
     Alarm alarm;
@@ -25,29 +27,34 @@ public class AlarmRingingActivity extends AppCompatActivity {
             Log.w("Alarm", "Attempted to ring null alarm");
             supportFinishAfterTransition();
         }
+        MaterialButton snoozeButton = findViewById(R.id.snoozeButton);
+        snoozeButton.setVisibility(alarm.allowSnooze() ? View.VISIBLE : View.GONE);
 
-        findViewById(R.id.snoozeButton).setOnClickListener(v -> {
+        snoozeButton.setOnClickListener(v -> {
+            stopRinging();
             AlarmHandler.snoozeAlarm(this, alarm);
-
-            Intent stopIntent = new Intent(this, AlarmForegroundService.class);
-            stopIntent.setAction(AlarmReceiver.ACTION_STOP_ALARM);
-            startActivity(stopIntent);
-
+            alarm.incrementSnoozeCount();
             finish();
         });
 
         findViewById(R.id.stopButton).setOnClickListener(v -> {
-            Intent stopIntent = new Intent(this, AlarmForegroundService.class);
-            stopIntent.setAction(AlarmReceiver.ACTION_STOP_ALARM);
-            startActivity(stopIntent);
+            stopRinging();
 
-            Intent intent = new Intent(this, NewAlarmActivity.class);
+            AlarmHandler.cancelAlarm(this, alarm);
+            alarm.resetSnoozeCount();
+
+            Intent intent = new Intent(this, MemorisationActivity.class);
+            intent.putExtra("lessonId", alarm.getLessonId());
+            intent.putExtra("qnCount", alarm.getQnNum());
             startActivity(intent);
             finish();
         });
 
-        // TODO: get lesson from lessonID in background (do this in others)
-        // TODO: snooze -> snoozeAlarm. snooze till alarm count done
-        // TODO: do lesson button -> new activity and layout
+    }
+
+    private void stopRinging() {
+        Intent stopIntent = new Intent(this, AlarmForegroundService.class);
+        stopIntent.setAction(AlarmReceiver.ACTION_STOP_ALARM);
+        startActivity(stopIntent);
     }
 }

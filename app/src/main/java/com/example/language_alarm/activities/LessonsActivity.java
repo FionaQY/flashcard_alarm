@@ -40,6 +40,7 @@ public class LessonsActivity extends AppCompatActivity {
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
         // TODO: search bar
         // TODO: delete lesson option
+        // TODO: practice lesson (set number of questions)
         lessonViewModel.getAllLessons().observe(this, lessons -> {
             lessonAdapter.setLessons(lessons);
             emptyView.setVisibility(lessons.isEmpty() ? View.VISIBLE : View.GONE);

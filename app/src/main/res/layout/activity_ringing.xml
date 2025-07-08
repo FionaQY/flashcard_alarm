@@ -15,6 +15,7 @@
         android:text="@string/snooze"
         android:textAllCaps="false"
         android:textSize="16sp"
+        android:visibility="gone"
         app:backgroundTint="?attr/colorPrimary"
         app:cornerRadius="8dp"
         app:icon="@drawable/baseline_snooze_24"
