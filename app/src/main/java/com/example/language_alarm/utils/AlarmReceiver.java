@@ -35,7 +35,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             alarmIntent.putExtra("alarm", alarm);
             alarmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             ctx.startActivity(alarmIntent);
-
         } else if (ACTION_STOP_ALARM.equals(action)) {
             Intent serviceIntent = new Intent(ctx, AlarmForegroundService.class);
             serviceIntent.setAction(action);

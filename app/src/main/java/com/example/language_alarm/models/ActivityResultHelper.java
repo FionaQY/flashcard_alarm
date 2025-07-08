@@ -27,9 +27,12 @@ public class ActivityResultHelper {
     }
 
     public void launchAudioPicker() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT)
-                .setType("audio/*")
-                .addCategory(Intent.CATEGORY_OPENABLE);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("audio/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         launcher.launch(Intent.createChooser(intent, "Select Alarm Tone"));
     }
 

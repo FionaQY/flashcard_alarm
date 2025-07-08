@@ -8,8 +8,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -35,8 +37,10 @@ import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -167,10 +171,28 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void handleAudioSelection(Uri uri) {
-        selectedAudio = uri;
-        String filename = getFileName(selectedAudio);
-//                TextView toneText = findViewById(R.id.selectToneButton);
-//                toneText.setText(String.format("Selected: %s", filename));
+        try {
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+            } catch (SecurityException e) {
+                Log.w("NewAlarmActivity", "Couldn't get persistable permission, will use temporary permission");
+            }
+
+            try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
+                if (pfd != null) {
+                    selectedAudio = uri;
+                    String filename = getFileName(selectedAudio);
+                    ((MaterialButton) findViewById(R.id.selectToneButton)).setText(filename);
+                }
+            } catch (IOException e) {
+                Log.e("NewAlarmActivity", "Error accessing selected audio file", e);
+            }
+        } catch (Exception e) {
+            Log.e("NewAlarmActivity", "Error handling audio selection", e);
+        }
     }
 
     private void populateAlarmData() {
@@ -195,6 +217,7 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         if (alarmToEdit.getRingtone() != null) {
             selectedAudio = Uri.parse(alarmToEdit.getRingtone());
+            ((MaterialButton) findViewById(R.id.selectToneButton)).setText(getFileName(selectedAudio));
         }
     }
 

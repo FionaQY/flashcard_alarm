@@ -493,18 +493,12 @@ public class NewLessonActivity extends AppCompatActivity {
             return;
         }
 
-        if (tempLesson.getFlashcards().isEmpty()) {  // Assuming you add flashcards to tempLesson
-            Toast.makeText(this, "Please add at least one flashcard", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         LessonHandler.saveLesson(this, tempLesson);
         Toast.makeText(this, "Lesson saved", Toast.LENGTH_SHORT).show();
         finish();
     }
 
     private void populateLessonData(Lesson lesson) {
-        // TODO: set values
         if (lesson.getLessonName() != null && !lesson.getLessonName().isEmpty()) {
             TextView titleView = findViewById(R.id.toolbar).findViewById(R.id.toolbar_title);
             if (titleView != null) {

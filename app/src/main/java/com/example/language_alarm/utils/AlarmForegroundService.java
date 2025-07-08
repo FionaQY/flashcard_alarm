@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -24,7 +25,10 @@ import androidx.core.app.NotificationCompat;
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Alarm;
 
+import java.io.IOException;
+
 public class AlarmForegroundService extends Service {
+    // TODO: make alarm have sound
     // to ensure the ringtone plays even if system tries to disrupt
     private static final String TAG = "AlarmForegroundService";
     private static final String CHANNEL_ID = "alarm_foreground_channel";
@@ -77,21 +81,20 @@ public class AlarmForegroundService extends Service {
         }
         if (vibrator != null) {
             vibrator.cancel();
+            vibrator = null;
         }
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NOTIFICATION_ID);
     }
 
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID, "Alarm Service Channel",
-                    NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription("Keeps the alarm running in the foreground");
+        NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID, "Alarm Service Channel",
+                NotificationManager.IMPORTANCE_HIGH);
+        channel.setDescription("Keeps the alarm running in the foreground");
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
     }
 
     private Notification createNotification() {
@@ -117,35 +120,88 @@ public class AlarmForegroundService extends Service {
     private void startVibration() {
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                long[] vibrationPatterns = new long[]{0, 1000, 1000};
-                vibrator.vibrate(VibrationEffect.createWaveform(vibrationPatterns, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                // Deprecated in API 26
-                vibrator.vibrate(2000);
-            }
+            long[] vibrationPattern = new long[]{0, 1000, 1000};
+            vibrator.vibrate(VibrationEffect.createWaveform(vibrationPattern, 0));
+
+            new Thread(() -> {
+                while (true) {
+                    try {
+                        Thread.sleep(2000);
+                        if (vibrator != null) {
+                            vibrator.vibrate(VibrationEffect.createWaveform(vibrationPattern, 0));
+                        }
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }).start();
+
         }
     }
 
     private void playRingtone(Alarm alarm) {
         stopAlarm();
-        Uri alarmUri;
+        Uri alarmUri = getValidAlarmUri(alarm.getRingtone());
+        MediaPlayer player = new MediaPlayer();
+        try {
+            player.setDataSource(this, alarmUri);
+        } catch (IOException e) {
+            Log.e("error: ", String.valueOf(e));
+        }
 
-        String ringtoneUriString = alarm.getRingtone();
+        try {
+            ringtone = RingtoneManager.getRingtone(this, alarmUri);
+            if (ringtone != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ringtone.setLooping(true);
+                }
+                ringtone.play();
+            } else {
+                playDefaultRingtone();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error playing ringtone", e);
+            playDefaultRingtone();
+        }
+    }
 
-        if (ringtoneUriString != null) {
-            alarmUri = Uri.parse(ringtoneUriString);
-        } else {
-            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            if (alarmUri == null) {
-                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    private Uri getValidAlarmUri(String ringtoneUriString) {
+        if (ringtoneUriString != null && !ringtoneUriString.isEmpty()) {
+            try {
+                return Uri.parse(ringtoneUriString);
+            } catch (Exception e) {
+                Log.e(TAG, "Invalid ringtone URI format", e);
             }
         }
+        return getDefaultAlarmUri();
+    }
 
-        ringtone = RingtoneManager.getRingtone(this, alarmUri);
-        if (ringtone != null) {
-            ringtone.play();
+    private void playDefaultRingtone() {
+        try {
+            Uri defaultUri = getDefaultAlarmUri();
+            ringtone = RingtoneManager.getRingtone(this, defaultUri);
+            if (ringtone != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ringtone.setLooping(true);
+                }
+                ringtone.play();
+            } else {
+                Log.e(TAG, "Couldn't get default ringtone");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error playing default ringtone", e);
         }
+    }
+
+    private Uri getDefaultAlarmUri() {
+        Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        if (alarmUri == null) {
+            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            if (alarmUri == null) {
+                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            }
+        }
+        return alarmUri;
     }
 
 
