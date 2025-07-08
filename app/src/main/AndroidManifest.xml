@@ -75,6 +75,24 @@
                 android:value=".activities.NewLessonActivity" />
         </activity>
 
+        <activity
+            android:name=".activities.AlarmRingingActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.AlarmRingingActivity" />
+        </activity>
+
+        <activity
+            android:name=".activities.MemorisationActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.AlarmRingingActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.AlarmRingingActivity" />
+        </activity>
+
         <receiver
             android:name=".utils.AlarmReceiver"
             android:enabled="true"

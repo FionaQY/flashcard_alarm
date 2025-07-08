@@ -169,6 +169,7 @@ public class AlarmHandler {
                 pendingIntent
         );
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
+        Log.i(TAG, "Scheduled alarm at: " + triggerAttMills);
     }
 
     public static void cancelAlarm(Context ctx, Alarm alarm) {

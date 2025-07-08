@@ -3,7 +3,6 @@ package com.example.language_alarm.utils;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
 
 import com.example.language_alarm.activities.AlarmRingingActivity;
@@ -30,11 +29,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             serviceIntent.setAction(action);
             serviceIntent.putExtra("alarm", alarm);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ctx.startForegroundService(serviceIntent);
-            } else {
-                ctx.startService(serviceIntent);
-            }
+            ctx.startForegroundService(serviceIntent);
 
             Intent alarmIntent = new Intent(ctx, AlarmRingingActivity.class);
             alarmIntent.putExtra("alarm", alarm);

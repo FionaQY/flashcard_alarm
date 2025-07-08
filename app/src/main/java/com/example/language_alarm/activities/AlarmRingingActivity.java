@@ -55,6 +55,6 @@ public class AlarmRingingActivity extends AppCompatActivity {
     private void stopRinging() {
         Intent stopIntent = new Intent(this, AlarmForegroundService.class);
         stopIntent.setAction(AlarmReceiver.ACTION_STOP_ALARM);
-        startActivity(stopIntent);
+        startService(stopIntent);
     }
 }
