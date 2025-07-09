@@ -144,9 +144,10 @@
             android:scrollbars="vertical"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:spanCount="2"
-            tools:listitem="@layout/lesson_item" />
+            app:spanCount="1"
+            tools:listitem="@layout/flashcard_item" />
     </LinearLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSaveLesson"
         android:layout_width="match_parent"
@@ -164,10 +165,10 @@
         android:id="@+id/practiceButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="62dp"
-        android:layout_marginStart="7dp"
-        android:contentDescription="@string/practice_lesson"
         android:layout_gravity="start"
+        android:layout_marginStart="7dp"
+        android:layout_marginBottom="62dp"
+        android:contentDescription="@string/practice_lesson"
         android:src="@drawable/ic_add_lesson"
         app:backgroundTint="@color/colorPrimary"
         app:layout_anchor="@id/btnSaveLesson"

@@ -73,11 +73,12 @@ public class NewLessonActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.flashcard_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        FlashcardAdapter adapter = new FlashcardAdapter(this, new ArrayList<>());
+        FlashcardAdapter adapter = new FlashcardAdapter(this, new ArrayList<>(), new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
         flashcardViewModel = new ViewModelProvider(this).get(FlashcardViewModel.class);
         flashcardViewModel.getFlashcards().observe(this, adapter::setFlashcards);
+        flashcardViewModel.getHeaders().observe(this, adapter::setHeaders);
 
         this.tempLesson = getIntent().getParcelableExtra("lesson");
         if (tempLesson == null) {
@@ -261,7 +262,7 @@ public class NewLessonActivity extends AppCompatActivity {
         }
         tempLesson.setHeaders(currentHeaders);
         tempLesson.addFlashcards(cards);
-        flashcardViewModel.setFlashcards(tempLesson.getFlashcards());
+        flashcardViewModel.setFlashcards(tempLesson.getFlashcards(), currentHeaders);
 
         new AlertDialog.Builder(this)
                 .setTitle("Import Successful")
@@ -513,7 +514,7 @@ public class NewLessonActivity extends AppCompatActivity {
         this.foreignIndexes = new ArrayList<>(lesson.getForeignIndexes());
 
         if (lesson.getFlashcards() != null) {
-            flashcardViewModel.setFlashcards(lesson.getFlashcards());
+            flashcardViewModel.setFlashcards(lesson.getFlashcards(), lesson.getHeaders());
         }
     }
 

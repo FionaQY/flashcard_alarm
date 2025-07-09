@@ -18,13 +18,16 @@ import com.example.language_alarm.models.Flashcard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.FlashcardViewHolder> {
     private final Context ctx;
     private List<Flashcard> flashcards;
+    private List<String> headers;
 
-    public FlashcardAdapter(Context ctx, List<Flashcard> flashcards) {
+    public FlashcardAdapter(Context ctx, List<String> headers, List<Flashcard> flashcards) {
         this.ctx = ctx;
+        this.headers = headers;
         this.flashcards = flashcards;
     }
 
@@ -65,18 +68,63 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         }
     }
 
+    public void setHeaders(List<String> newHeaders) {
+        if (newHeaders == null || newHeaders.isEmpty()) {
+            this.headers = new ArrayList<>();
+            notifyDataSetChanged();
+        } else if (this.headers == null || this.headers.isEmpty()) {
+            this.headers = new ArrayList<>(newHeaders);
+            notifyDataSetChanged();
+        } else {
+            DiffUtil.Callback diffCallback = new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return headers.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newHeaders.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return Objects.equals(headers.get(oldItemPosition), newHeaders.get(newItemPosition));
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    return headers.get(oldItemPosition).equals(newHeaders.get(newItemPosition));
+                }
+            };
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+            headers.clear();
+            headers.addAll(newHeaders);
+            diffResult.dispatchUpdatesTo(this);
+        }
+    }
+
     @NonNull
     @Override
     public FlashcardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.lesson_item, parent, false);
+                .inflate(R.layout.flashcard_item, parent, false);
         return new FlashcardViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(FlashcardViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull FlashcardViewHolder holder, int position) {
         Flashcard flashcard = this.flashcards.get(position);
-        holder.lessonNameView.setText(flashcard.getValsString());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.headers.size() && i < flashcard.getVals().size(); i++) {
+            String val = flashcard.getVals().get(i);
+            String header = this.headers.get(i);
+            if (header != null && !header.isEmpty() && val != null && !val.isEmpty()) {
+                sb.append(String.format("%s: %s\n", header.trim(), val.trim()));
+            }
+        }
+        holder.txtValues.setText(sb.toString().trim());
 
         holder.editButton.setOnClickListener(view -> {
             Intent intent = new Intent(ctx, NewLessonActivity.class);
@@ -99,15 +147,15 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     }
 
     public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
-        public TextView lessonNameView;
+        public TextView txtValues;
         public Button editButton;
-        public Button deleteButton;
+        public Button starButton;
 
         public FlashcardViewHolder(View itemView) {
             super(itemView);
-            lessonNameView = itemView.findViewById(R.id.lesson_name);
-            editButton = itemView.findViewById(R.id.edit_lesson);
-            deleteButton = itemView.findViewById(R.id.delete_lesson);
+            txtValues = itemView.findViewById(R.id.txtValues);
+            editButton = itemView.findViewById(R.id.btnEdit);
+            starButton = itemView.findViewById(R.id.btnStar);
         }
     }
 }

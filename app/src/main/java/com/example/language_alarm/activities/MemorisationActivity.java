@@ -2,6 +2,7 @@ package com.example.language_alarm.activities;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -15,7 +16,6 @@ import com.example.language_alarm.models.LessonViewModel;
 import com.example.language_alarm.utils.InputFlashcardAdapter;
 import com.google.android.material.button.MaterialButton;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class MemorisationActivity extends AppCompatActivity {
 
     private static Queue<Integer> generateUniqueRandomNumbers(int count, int max) {
         if (count > (max + 1)) {
-            Log.w(TAG, "Cannot generate more unique numbers than the available range.");
+            Log.w(TAG, String.format("Cannot generate more unique numbers than given max (%d). (count: %d)", max, count));
             count = max;
         }
 
@@ -55,34 +55,34 @@ public class MemorisationActivity extends AppCompatActivity {
         int lessonId = getIntent().getIntExtra("lessonId", 0);
         if (lessonId == 0) {
             Log.w(TAG, "Attempted to perform null lesson");
-            finish();
+            handleFinishQuiz();
             return;
         }
         int qnCount = getIntent().getIntExtra("qnCount", 3);
 
         RecyclerView recyclerView = findViewById(R.id.values_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new InputFlashcardAdapter(new ArrayList<>(), new ArrayList<>());
+        adapter = new InputFlashcardAdapter();
         recyclerView.setAdapter(adapter);
 
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
         lessonViewModel.getLesson(lessonId).observe(this, lesson -> {
             if (lesson == null) {
                 Log.w(TAG, "Attempted to perform null lesson");
-                finish();
+                handleFinishQuiz();
                 return;
             }
-            adapter.setHeaders(lesson.getHeaders());
+            adapter.setLesson(lesson);
             allFlashcards = lesson.getFlashcards();
             if (allFlashcards == null || allFlashcards.isEmpty()) {
-                finish();
+                handleFinishQuiz();
             }
             this.lesson = lesson;
 
             cardIndexes = generateUniqueRandomNumbers(qnCount, this.allFlashcards.size() - 1);
             if (cardIndexes.isEmpty()) {
                 Log.w(TAG, "Card indexes generate is empty");
-                finish();
+                handleFinishQuiz();
                 return;
             }
             handleNextCard();
@@ -101,7 +101,7 @@ public class MemorisationActivity extends AppCompatActivity {
 
     private void handleNextCard() {
         if (cardIndexes.isEmpty()) {
-            finish();
+            handleFinishQuiz();
             return;
         }
         Integer nextInd = cardIndexes.poll();
@@ -112,8 +112,8 @@ public class MemorisationActivity extends AppCompatActivity {
         secondClick = false;
         Flashcard nextCard = allFlashcards.get(nextInd);
         if (nextCard == null) {
-            Log.e(TAG, "Flashcard at index " + nextInd + " is null");
-            handleNextCard(); // Skip to the next card
+            Log.e(TAG, String.format("Flashcard at index %d is null", nextInd));
+            handleNextCard();
             return;
         }
         adapter.setValues(nextCard);
@@ -122,17 +122,22 @@ public class MemorisationActivity extends AppCompatActivity {
     private void validateAnswers() {
         List<String> userInput = adapter.getUserAnswers();
         if (currFlashcardIndex >= allFlashcards.size() || currFlashcardIndex < 0) {
-            finish();
+            handleFinishQuiz();
             return;
         }
         Flashcard curr = allFlashcards.get(currFlashcardIndex);
         boolean isCorrect = curr.isCorrect(userInput, lesson.isPunctSensitive(), lesson.isCaseSensitive());
         if (isCorrect) {
-            adapter.showAnswers();
+            Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show();
         } else {
+            adapter.showAnswers();
             this.cardIndexes.add(currFlashcardIndex);
         }
         secondClick = true;
+    }
+
+    private void handleFinishQuiz() {
+        finishAfterTransition();
     }
 
 }

@@ -28,9 +28,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="20sp"
                 android:text=""
-                android:textAppearance="?attr/textAppearanceSubtitle1" />
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:textSize="20sp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
@@ -46,6 +46,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
+
         <TextView
             android:id="@+id/answer"
             android:layout_width="match_parent"
@@ -53,6 +54,6 @@
             android:layout_marginTop="10dp"
             android:text=""
             android:textAppearance="?attr/textAppearanceSubtitle1"
-            android:visibility="gone"/>
+            android:visibility="gone" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

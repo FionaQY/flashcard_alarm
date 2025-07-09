@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Flashcard;
+import com.example.language_alarm.models.Lesson;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -20,22 +21,30 @@ import java.util.List;
 public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAdapter.InputFlashcardViewHolder> {
     private final List<TextInputEditText> inputFields = new ArrayList<>();
     private final List<TextView> answerViews = new ArrayList<>();
-    private List<String> headers;
-    private List<String> ans;
+    private List<Boolean> foreignIndexes = new ArrayList<>();
+    private List<String> headers = new ArrayList<>();
+    private List<String> ans = new ArrayList<>();
 
-    public InputFlashcardAdapter(List<String> headers, List<String> ans) {
-        this.headers = headers;
-        this.ans = ans;
+    public InputFlashcardAdapter() {
     }
 
-    public void setHeaders(List<String> headers) { // one time per lessons
-        if (headers == null || headers.isEmpty()) {
+    public void setLesson(Lesson lesson) { // one time per lessons
+        if (lesson == null || lesson.getHeaders() == null) {
             this.headers = new ArrayList<>();
         } else if (this.headers == null || this.headers.isEmpty()) {
-            this.headers = new ArrayList<>(headers);
+            this.headers = new ArrayList<>(lesson.getHeaders());
         } else {
-            this.headers = headers;
+            this.headers = lesson.getHeaders();
         }
+
+        if (lesson == null || lesson.getHeaders() == null) {
+            this.foreignIndexes = new ArrayList<>();
+        } else if (this.foreignIndexes == null || this.foreignIndexes.isEmpty()) {
+            this.foreignIndexes = new ArrayList<>(lesson.getForeignIndexes());
+        } else {
+            this.foreignIndexes = lesson.getForeignIndexes();
+        }
+
         notifyDataSetChanged();
     }
 
@@ -92,6 +101,10 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         }
         holder.valueName.setText(String.format("%s: ", valueName));
         holder.displayAnswer.setText(String.format("Answer: %s", valueAns));
+        if (this.foreignIndexes.get(position)) {
+            holder.inputValue.setText(valueAns);
+            holder.inputValue.setEnabled(false);
+        }
         this.inputFields.add(holder.inputValue);
         this.answerViews.add(holder.displayAnswer);
     }
