@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Study Alarm</string>
     <string name="add_alarm">add a new alarm</string>
     <string name="return_to_main_page">return to main page</string>
     <string name="default_time">07:00 AM</string>

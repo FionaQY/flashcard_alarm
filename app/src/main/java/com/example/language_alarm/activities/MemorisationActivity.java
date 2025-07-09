@@ -24,6 +24,7 @@ import java.util.Random;
 
 public class MemorisationActivity extends AppCompatActivity {
     // TODO: countdown timer: 5mins -> alarm
+    // TODO: page doesnt go up when keyboard, blocking some words
     private static final String TAG = "MemorisationActivity";
     private InputFlashcardAdapter adapter;
     private List<Flashcard> allFlashcards;

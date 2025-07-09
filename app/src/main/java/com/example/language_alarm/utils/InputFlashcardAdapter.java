@@ -1,6 +1,7 @@
 package com.example.language_alarm.utils;
 
 import android.text.Editable;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +21,15 @@ import java.util.List;
 
 public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAdapter.InputFlashcardViewHolder> {
     private final List<TextInputEditText> inputFields = new ArrayList<>();
-    private final List<TextView> answerViews = new ArrayList<>();
+    private final SparseArray<LinearLayout> containers;
+    private final SparseArray<TextView> answerViews;
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private List<String> headers = new ArrayList<>();
     private List<String> ans = new ArrayList<>();
 
     public InputFlashcardAdapter() {
+        containers = new SparseArray<>();
+        answerViews = new SparseArray<>();
     }
 
     public void setLesson(Lesson lesson) { // one time per lessons
@@ -49,6 +53,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     }
 
     public void setValues(Flashcard flash) {
+        this.inputFields.clear();
         if (flash == null || flash.getVals() == null) {
             this.ans = new ArrayList<>();
         } else {
@@ -67,13 +72,16 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     }
 
     public void showAnswers() {
-        for (int i = 0; i < this.answerViews.size(); i++) {
+        for (int i = 0; i < this.headers.size(); i++) {
             String valueName = this.headers.get(i);
             String valueAns = this.ans.get(i);
-            if (noInputExpected(valueName, valueAns)) {
-                return;
+            TextView ansView = this.answerViews.get(i);
+            if (ansView == null) {
+                continue;
             }
-            answerViews.get(i).setVisibility(View.VISIBLE);
+
+            boolean isNoShow = noInputExpected(valueName, valueAns);
+            ansView.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -96,17 +104,22 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     public void onBindViewHolder(@NonNull InputFlashcardViewHolder holder, int position) {
         String valueName = this.headers.get(position);
         String valueAns = this.ans.get(position);
-        if (noInputExpected(valueName, valueAns)) {
-            holder.inputContainer.setVisibility(View.GONE);
-        }
         holder.valueName.setText(String.format("%s: ", valueName));
         holder.displayAnswer.setText(String.format("Answer: %s", valueAns));
-        if (this.foreignIndexes.get(position)) {
+        if (!this.foreignIndexes.get(position)) {
             holder.inputValue.setText(valueAns);
             holder.inputValue.setEnabled(false);
+        } else {
+            holder.inputValue.setText("");
+            holder.inputValue.setEnabled(true);
         }
         this.inputFields.add(holder.inputValue);
-        this.answerViews.add(holder.displayAnswer);
+        this.answerViews.put(position, holder.displayAnswer);
+        this.containers.put(position, holder.inputContainer);
+
+        boolean isNoShow = noInputExpected(valueName, valueAns);
+        holder.inputContainer.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
+        holder.displayAnswer.setVisibility(View.GONE);
     }
 
     @Override
