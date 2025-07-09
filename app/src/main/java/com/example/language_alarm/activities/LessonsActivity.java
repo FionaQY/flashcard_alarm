@@ -2,6 +2,8 @@ package com.example.language_alarm.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.TextView;
 
@@ -11,17 +13,21 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.models.Lesson;
 import com.example.language_alarm.models.LessonViewModel;
 import com.example.language_alarm.utils.LessonAdapter;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class LessonsActivity extends AppCompatActivity {
     private LessonAdapter lessonAdapter = null;
     private TextView emptyView;
+    private List<Lesson> lessonList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +44,43 @@ public class LessonsActivity extends AppCompatActivity {
         recyclerView.setAdapter(lessonAdapter);
 
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
-        // TODO: search bar
-        // TODO: delete lesson option
-        // TODO: practice lesson (set number of questions)
+        // TODO: delete lesson option (+ confirmation)
+        // TODO: set number of questions for practice. move practice button here? 3 dots -> edit, delete, practice?
+        // or click practice/delete button and can click multiple
         lessonViewModel.getAllLessons().observe(this, lessons -> {
             lessonAdapter.setLessons(lessons);
+            lessonList = lessons;
             emptyView.setVisibility(lessons.isEmpty() ? View.VISIBLE : View.GONE);
+        });
+
+        ((TextInputEditText) findViewById(R.id.searchBar).findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                String str = s.toString().trim();
+                if (lessonList == null || lessonList.isEmpty()) {
+                    return;
+                }
+                if (str.isEmpty()) {
+                    return;
+                }
+                List<Lesson> less = new ArrayList<>();
+                for (Lesson lesson : lessonList) {
+                    if (lesson.toString().toUpperCase().contains(str.toUpperCase())) {
+                        less.add(lesson);
+                    }
+                }
+                lessonAdapter.setLessons(less);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
         });
     }
 

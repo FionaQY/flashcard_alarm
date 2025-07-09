@@ -37,8 +37,10 @@ public class Flashcard implements Parcelable {
         this.isImportant = isImportant;
     }
 
-    public String getValsString() {
-        return android.text.TextUtils.join("\n", this.values);
+    @NonNull
+    @Override
+    public String toString() {
+        return android.text.TextUtils.join(" ", this.values);
     }
 
     public List<String> getVals() {

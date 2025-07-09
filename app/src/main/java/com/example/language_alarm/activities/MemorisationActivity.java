@@ -23,6 +23,7 @@ import java.util.Queue;
 import java.util.Random;
 
 public class MemorisationActivity extends AppCompatActivity {
+    // TODO: countdown timer: 5mins -> alarm
     private static final String TAG = "MemorisationActivity";
     private InputFlashcardAdapter adapter;
     private List<Flashcard> allFlashcards;
@@ -126,6 +127,7 @@ public class MemorisationActivity extends AppCompatActivity {
             return;
         }
         Flashcard curr = allFlashcards.get(currFlashcardIndex);
+        // TODO: return arraylist of index. set each one in index to red
         boolean isCorrect = curr.isCorrect(userInput, lesson.isPunctSensitive(), lesson.isCaseSensitive());
         if (isCorrect) {
             Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show();

@@ -167,6 +167,12 @@ public class Lesson implements Parcelable {
         dest.writeList(foreignIndexes);
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return String.format("%s: %s", this.lessonName, android.text.TextUtils.join(" ", this.flashcards));
+    }
+
     public static class Converters {
         @TypeConverter
         public static String fromFlashcardList(List<Flashcard> cards) {

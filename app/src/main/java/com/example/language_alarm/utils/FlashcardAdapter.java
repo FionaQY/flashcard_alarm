@@ -126,6 +126,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         }
         holder.txtValues.setText(sb.toString().trim());
 
+        // TODO: set up editing and deleting (3 dots?)
         holder.editButton.setOnClickListener(view -> {
             Intent intent = new Intent(ctx, NewLessonActivity.class);
             intent.putExtra("flashcard", flashcard);

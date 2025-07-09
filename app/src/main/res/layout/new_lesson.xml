@@ -134,6 +134,13 @@
             app:strokeColor="?attr/colorPrimary"
             app:strokeWidth="1dp" />
 
+        <include
+            android:id="@+id/searchBar"
+            layout="@layout/searchbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:placeholderText="" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/flashcard_list"
             android:layout_width="match_parent"

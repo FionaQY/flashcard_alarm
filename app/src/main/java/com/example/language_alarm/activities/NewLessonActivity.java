@@ -38,6 +38,7 @@ import com.example.language_alarm.utils.ToolbarHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -60,6 +61,7 @@ public class NewLessonActivity extends AppCompatActivity {
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private FlashcardViewModel flashcardViewModel = null;
     private ActivityResultHelper csvPickerHelper = null;
+    private FlashcardAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +75,7 @@ public class NewLessonActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.flashcard_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        FlashcardAdapter adapter = new FlashcardAdapter(this, new ArrayList<>(), new ArrayList<>());
+        adapter = new FlashcardAdapter(this, new ArrayList<>(), new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
         flashcardViewModel = new ViewModelProvider(this).get(FlashcardViewModel.class);
@@ -131,6 +133,32 @@ public class NewLessonActivity extends AppCompatActivity {
         btnCopy.setOnClickListener(v -> showCopyPasteDialog());
         btnPreferences.setOnClickListener(v -> showPreferencesDialog());
         btnSaveLesson.setOnClickListener(v -> saveLesson());
+        ((TextInputEditText) findViewById(R.id.searchBar).findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (tempLesson == null || tempLesson.getFlashcards() == null) {
+                    return;
+                }
+                String str = s.toString().trim();
+                List<Flashcard> cards = new ArrayList<>();
+                for (Flashcard card : tempLesson.getFlashcards()) {
+                    if (card.toString().toUpperCase().contains(str.toUpperCase())) {
+                        cards.add(card);
+                    }
+                }
+                adapter.setFlashcards(cards);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+        });
     }
 
     private void showAddOptions() {
