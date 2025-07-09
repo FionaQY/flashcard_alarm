@@ -50,5 +50,5 @@ dependencies {
     implementation libs.recyclerview.selection
     implementation libs.room.runtime
     implementation libs.room.ktx
-
+    implementation(libs.commons.lang3)
 }

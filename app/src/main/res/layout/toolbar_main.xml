@@ -7,8 +7,6 @@
     android:layout_height="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
     android:minHeight="?attr/actionBarSize"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp"
     app:contentInsetStartWithNavigation="16dp"
     app:navigationContentDescription="@string/action_back"
     app:navigationIcon="@drawable/outline_arrow_back_24"

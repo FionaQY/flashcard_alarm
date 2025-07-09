@@ -88,7 +88,8 @@
         <activity
             android:name=".activities.MemorisationActivity"
             android:exported="false"
-            android:parentActivityName=".activities.AlarmRingingActivity">
+            android:parentActivityName=".activities.AlarmRingingActivity"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.AlarmRingingActivity" />

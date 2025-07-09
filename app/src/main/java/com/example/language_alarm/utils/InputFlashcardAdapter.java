@@ -20,16 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAdapter.InputFlashcardViewHolder> {
-    private final List<TextInputEditText> inputFields = new ArrayList<>();
-    private final SparseArray<LinearLayout> containers;
+    private final SparseArray<TextInputEditText> inputFields;
     private final SparseArray<TextView> answerViews;
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private List<String> headers = new ArrayList<>();
     private List<String> ans = new ArrayList<>();
 
     public InputFlashcardAdapter() {
-        containers = new SparseArray<>();
         answerViews = new SparseArray<>();
+        inputFields = new SparseArray<>();
     }
 
     public void setLesson(Lesson lesson) { // one time per lessons
@@ -64,8 +63,8 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
 
     public List<String> getUserAnswers() {
         List<String> answers = new ArrayList<>();
-        for (TextInputEditText input : inputFields) {
-            Editable txt = input.getText();
+        for (int i = 0; i < inputFields.size(); i++) {
+            Editable txt = inputFields.get(i).getText();
             answers.add(txt == null ? "" : txt.toString());
         }
         return answers;
@@ -103,6 +102,9 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     @Override
     public void onBindViewHolder(@NonNull InputFlashcardViewHolder holder, int position) {
         String valueName = this.headers.get(position);
+        if (position >= this.ans.size()) {
+            return;
+        }
         String valueAns = this.ans.get(position);
         holder.valueName.setText(String.format("%s: ", valueName));
         holder.displayAnswer.setText(String.format("Answer: %s", valueAns));
@@ -113,9 +115,8 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
             holder.inputValue.setText("");
             holder.inputValue.setEnabled(true);
         }
-        this.inputFields.add(holder.inputValue);
+        this.inputFields.put(position, holder.inputValue);
         this.answerViews.put(position, holder.displayAnswer);
-        this.containers.put(position, holder.inputContainer);
 
         boolean isNoShow = noInputExpected(valueName, valueAns);
         holder.inputContainer.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
