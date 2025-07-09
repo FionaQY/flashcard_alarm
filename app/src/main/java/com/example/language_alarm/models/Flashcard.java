@@ -30,6 +30,7 @@ public class Flashcard implements Parcelable {
 
     protected Flashcard(Parcel in) {
         values = in.createStringArrayList();
+        isImportant = in.readByte() != 0;
     }
 
     public void markImportance(boolean isImportant) {
@@ -48,6 +49,36 @@ public class Flashcard implements Parcelable {
         this.values = values;
     }
 
+    public boolean isCorrect(List<String> userInput, boolean isPunctSensitive, boolean isCaseSensitive) {
+        if (userInput == null || userInput.size() < this.values.size()) {
+            return false;
+        }
+        for (int i = 0; i < this.values.size(); i++) {
+            String corrAns = this.values.get(i);
+            if (corrAns == null || corrAns.trim().isEmpty()) {
+                continue;
+            }
+            String userAns = userInput.get(i);
+            if (userAns == null || userAns.trim().isEmpty()) {
+                return false;
+            }
+            corrAns = corrAns.replaceAll("\\s","");
+            userAns = userAns.replaceAll("\\s","");
+            if (!isPunctSensitive) {
+                corrAns = corrAns.replaceAll("\\p{Punct}", "");
+                userAns = userAns.replaceAll("\\p{Punct}", "");
+            }
+            if (!isCaseSensitive) {
+                corrAns = corrAns.toLowerCase();
+                userAns = userAns.toLowerCase();
+            }
+            if (!corrAns.equals(userAns)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -56,5 +87,6 @@ public class Flashcard implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStringList(values);
+        dest.writeByte((byte) (isImportant ? 1 : 0));
     }
 }

@@ -41,4 +41,6 @@
     <string name="pick_qns_num">Pick number of questions</string>
     <string name="proceed_to_learn">Proceed to learn</string>
     <string name="snooze">Snooze</string>
+    <string name="practice_lesson">Practice lesson</string>
+    <string name="go_to_lessons">Go to lessons</string>
 </resources>

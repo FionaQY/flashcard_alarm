@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
-        android:contentDescription="@string/add_alarm"
+        android:contentDescription="@string/go_to_lessons"
         android:elevation="6dp"
         android:onClick="onToggleNewAlarm"
         android:src="@drawable/baseline_add_alarm_24"

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,7 +62,6 @@ public class NewLessonActivity extends AppCompatActivity {
     private FlashcardViewModel flashcardViewModel = null;
     private ActivityResultHelper csvPickerHelper = null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +69,6 @@ public class NewLessonActivity extends AppCompatActivity {
 
         setupViews();
         setupToolbar();
-
 
         csvPickerHelper = new ActivityResultHelper(this, this::showCsvImportProgress);
 
@@ -87,10 +86,16 @@ public class NewLessonActivity extends AppCompatActivity {
         } else {
             // populate stuff at the end or risk null pointer
             populateLessonData(tempLesson);
-            FloatingActionButton deleteButt = findViewById(R.id.deleteButton);
-            deleteButt.setVisibility(View.VISIBLE);
-            deleteButt.setOnClickListener(v -> {
+            findViewById(R.id.deleteButton).setVisibility(View.VISIBLE);
+            findViewById(R.id.deleteButton).setOnClickListener(v -> {
                 LessonHandler.deleteAlarm(this, tempLesson);
+                finishAfterTransition();
+            });
+            findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);
+            findViewById(R.id.practiceButton).setOnClickListener(v -> {
+                Intent intent = new Intent(this, MemorisationActivity.class);
+                intent.putExtra("lessonId", tempLesson.getId());
+                startActivity(intent);
                 finishAfterTransition();
             });
         }
