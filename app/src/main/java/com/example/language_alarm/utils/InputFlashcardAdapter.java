@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAdapter.InputFlashcardViewHolder> {
-    private List<String> headers;
     private final List<TextInputEditText> inputFields = new ArrayList<>();
     private final List<TextView> answerViews = new ArrayList<>();
+    private List<String> headers;
     private List<String> ans;
 
     public InputFlashcardAdapter(List<String> headers, List<String> ans) {
@@ -50,7 +50,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
 
     public List<String> getUserAnswers() {
         List<String> answers = new ArrayList<>();
-        for (TextInputEditText input: inputFields) {
+        for (TextInputEditText input : inputFields) {
             Editable txt = input.getText();
             answers.add(txt == null ? "" : txt.toString());
         }

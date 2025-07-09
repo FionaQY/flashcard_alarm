@@ -62,8 +62,8 @@ public class Flashcard implements Parcelable {
             if (userAns == null || userAns.trim().isEmpty()) {
                 return false;
             }
-            corrAns = corrAns.replaceAll("\\s","");
-            userAns = userAns.replaceAll("\\s","");
+            corrAns = corrAns.replaceAll("\\s", "");
+            userAns = userAns.replaceAll("\\s", "");
             if (!isPunctSensitive) {
                 corrAns = corrAns.replaceAll("\\p{Punct}", "");
                 userAns = userAns.replaceAll("\\p{Punct}", "");

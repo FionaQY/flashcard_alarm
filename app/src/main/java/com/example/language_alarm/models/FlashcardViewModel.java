@@ -7,9 +7,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.language_alarm.database.LessonDao;
-import com.example.language_alarm.database.LessonDatabase;
-
 import java.util.List;
 
 public class FlashcardViewModel extends AndroidViewModel {

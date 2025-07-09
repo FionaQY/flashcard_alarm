@@ -31,6 +31,22 @@ public class MemorisationActivity extends AppCompatActivity {
     private Queue<Integer> cardIndexes = new LinkedList<>();
     private boolean secondClick = false;
 
+    private static Queue<Integer> generateUniqueRandomNumbers(int count, int max) {
+        if (count > (max + 1)) {
+            Log.w(TAG, "Cannot generate more unique numbers than the available range.");
+            count = max;
+        }
+
+        HashSet<Integer> uniqueNumbers = new HashSet<>();
+        Random random = new Random();
+
+        while (uniqueNumbers.size() < count) {
+            Integer randomNumber = random.nextInt(max + 1);
+            uniqueNumbers.add(randomNumber);
+        }
+        return new LinkedList<>(uniqueNumbers);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,22 +133,6 @@ public class MemorisationActivity extends AppCompatActivity {
             this.cardIndexes.add(currFlashcardIndex);
         }
         secondClick = true;
-    }
-
-    private static Queue<Integer> generateUniqueRandomNumbers(int count, int max) {
-        if (count > (max + 1)) {
-            Log.w(TAG, "Cannot generate more unique numbers than the available range.");
-            count = max;
-        }
-
-        HashSet<Integer> uniqueNumbers = new HashSet<>();
-        Random random = new Random();
-
-        while (uniqueNumbers.size() < count) {
-            Integer randomNumber = random.nextInt(max + 1);
-            uniqueNumbers.add(randomNumber);
-        }
-        return new LinkedList<>(uniqueNumbers);
     }
 
 }
