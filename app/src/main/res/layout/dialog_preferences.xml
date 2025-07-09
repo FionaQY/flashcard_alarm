@@ -118,7 +118,9 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_weight="1"
-            android:text="@string/cancel" />
+            android:text="@string/cancel"
+            app:icon="@drawable/ic_cancel"
+            app:iconGravity="textStart" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSavePrefs"
@@ -127,7 +129,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_weight="1"
-            android:text="@string/save" />
+            android:text="@string/save"
+            app:icon="@drawable/ic_save"
+            app:iconGravity="textStart" />
     </LinearLayout>
 
 </LinearLayout>

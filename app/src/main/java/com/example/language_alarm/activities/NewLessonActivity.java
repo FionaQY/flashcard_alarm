@@ -90,7 +90,7 @@ public class NewLessonActivity extends AppCompatActivity {
             populateLessonData(tempLesson);
             findViewById(R.id.deleteButton).setVisibility(View.VISIBLE);
             findViewById(R.id.deleteButton).setOnClickListener(v -> {
-                LessonHandler.deleteAlarm(this, tempLesson);
+                LessonHandler.deleteLesson(this, tempLesson);
                 finishAfterTransition();
             });
             findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);

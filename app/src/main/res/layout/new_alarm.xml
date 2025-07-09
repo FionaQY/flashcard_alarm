@@ -60,7 +60,7 @@
         android:textSize="16sp"
         app:backgroundTint="?attr/colorPrimary"
         app:cornerRadius="8dp"
-        app:icon="@drawable/outline_alarm_24"
+        app:icon="@drawable/ic_ringtone"
         app:iconGravity="textStart"
         app:iconPadding="8dp"
         app:iconTint="@android:color/white"

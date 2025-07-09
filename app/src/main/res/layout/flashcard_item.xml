@@ -44,7 +44,7 @@
                 android:minWidth="36dp"
                 android:minHeight="36dp"
                 android:padding="5dp"
-                app:icon="@drawable/outline_alarm_24"
+                app:icon="@drawable/ic_star"
                 app:iconSize="24dp"
                 app:iconTint="@color/colorPrimary" />
 

@@ -43,7 +43,7 @@ public class LessonHandler {
         });
     }
 
-    public static void deleteAlarm(Context ctx, Lesson lesson) {
+    public static void deleteLesson(Context ctx, Lesson lesson) {
         Context appContext = ctx.getApplicationContext();
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
@@ -59,6 +59,15 @@ public class LessonHandler {
                 Log.e(TAG, "Error deleting lesson", e);
             }
         });
+    }
+
+    public static void deleteFlashcard(Context ctx, Lesson lesson, int index) {
+        if (lesson == null || lesson.getFlashcards() == null || index >= lesson.getFlashcards().size() || index < 0) {
+            Log.w(TAG, String.format("Unable to delete flashcard of index %d for lesson %s", index, lesson == null ? null : lesson.getLessonName()));
+            return;
+        }
+        lesson.getFlashcards().remove(index);
+        saveLesson(ctx, lesson);
     }
 
 }

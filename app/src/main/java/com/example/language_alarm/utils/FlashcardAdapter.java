@@ -134,8 +134,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         });
 
 //        holder.deleteButton.setOnClickListener(view -> {
-//            intent.putExtra("flashcard", flashcard);
-//            ctx.startActivity(intent);
+//            LessonHandler.deleteFlashcard(this.ctx, )
 //        });
     }
 

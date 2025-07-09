@@ -50,7 +50,9 @@
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="@string/cancel"
+            android:text="@string/edit"
+            app:icon="@drawable/baseline_edit_24"
+            app:iconGravity="textStart"
             app:strokeColor="@color/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
@@ -59,8 +61,8 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="@string/save"
-            app:icon="@drawable/ic_save"
+            android:text="@string/next"
+            app:icon="@drawable/ic_next"
             app:iconGravity="textStart" />
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
