@@ -14,6 +14,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.FlashcardViewModel;
 import com.example.language_alarm.models.Lesson;
 import com.example.language_alarm.utils.FlashcardAdapter;
+import com.example.language_alarm.utils.InputFlashcardAdapter;
 import com.example.language_alarm.utils.LessonHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
@@ -49,9 +51,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewLessonActivity extends AppCompatActivity {
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
     Runnable headersUpdateRunnable;
     private MaterialButton btnAddFlashcards;
@@ -75,7 +79,8 @@ public class NewLessonActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.flashcard_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new FlashcardAdapter(this, new ArrayList<>(), new ArrayList<>());
+        adapter = new FlashcardAdapter(new ArrayList<>(), new ArrayList<>(),
+                this::showEditFlashcardDialog);
         recyclerView.setAdapter(adapter);
 
         flashcardViewModel = new ViewModelProvider(this).get(FlashcardViewModel.class);
@@ -191,7 +196,7 @@ public class NewLessonActivity extends AppCompatActivity {
                 .create();
         progressDialog.show();
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executor.execute(() -> {
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -239,7 +244,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void copyFromGoogleSheet(String pastedText) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executor.execute(() -> {
             try {
                 String[] linesArray = pastedText.split("\\R");
                 List<Flashcard> importedCards = new ArrayList<>();
@@ -247,7 +252,7 @@ public class NewLessonActivity extends AppCompatActivity {
                     String line = linesArray[lineNum].trim();
                     if (line.isEmpty()) continue;
 
-                    List<String> values = parseCsvLine(line);
+                    List<String> values = parseExcelLine(line);
                     if (lineNum == 0) {
                         if (currentHeaders == null || currentHeaders.isEmpty()) {
                             currentHeaders = values;
@@ -290,8 +295,7 @@ public class NewLessonActivity extends AppCompatActivity {
         }
         tempLesson.setHeaders(currentHeaders);
         tempLesson.addFlashcards(cards);
-        flashcardViewModel.setFlashcards(tempLesson.getFlashcards(), currentHeaders);
-
+        flashcardViewModel.setBothValues(new ArrayList<>(tempLesson.getFlashcards()), new ArrayList<>(tempLesson.getHeaders()));
         new AlertDialog.Builder(this)
                 .setTitle("Import Successful")
                 .setMessage(String.format(Locale.US,
@@ -302,8 +306,26 @@ public class NewLessonActivity extends AppCompatActivity {
                 .show();
     }
 
+    private List<String> parseExcelLine(String line) {
+        List<String> values = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < line.length(); i++) {
+            char ch = line.charAt(i);
+            if (ch == '\t') {
+                values.add(sb.toString().trim());
+                sb.setLength(0);
+            } else {
+                sb.append(ch);
+            }
+        }
+
+        values.add(sb.toString().trim());
+        return values;
+    }
+
+
     private List<String> parseCsvLine(String line) {
-        boolean isTabDelimited = line.contains("\t");
         List<String> values = new ArrayList<>();
         boolean inQuotes = false;
         StringBuilder sb = new StringBuilder();
@@ -312,7 +334,7 @@ public class NewLessonActivity extends AppCompatActivity {
             char ch = line.charAt(i);
             if (ch == '"') {
                 inQuotes = !inQuotes;
-            } else if ((ch == ',' || (isTabDelimited && ch == '\t')) && !inQuotes) {
+            } else if (ch == ',' && !inQuotes) {
                 values.add(sb.toString().trim());
                 sb.setLength(0);
             } else {
@@ -454,6 +476,7 @@ public class NewLessonActivity extends AppCompatActivity {
             }
         }
         tempLesson.setForeignIndexes(foreignIndices);
+        flashcardViewModel.setHeaders(tempLesson.getHeaders());
     }
 
     private void setupHeaderMapping(RecyclerView englishRecycler, RecyclerView germanRecycler) {
@@ -542,8 +565,38 @@ public class NewLessonActivity extends AppCompatActivity {
         this.foreignIndexes = new ArrayList<>(lesson.getForeignIndexes());
 
         if (lesson.getFlashcards() != null) {
-            flashcardViewModel.setFlashcards(lesson.getFlashcards(), lesson.getHeaders());
+            flashcardViewModel.setBothValues(lesson.getFlashcards(), lesson.getHeaders());
         }
+    }
+
+    private void showEditFlashcardDialog(Flashcard flashcard, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
+        builder.setView(dialogView);
+
+        RecyclerView recyclerView = dialogView.findViewById(R.id.values_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true);
+        recyclerView.setAdapter(inputAdapter);
+        inputAdapter.setLesson(this.tempLesson);
+        inputAdapter.setValues(flashcard);
+
+        MaterialButton btnCancel = dialogView.findViewById(R.id.cancelButton);
+        MaterialButton btnSave = dialogView.findViewById(R.id.saveButton);
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(d -> Objects.requireNonNull(dialog.getWindow()).clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
+
+        dialog.show();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            List<String> newVals = inputAdapter.getUserAnswers();
+            flashcard.setVals(newVals);
+            tempLesson.getFlashcards().set(position, flashcard);
+            flashcardViewModel.setFlashcards(new ArrayList<>(tempLesson.getFlashcards()));
+            dialog.dismiss();
+        });
     }
 
     public void showExitDialog() {

@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 public class AlarmHandler {
     private static final String TAG = "AlarmHandler";
     private static final String RINGTONE_STR = "ringtone";
-    private static final ExecutorService alarmExecutor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private static AlarmDao getAlarmDao(Context ctx) {
         return AlarmDatabase.getDatabase(ctx).alarmDao();
@@ -32,7 +32,7 @@ public class AlarmHandler {
 
     public static void saveAlarm(Context ctx, Alarm alarm) {
         Context appContext = ctx.getApplicationContext();
-        alarmExecutor.execute(() -> {
+        executor.execute(() -> {
             try {
                 if (alarm == null) {
                     Log.w(TAG, "Attempted to save null alarm");
@@ -199,7 +199,7 @@ public class AlarmHandler {
         Context appContext = ctx.getApplicationContext();
         List<Alarm> alarmList = getAlarmDao(appContext).getAllAlarms().getValue();
         if (alarmList == null) return;
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executor.execute(() -> {
             try {
                 for (Alarm alarm : alarmList) {
                     rescheduleAlarm(appContext, alarm);
@@ -214,7 +214,7 @@ public class AlarmHandler {
 
     public static void deleteAlarm(Context ctx, Alarm alarm) {
         Context appContext = ctx.getApplicationContext();
-        alarmExecutor.execute(() -> {
+        executor.execute(() -> {
             try {
                 if (alarm.getId() == 0) {
                     Log.w(TAG, "Attempted to delete null alarm");

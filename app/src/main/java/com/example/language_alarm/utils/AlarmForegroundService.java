@@ -88,7 +88,7 @@ public class AlarmForegroundService extends Service {
         if (ringtone != null && ringtone.isPlaying()) {
             ringtone.stop();
         }
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
         }
         if (vibrator != null) {
@@ -161,7 +161,6 @@ public class AlarmForegroundService extends Service {
         Uri alarmUri = getValidAlarmUri(alarm.getRingtone());
 
         try {
-            // Modern approach with AudioAttributes
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -176,6 +175,7 @@ public class AlarmForegroundService extends Service {
                 mediaPlayer.setDataSource(this, alarmUri);
                 mediaPlayer.setAudioAttributes(audioAttributes);
                 mediaPlayer.setLooping(true);
+                // TODO: make volume variable
                 mediaPlayer.setVolume(1.0f, 1.0f);
                 mediaPlayer.setOnPreparedListener(MediaPlayer::start);
                 mediaPlayer.prepareAsync();
@@ -187,12 +187,9 @@ public class AlarmForegroundService extends Service {
             if (ringtone != null) {
                 ringtone.setAudioAttributes(audioAttributes);
                 ringtone.play();
-            } else {
-                playDefaultRingtone();
             }
         } catch (Exception e) {
             Log.e(TAG, "Error playing ringtone", e);
-            playDefaultRingtone();
         }
     }
 
@@ -205,40 +202,6 @@ public class AlarmForegroundService extends Service {
             }
         }
         return getDefaultAlarmUri();
-    }
-
-    private void playDefaultRingtone() {
-
-        Uri defaultUri = getDefaultAlarmUri();
-
-        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build();
-
-        try {
-
-            ringtone = RingtoneManager.getRingtone(this, defaultUri);
-            try {
-                mediaPlayer = new MediaPlayer();
-                mediaPlayer.setDataSource(this, defaultUri);
-                mediaPlayer.setAudioAttributes(audioAttributes);
-                mediaPlayer.setLooping(true);
-                mediaPlayer.setVolume(1.0f, 1.0f);
-                mediaPlayer.setOnPreparedListener(MediaPlayer::start);
-                mediaPlayer.prepareAsync();
-                return;
-            } catch (IOException e) {
-                Log.e(TAG, "MediaPlayer failed for default ringtone", e);
-            }
-            ringtone = RingtoneManager.getRingtone(this, defaultUri);
-            if (ringtone != null) {
-                ringtone.setAudioAttributes(audioAttributes);
-                ringtone.play();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error playing default ringtone", e);
-        }
     }
 
     private Uri getDefaultAlarmUri() {

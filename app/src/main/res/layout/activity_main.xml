@@ -24,7 +24,6 @@
         android:layout_margin="20dp"
         android:contentDescription="@string/go_to_lessons"
         android:elevation="6dp"
-        android:onClick="onToggleNewAlarm"
         android:src="@drawable/baseline_add_alarm_24"
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white" />
@@ -37,7 +36,6 @@
         android:layout_margin="20dp"
         android:contentDescription="@string/add_alarm"
         android:elevation="6dp"
-        android:onClick="onToggleLessons"
         android:src="@drawable/ic_lesson"
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white" />

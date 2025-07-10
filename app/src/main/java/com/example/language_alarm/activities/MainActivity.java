@@ -2,7 +2,6 @@ package com.example.language_alarm.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -18,6 +17,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     private AlarmAdapter adapter = null;
 
+    // TODO: light and dark mode
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,14 +30,17 @@ public class MainActivity extends AppCompatActivity {
 
         AlarmViewModel alarmViewModel = new ViewModelProvider(this).get(AlarmViewModel.class);
         alarmViewModel.getAllAlarms().observe(this, alarms -> adapter.setAlarms(alarms));
+
+        findViewById(R.id.addAlarmFab).setOnClickListener(v -> onToggleNewAlarm());
+        findViewById(R.id.addLessonFab).setOnClickListener(v -> onToggleLessons());
     }
 
-    public void onToggleNewAlarm(View view) {
+    public void onToggleNewAlarm() {
         Intent intent = new Intent(this, NewAlarmActivity.class);
         startActivity(intent);
     }
 
-    public void onToggleLessons(View view) {
+    public void onToggleLessons() {
         Intent intent = new Intent(this, LessonsActivity.class);
         startActivity(intent);
     }

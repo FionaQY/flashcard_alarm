@@ -25,10 +25,17 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private List<String> headers = new ArrayList<>();
     private List<String> ans = new ArrayList<>();
+    private boolean isNotMemo = false;
 
     public InputFlashcardAdapter() {
-        answerViews = new SparseArray<>();
-        inputFields = new SparseArray<>();
+        this.answerViews = new SparseArray<>();
+        this.inputFields = new SparseArray<>();
+    }
+
+    public InputFlashcardAdapter(boolean isNotMemo) {
+        this.isNotMemo = isNotMemo;
+        this.answerViews = new SparseArray<>();
+        this.inputFields = new SparseArray<>();
     }
 
     public void setLesson(Lesson lesson) { // one time per lessons
@@ -47,7 +54,6 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         } else {
             this.foreignIndexes = lesson.getForeignIndexes();
         }
-
         notifyDataSetChanged();
     }
 
@@ -107,20 +113,32 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         }
         String valueAns = this.ans.get(position);
         holder.valueName.setText(String.format("%s: ", valueName));
-        holder.displayAnswer.setText(String.format("Answer: %s", valueAns));
-        if (!this.foreignIndexes.get(position)) {
-            holder.inputValue.setText(valueAns);
-            holder.inputValue.setEnabled(false);
-        } else {
-            holder.inputValue.setText("");
-            holder.inputValue.setEnabled(true);
-        }
-        this.inputFields.put(position, holder.inputValue);
-        this.answerViews.put(position, holder.displayAnswer);
 
-        boolean isNoShow = noInputExpected(valueName, valueAns);
-        holder.inputContainer.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
-        holder.displayAnswer.setVisibility(View.GONE);
+        TextView ansView = holder.displayAnswer;
+        TextInputEditText input = holder.inputValue;
+
+        ansView.setText(String.format("Answer: %s", valueAns));
+        ansView.setVisibility(View.GONE);
+
+        this.inputFields.put(position, input);
+        this.answerViews.put(position, ansView);
+
+        if (isNotMemo) {
+            input.setText(valueAns);
+            input.setEnabled(true);
+        } else {
+            if (!this.foreignIndexes.get(position)) {
+                input.setText(valueAns);
+                input.setEnabled(false);
+            } else {
+                input.setText("");
+                input.setEnabled(true);
+            }
+
+            boolean isNoShow = noInputExpected(valueName, valueAns);
+            holder.inputContainer.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
+        }
+
     }
 
     @Override

@@ -44,9 +44,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewAlarmActivity extends AppCompatActivity {
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     private MaterialToolbar header;
     private TimePicker alarmTimePicker;
     private AlarmManager alarmManager;
@@ -253,7 +255,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     private void saveAlarm(Alarm newAlarm) {
         if (newAlarm == null) return;
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executor.execute(() -> {
             try {
                 runOnUiThread(() -> {
                     AlarmHandler.saveAlarm(this, newAlarm);

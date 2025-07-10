@@ -20,16 +20,24 @@ public class FlashcardViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Flashcard>> getFlashcards() {
-        return flashcards;
+        return this.flashcards;
+    }
+
+    public void setFlashcards(List<Flashcard> flashcards) {
+        this.flashcards.setValue(flashcards);
     }
 
     public LiveData<List<String>> getHeaders() {
-        return headers;
+        return this.headers;
     }
 
-    public void setFlashcards(List<Flashcard> flashcards, List<String> headers) {
-        this.flashcards.setValue(flashcards);
+    public void setHeaders(List<String> headers) {
         this.headers.setValue(headers);
+    }
+
+    public void setBothValues(List<Flashcard> flashcards, List<String> headers) {
+        this.setFlashcards(flashcards);
+        this.setHeaders(headers);
     }
 
 }

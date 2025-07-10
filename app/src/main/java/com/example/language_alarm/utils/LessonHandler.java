@@ -7,11 +7,13 @@ import com.example.language_alarm.database.LessonDao;
 import com.example.language_alarm.database.LessonDatabase;
 import com.example.language_alarm.models.Lesson;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
 public class LessonHandler {
     private static final String TAG = "LessonHandler";
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private static LessonDao getLessonDao(Context ctx) {
         return LessonDatabase.getDatabase(ctx).lessonDao();
@@ -19,7 +21,7 @@ public class LessonHandler {
 
     public static void saveLesson(Context ctx, Lesson lesson) {
         Context appContext = ctx.getApplicationContext();
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executor.execute(() -> {
             try {
                 if (lesson == null) {
                     Log.w(TAG, "Attempted to save null lesson");
@@ -45,13 +47,12 @@ public class LessonHandler {
 
     public static void deleteLesson(Context ctx, Lesson lesson) {
         Context appContext = ctx.getApplicationContext();
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executor.execute(() -> {
             try {
                 if (lesson.getId() == 0) {
                     Log.w(TAG, "Attempted to delete null lesson");
                     return;
                 }
-//                cancelAlarm(appContext, lesson);
                 // set lessonID of all alarms with this lessonId to null?
                 getLessonDao(appContext).delete(lesson);
                 Log.i(TAG, String.format("Successfully deleted lesson ID:%d", lesson.getId()));
@@ -59,15 +60,6 @@ public class LessonHandler {
                 Log.e(TAG, "Error deleting lesson", e);
             }
         });
-    }
-
-    public static void deleteFlashcard(Context ctx, Lesson lesson, int index) {
-        if (lesson == null || lesson.getFlashcards() == null || index >= lesson.getFlashcards().size() || index < 0) {
-            Log.w(TAG, String.format("Unable to delete flashcard of index %d for lesson %s", index, lesson == null ? null : lesson.getLessonName()));
-            return;
-        }
-        lesson.getFlashcards().remove(index);
-        saveLesson(ctx, lesson);
     }
 
 }
