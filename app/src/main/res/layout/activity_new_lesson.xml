@@ -7,7 +7,6 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.NewLessonActivity">
 
-    <!--    TODO: star to indicate which flashcards are important-->
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar_main"
@@ -63,7 +62,6 @@
             app:iconTint="?attr/colorPrimary"
             app:strokeColor="?attr/colorPrimary"
             app:strokeWidth="1dp" />
-
 
         <LinearLayout
             android:id="@+id/optionsContainer"
@@ -170,7 +168,6 @@
         app:iconGravity="textStart"
         app:iconTint="@android:color/white" />
 
-    <!-- Practice FAB (anchored above Save Button) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/practiceButton"
         android:layout_width="wrap_content"

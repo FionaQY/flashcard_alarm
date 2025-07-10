@@ -1,6 +1,7 @@
 package com.example.language_alarm.utils;
 
 import android.text.Editable;
+import android.text.SpannableString;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import com.example.language_alarm.models.Lesson;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAdapter.InputFlashcardViewHolder> {
@@ -76,7 +78,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         return answers;
     }
 
-    public void showAnswers() {
+    public void showAnswers(HashMap<Integer, SpannableString> strs) {
         for (int i = 0; i < this.headers.size(); i++) {
             String valueName = this.headers.get(i);
             String valueAns = this.ans.get(i);
@@ -87,6 +89,10 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
 
             boolean isNoShow = noInputExpected(valueName, valueAns);
             ansView.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
+
+            if (strs.containsKey(i)) {
+                ansView.setText(strs.get(i));
+            }
         }
     }
 

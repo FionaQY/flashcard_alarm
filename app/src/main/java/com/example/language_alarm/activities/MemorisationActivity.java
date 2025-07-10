@@ -1,9 +1,14 @@
 package com.example.language_alarm.activities;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -57,6 +63,17 @@ public class MemorisationActivity extends AppCompatActivity {
         }
 
         return que;
+    }
+
+    @NonNull
+    private static SpannableString getSpannableString(NormalizedResult corrNorm, int diffIndex, String corrAns) {
+        int originalStart = corrNorm.originalIndices.get(diffIndex);
+        int originalEnd = corrAns.length();
+
+        SpannableString spannableString = new SpannableString(corrAns);
+        BackgroundColorSpan highlightSpan = new BackgroundColorSpan(Color.RED);
+        spannableString.setSpan(highlightSpan, originalStart, originalEnd, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        return spannableString;
     }
 
     @Override
@@ -97,7 +114,6 @@ public class MemorisationActivity extends AppCompatActivity {
             if (cardIndexes.isEmpty()) {
                 Log.w(TAG, "Card indexes generate is empty");
                 Log.w(TAG, String.format("No flashcards can be retrieved for lesson with id %d", lessonId));
-                System.out.println(lesson.getFlashcards());
                 handleFinishQuiz();
                 return;
             }
@@ -141,25 +157,26 @@ public class MemorisationActivity extends AppCompatActivity {
             handleFinishQuiz();
             return;
         }
-        // TODO: return arraylist of index. set each one in index to red
-        boolean isCorrect = this.isCorrect(userInput);
-        if (isCorrect) {
+        HashMap<Integer, SpannableString> stringy = this.isCorrect(userInput);
+        if (stringy.isEmpty()) {
             Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show();
         } else {
-            adapter.showAnswers();
+            adapter.showAnswers(stringy);
             this.cardIndexes.add(currFlashcardIndex);
+            Toast.makeText(this, ":(", Toast.LENGTH_SHORT).show();
         }
 
         secondClick = true;
     }
 
-    private boolean isCorrect(List<String> userInput) {
+    private HashMap<Integer, SpannableString> isCorrect(List<String> userInput) {
+        HashMap<Integer, SpannableString> outp = new HashMap<>();
         if (lesson == null || lesson.getFlashcards() == null || this.currFlashcardIndex >= lesson.getFlashcards().size()) {
-            return false;
+            return outp;
         }
         List<String> values = lesson.getFlashcards().get(currFlashcardIndex).getVals();
         if (userInput == null || lesson.getFlashcards() == null || userInput.size() != values.size()) {
-            return false;
+            return outp;
         }
         for (int i = 0; i < values.size(); i++) {
             if (!lesson.getForeignIndexes().get(i)) {
@@ -172,30 +189,52 @@ public class MemorisationActivity extends AppCompatActivity {
             String userAns = userInput.get(i);
             if (userAns == null || userAns.trim().isEmpty()) {
                 Log.i(TAG, String.format("Answer is incorrect as user input is empty for header %s", lesson.getHeaders().get(i)));
-                return false;
+                userAns = "";
             }
-            corrAns = corrAns.replaceAll("\\s", "");
-            userAns = userAns.replaceAll("\\s", "");
-            if (!lesson.isPunctSensitive()) {
-                corrAns = corrAns.replaceAll("\\p{Punct}", "");
-                userAns = userAns.replaceAll("\\p{Punct}", "");
-            }
-            if (!lesson.isCaseSensitive()) {
-                corrAns = corrAns.toLowerCase();
-                userAns = userAns.toLowerCase();
-            }
-            if (!corrAns.trim().equals(userAns.trim())) {
-                Log.i(TAG, String.format("Answer is incorrect as user input is empty for header %s", lesson.getHeaders().get(i)));
-                System.out.printf("Difference between input \"%s\" & answer \"%s\" - \"%s\"", userAns, corrAns, StringUtils.difference(userAns, corrAns));
-                return false;
+            NormalizedResult corrNorm = normalize(corrAns);
+            NormalizedResult userNorm = normalize(userAns);
+
+            if (!corrNorm.normalized.equals(userNorm.normalized)) {
+                int diffIndex = StringUtils.indexOfDifference(userNorm.normalized, corrNorm.normalized);
+
+                if (diffIndex >= 0 && diffIndex < corrNorm.originalIndices.size()) {
+                    SpannableString spannableString = getSpannableString(corrNorm, diffIndex, corrAns);
+                    outp.put(i, spannableString);
+                }
             }
         }
-        return true;
+        return outp;
     }
 
+    private NormalizedResult normalize(String input) {
+        NormalizedResult res = new NormalizedResult();
+        res.normalized = "";
+        StringBuilder sb = new StringBuilder();
+        res.originalIndices = new ArrayList<>();
+
+        if (input == null) return res;
+        for (int i = 0; i < input.length(); i++) {
+            char ch = input.charAt(i);
+            boolean isPunct = !lesson.isPunctSensitive() && Character.toString(ch).matches("\\p{Punct}");
+            boolean isWhitespace = Character.isWhitespace(ch);
+            if (isWhitespace || isPunct) continue;
+
+            char normalizedChar = lesson.isCaseSensitive() ? ch : Character.toLowerCase(ch);
+            sb.append(normalizedChar);
+            res.originalIndices.add(i);
+        }
+        res.normalized = sb.toString();
+        return res;
+    }
 
     private void handleFinishQuiz() {
         finishAfterTransition();
     }
+
+    private static class NormalizedResult {
+        String normalized;
+        List<Integer> originalIndices;
+    }
+
 
 }

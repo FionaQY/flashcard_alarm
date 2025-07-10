@@ -53,7 +53,6 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    System.out.println(flashcards.get(oldItemPosition).equals(newFlashcards.get(newItemPosition)));
                     return flashcards.get(oldItemPosition).equals(newFlashcards.get(newItemPosition));
                 }
             };

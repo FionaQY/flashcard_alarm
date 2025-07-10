@@ -26,12 +26,14 @@
         android:id="@+id/switchCapitalization"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:checked="false"
         android:text="@string/care_about_capitalisation" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switchPunctuation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:checked="false"
         android:text="@string/care_about_punctuation" />
 
     <com.google.android.material.textfield.TextInputLayout
