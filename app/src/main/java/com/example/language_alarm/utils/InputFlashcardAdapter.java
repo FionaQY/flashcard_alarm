@@ -61,10 +61,11 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
 
     public void setValues(Flashcard flash) {
         this.inputFields.clear();
+        this.answerViews.clear();
         if (flash == null || flash.getVals() == null) {
             this.ans = new ArrayList<>();
         } else {
-            this.ans = flash.getVals();
+            this.ans = new ArrayList<>(flash.getVals());
         }
         notifyDataSetChanged();
     }
@@ -78,10 +79,10 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         return answers;
     }
 
-    public void showAnswers(HashMap<Integer, SpannableString> strs) {
+    public void showAnswers(HashMap<Integer, SpannableString> strings) {
         for (int i = 0; i < this.headers.size(); i++) {
             String valueName = this.headers.get(i);
-            String valueAns = this.ans.get(i);
+            String valueAns = i < this.ans.size() ? this.ans.get(i) : "";
             TextView ansView = this.answerViews.get(i);
             if (ansView == null) {
                 continue;
@@ -90,8 +91,8 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
             boolean isNoShow = noInputExpected(valueName, valueAns);
             ansView.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
 
-            if (strs.containsKey(i)) {
-                ansView.setText(strs.get(i));
+            if (strings.containsKey(i)) {
+                ansView.setText(strings.get(i));
             }
         }
     }

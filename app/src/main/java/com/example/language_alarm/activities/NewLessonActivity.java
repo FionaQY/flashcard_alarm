@@ -173,6 +173,9 @@ public class NewLessonActivity extends AppCompatActivity {
 
     private void startManualFlashcardCreation() {
         // TODO: create manual input method
+        Flashcard newFlashcard = new Flashcard(new ArrayList<>(this.tempLesson.getHeaders().size()));
+        this.tempLesson.getFlashcards().add(newFlashcard);
+        showEditFlashcardDialog(newFlashcard, this.tempLesson.getFlashcards().size() - 1);
         Toast.makeText(this, "Manual flashcard creation", Toast.LENGTH_SHORT).show();
     }
 

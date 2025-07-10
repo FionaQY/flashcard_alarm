@@ -165,18 +165,17 @@ public class MemorisationActivity extends AppCompatActivity {
             this.cardIndexes.add(currFlashcardIndex);
             Toast.makeText(this, ":(", Toast.LENGTH_SHORT).show();
         }
-
         secondClick = true;
     }
 
     private HashMap<Integer, SpannableString> isCorrect(List<String> userInput) {
-        HashMap<Integer, SpannableString> outp = new HashMap<>();
+        HashMap<Integer, SpannableString> output = new HashMap<>();
         if (lesson == null || lesson.getFlashcards() == null || this.currFlashcardIndex >= lesson.getFlashcards().size()) {
-            return outp;
+            return output;
         }
         List<String> values = lesson.getFlashcards().get(currFlashcardIndex).getVals();
         if (userInput == null || lesson.getFlashcards() == null || userInput.size() != values.size()) {
-            return outp;
+            return output;
         }
         for (int i = 0; i < values.size(); i++) {
             if (!lesson.getForeignIndexes().get(i)) {
@@ -199,11 +198,11 @@ public class MemorisationActivity extends AppCompatActivity {
 
                 if (diffIndex >= 0 && diffIndex < corrNorm.originalIndices.size()) {
                     SpannableString spannableString = getSpannableString(corrNorm, diffIndex, corrAns);
-                    outp.put(i, spannableString);
+                    output.put(i, spannableString);
                 }
             }
         }
-        return outp;
+        return output;
     }
 
     private NormalizedResult normalize(String input) {
@@ -215,9 +214,9 @@ public class MemorisationActivity extends AppCompatActivity {
         if (input == null) return res;
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
-            boolean isPunct = !lesson.isPunctSensitive() && Character.toString(ch).matches("\\p{Punct}");
+            boolean isPunctuation = !lesson.isPunctSensitive() && Character.toString(ch).matches("\\p{Punct}");
             boolean isWhitespace = Character.isWhitespace(ch);
-            if (isWhitespace || isPunct) continue;
+            if (isWhitespace || isPunctuation) continue;
 
             char normalizedChar = lesson.isCaseSensitive() ? ch : Character.toLowerCase(ch);
             sb.append(normalizedChar);
