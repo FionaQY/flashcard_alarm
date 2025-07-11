@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <!-- For Android 12- -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -21,7 +23,6 @@
     <!-- For Android 14+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:allowBackup="true"
@@ -79,7 +80,10 @@
         <activity
             android:name=".activities.AlarmRingingActivity"
             android:exported="false"
-            android:parentActivityName=".activities.MainActivity">
+            android:parentActivityName=".activities.MainActivity"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.AlarmRingingActivity" />
@@ -89,6 +93,8 @@
             android:name=".activities.MemorisationActivity"
             android:exported="false"
             android:parentActivityName=".activities.AlarmRingingActivity"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -96,7 +102,7 @@
         </activity>
 
         <receiver
-            android:name=".utils.AlarmReceiver"
+            android:name=".receiver.AlarmReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -105,7 +111,7 @@
         </receiver>
 
         <receiver
-            android:name=".utils.BootReceiver"
+            android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

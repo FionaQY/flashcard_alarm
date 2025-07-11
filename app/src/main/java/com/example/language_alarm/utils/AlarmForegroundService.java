@@ -26,6 +26,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Alarm;
+import com.example.language_alarm.receiver.AlarmReceiver;
 
 import java.io.IOException;
 
@@ -113,6 +114,7 @@ public class AlarmForegroundService extends Service {
 
     private Notification createNotification() {
         createNotificationChannel();
+
         Intent stopIntent = new Intent(this, AlarmForegroundService.class);
         stopIntent.setAction(AlarmReceiver.ACTION_STOP_ALARM);
         PendingIntent pendingIntent = PendingIntent.getService(

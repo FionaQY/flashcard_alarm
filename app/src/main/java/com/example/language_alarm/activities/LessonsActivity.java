@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.adapter.LessonAdapter;
 import com.example.language_alarm.models.Lesson;
-import com.example.language_alarm.models.LessonViewModel;
-import com.example.language_alarm.utils.LessonAdapter;
 import com.example.language_alarm.utils.ToolbarHelper;
+import com.example.language_alarm.viewmodel.LessonViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -44,9 +44,6 @@ public class LessonsActivity extends AppCompatActivity {
         recyclerView.setAdapter(lessonAdapter);
 
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
-        // TODO: delete lesson option (+ confirmation)
-        // TODO: set number of questions for practice. move practice button here? 3 dots -> edit, delete, practice?
-        // or click practice/delete button and can click multiple
         lessonViewModel.getAllLessons().observe(this, lessons -> {
             lessonAdapter.setLessons(lessons);
             lessonList = lessons;

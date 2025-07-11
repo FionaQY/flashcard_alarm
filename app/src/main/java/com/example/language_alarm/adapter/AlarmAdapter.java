@@ -1,4 +1,4 @@
-package com.example.language_alarm.utils;
+package com.example.language_alarm.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.language_alarm.R;
 import com.example.language_alarm.activities.NewAlarmActivity;
 import com.example.language_alarm.models.Alarm;
+import com.example.language_alarm.utils.AlarmHandler;
 
 import java.util.ArrayList;
 import java.util.List;

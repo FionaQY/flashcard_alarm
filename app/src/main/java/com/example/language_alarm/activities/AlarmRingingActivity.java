@@ -1,5 +1,6 @@
 package com.example.language_alarm.activities;
 
+import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,9 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Alarm;
+import com.example.language_alarm.receiver.AlarmReceiver;
 import com.example.language_alarm.utils.AlarmForegroundService;
 import com.example.language_alarm.utils.AlarmHandler;
-import com.example.language_alarm.utils.AlarmReceiver;
 import com.google.android.material.button.MaterialButton;
 
 public class AlarmRingingActivity extends AppCompatActivity {
@@ -20,6 +21,12 @@ public class AlarmRingingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setTurnScreenOn(true);
+        setShowWhenLocked(true);
+        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+        keyguardManager.requestDismissKeyguard(this, null);
+
         setContentView(R.layout.activity_ringing);
 
         alarm = getIntent().getParcelableExtra("alarm");

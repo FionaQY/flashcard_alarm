@@ -1,12 +1,14 @@
-package com.example.language_alarm.utils;
+package com.example.language_alarm.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.example.language_alarm.activities.AlarmRingingActivity;
 import com.example.language_alarm.models.Alarm;
+import com.example.language_alarm.utils.AlarmForegroundService;
 
 public class AlarmReceiver extends BroadcastReceiver {
     public static final String ACTION_ALARM_TRIGGER = "com.example.language_alarm.ACTION_ALARM_TRIGGER";
@@ -24,6 +26,14 @@ public class AlarmReceiver extends BroadcastReceiver {
             return;
         }
 
+        PowerManager powerManager = (PowerManager) ctx.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK |
+                        PowerManager.ON_AFTER_RELEASE,
+                "LanguageAlarm:AlarmWakeLock"
+        );
+        wakeLock.acquire(30 * 1000L /*half a minute*/);
+
         if (ACTION_ALARM_TRIGGER.equals(action)) {
             Intent serviceIntent = new Intent(ctx, AlarmForegroundService.class);
             serviceIntent.setAction(action);
@@ -33,13 +43,21 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             Intent alarmIntent = new Intent(ctx, AlarmRingingActivity.class);
             alarmIntent.putExtra("alarm", alarm);
-            alarmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS //
+                    | Intent.FLAG_ACTIVITY_NO_USER_ACTION //
+            );
             ctx.startActivity(alarmIntent);
+
+            wakeLock.release();
+
         } else if (ACTION_STOP_ALARM.equals(action)) {
             Intent serviceIntent = new Intent(ctx, AlarmForegroundService.class);
             serviceIntent.setAction(action);
             ctx.stopService(serviceIntent);
         }
+
     }
 
 }

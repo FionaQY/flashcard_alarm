@@ -1,11 +1,15 @@
 package com.example.language_alarm.activities;
 
+import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,25 +19,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.adapter.InputFlashcardAdapter;
 import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.Lesson;
-import com.example.language_alarm.models.LessonViewModel;
-import com.example.language_alarm.utils.InputFlashcardAdapter;
+import com.example.language_alarm.viewmodel.LessonViewModel;
 import com.google.android.material.button.MaterialButton;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Random;
 
 public class MemorisationActivity extends AppCompatActivity {
     // TODO: countdown timer: 5mins -> alarm
+    // TODO: progress bar at corner
     private static final String TAG = "MemorisationActivity";
+    SparseArray<SparseArray<SpannableString>> progress = new SparseArray<>();
     private InputFlashcardAdapter adapter;
     private List<Flashcard> allFlashcards = new ArrayList<>();
     private int currFlashcardIndex = 0;
@@ -120,15 +126,47 @@ public class MemorisationActivity extends AppCompatActivity {
             handleNextCard();
         });
 
-        MaterialButton submitButton = findViewById(R.id.nextButton);
-        submitButton.setOnClickListener(v -> {
+        findViewById(R.id.nextButton).setOnClickListener(v -> {
             if (secondClick) {
                 handleNextCard();
             } else {
                 validateAnswers();
             }
         });
+        findViewById(R.id.editButton).setOnClickListener(v -> handleEditCard());
 
+    }
+
+    private void handleEditCard() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
+        builder.setView(dialogView);
+
+        RecyclerView recyclerView = dialogView.findViewById(R.id.values_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true);
+        recyclerView.setAdapter(inputAdapter);
+        inputAdapter.setLesson(this.lesson);
+        Flashcard currFlashcard = this.lesson.getFlashcards().get(currFlashcardIndex);
+        inputAdapter.setValues(currFlashcard);
+
+        MaterialButton btnCancel = dialogView.findViewById(R.id.cancelButton);
+        MaterialButton btnSave = dialogView.findViewById(R.id.saveButton);
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(d -> Objects.requireNonNull(dialog.getWindow()).clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
+
+        dialog.show();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            List<String> newVals = inputAdapter.getUserAnswers();
+            currFlashcard.setVals(newVals);
+            lesson.getFlashcards().set(currFlashcardIndex, currFlashcard);
+            adapter.setValues(currFlashcard);
+            this.secondClick = false;
+            dialog.dismiss();
+        });
     }
 
     private void handleNextCard() {
@@ -148,7 +186,7 @@ public class MemorisationActivity extends AppCompatActivity {
             handleNextCard();
             return;
         }
-        adapter.setValues(nextCard);
+        adapter.setValues(nextCard, this.progress.get(nextInd));
     }
 
     private void validateAnswers() {
@@ -157,10 +195,11 @@ public class MemorisationActivity extends AppCompatActivity {
             handleFinishQuiz();
             return;
         }
-        HashMap<Integer, SpannableString> stringy = this.isCorrect(userInput);
-        if (stringy.isEmpty()) {
+        SparseArray<SpannableString> stringy = this.isCorrect(userInput);
+        if (stringy.size() == 0) {
             Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show();
         } else {
+            progress.put(currFlashcardIndex, stringy);
             adapter.showAnswers(stringy);
             this.cardIndexes.add(currFlashcardIndex);
             Toast.makeText(this, ":(", Toast.LENGTH_SHORT).show();
@@ -168,8 +207,8 @@ public class MemorisationActivity extends AppCompatActivity {
         secondClick = true;
     }
 
-    private HashMap<Integer, SpannableString> isCorrect(List<String> userInput) {
-        HashMap<Integer, SpannableString> output = new HashMap<>();
+    private SparseArray<SpannableString> isCorrect(List<String> userInput) {
+        SparseArray<SpannableString> output = new SparseArray<>();
         if (lesson == null || lesson.getFlashcards() == null || this.currFlashcardIndex >= lesson.getFlashcards().size()) {
             return output;
         }
@@ -234,6 +273,5 @@ public class MemorisationActivity extends AppCompatActivity {
         String normalized;
         List<Integer> originalIndices;
     }
-
 
 }

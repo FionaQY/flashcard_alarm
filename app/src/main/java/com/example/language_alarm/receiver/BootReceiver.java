@@ -1,8 +1,10 @@
-package com.example.language_alarm.utils;
+package com.example.language_alarm.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import com.example.language_alarm.utils.AlarmHandler;
 
 public class BootReceiver extends BroadcastReceiver {
 

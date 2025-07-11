@@ -1,4 +1,4 @@
-package com.example.language_alarm.utils;
+package com.example.language_alarm.adapter;
 
 import android.text.Editable;
 import android.text.SpannableString;
@@ -18,7 +18,6 @@ import com.example.language_alarm.models.Lesson;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAdapter.InputFlashcardViewHolder> {
@@ -28,6 +27,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     private List<String> headers = new ArrayList<>();
     private List<String> ans = new ArrayList<>();
     private boolean isNotMemo = false;
+    private SparseArray<SpannableString> progress;
 
     public InputFlashcardAdapter() {
         this.answerViews = new SparseArray<>();
@@ -59,6 +59,11 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         notifyDataSetChanged();
     }
 
+    public void setValues(Flashcard flash, SparseArray<SpannableString> pro) {
+        this.progress = pro;
+        this.setValues(flash);
+    }
+
     public void setValues(Flashcard flash) {
         this.inputFields.clear();
         this.answerViews.clear();
@@ -66,6 +71,11 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
             this.ans = new ArrayList<>();
         } else {
             this.ans = new ArrayList<>(flash.getVals());
+        }
+        if (this.ans.size() < this.headers.size()) {
+            for (int i = this.ans.size(); i < this.headers.size(); i++) {
+                this.ans.add("");
+            }
         }
         notifyDataSetChanged();
     }
@@ -79,7 +89,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         return answers;
     }
 
-    public void showAnswers(HashMap<Integer, SpannableString> strings) {
+    public void showAnswers(SparseArray<SpannableString> strings) {
         for (int i = 0; i < this.headers.size(); i++) {
             String valueName = this.headers.get(i);
             String valueAns = i < this.ans.size() ? this.ans.get(i) : "";
@@ -91,10 +101,12 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
             boolean isNoShow = noInputExpected(valueName, valueAns);
             ansView.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
 
-            if (strings.containsKey(i)) {
-                ansView.setText(strings.get(i));
+            SpannableString ansText = strings.get(i);
+            if (ansText != null) {
+                ansView.setText(ansText);
             }
         }
+        this.progress = null;
     }
 
     private boolean noInputExpected(String valueName, String valueAns) {
@@ -134,7 +146,10 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
             input.setText(valueAns);
             input.setEnabled(true);
         } else {
-            if (!this.foreignIndexes.get(position)) {
+            if (this.progress != null && this.progress.get(position) == null) {
+                input.setText(valueAns);
+                input.setEnabled(false);
+            } else if (!this.foreignIndexes.get(position)) {
                 input.setText(valueAns);
                 input.setEnabled(false);
             } else {

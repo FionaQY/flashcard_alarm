@@ -1,4 +1,4 @@
-package com.example.language_alarm.utils;
+package com.example.language_alarm.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;

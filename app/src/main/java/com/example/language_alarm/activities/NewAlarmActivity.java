@@ -32,10 +32,10 @@ import com.example.language_alarm.R;
 import com.example.language_alarm.models.ActivityResultHelper;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.models.Lesson;
-import com.example.language_alarm.models.LessonViewModel;
 import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
+import com.example.language_alarm.viewmodel.LessonViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -49,6 +49,10 @@ import java.util.concurrent.Executors;
 
 public class NewAlarmActivity extends AppCompatActivity {
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final Integer[] NUMBER_OF_QNS = new Integer[]{
+            1, 3, 5, 10, 1000
+    };
+    AutoCompleteTextView qnNumDropdown;
     private MaterialToolbar header;
     private TimePicker alarmTimePicker;
     private AlarmManager alarmManager;
@@ -59,6 +63,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     private Uri selectedAudio;
     private ActivityResultHelper audioPickerHelper = null;
     private Lesson selectedLesson = null;
+    private Integer selectedQnNum = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +90,11 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void setupDropdown() {
+        ArrayAdapter<Integer> qnsAdapter = new ArrayAdapter<>(this, R.layout.dropdown_item, NUMBER_OF_QNS);
+        qnNumDropdown.setText(String.valueOf(this.selectedQnNum));
+        qnNumDropdown.setAdapter(qnsAdapter);
+        qnNumDropdown.setOnItemClickListener((p, v, pos, id) -> selectedQnNum = NUMBER_OF_QNS[pos]);
+
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
         AutoCompleteTextView lessonsDropdown = findViewById(R.id.lesson_dropdown);
         ArrayAdapter<Lesson> lessonAdapter = new ArrayAdapter<>(this, R.layout.dropdown_item, new ArrayList<>()) {
@@ -146,6 +156,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         ToggleButton isSat = findViewById(R.id.isSat);
         this.buttons = new ToggleButton[]{isSun, isMon, isTues, isWed, isThurs, isFri, isSat};
         oneTimeCheckBox = findViewById(R.id.oneTime);
+        qnNumDropdown = findViewById(R.id.qns_num_dropdown);
     }
 
     private void setupToolbar() {
@@ -221,6 +232,7 @@ public class NewAlarmActivity extends AppCompatActivity {
             selectedAudio = Uri.parse(alarmToEdit.getRingtone());
             ((MaterialButton) findViewById(R.id.selectToneButton)).setText(getFileName(selectedAudio));
         }
+        this.selectedQnNum = alarmToEdit.getQnNum();
     }
 
     private void updateToolbarTitle(int hourOfDay, int minute) {
@@ -306,6 +318,9 @@ public class NewAlarmActivity extends AppCompatActivity {
         }
         if (selectedLesson != null) {
             newAlarm.setLessonId(selectedLesson.getId());
+        }
+        if (selectedQnNum != null) {
+            newAlarm.setQnNum(selectedQnNum);
         }
         return newAlarm;
     }

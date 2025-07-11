@@ -28,15 +28,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.adapter.FlashcardAdapter;
+import com.example.language_alarm.adapter.InputFlashcardAdapter;
 import com.example.language_alarm.models.ActivityResultHelper;
 import com.example.language_alarm.models.Flashcard;
-import com.example.language_alarm.models.FlashcardViewModel;
 import com.example.language_alarm.models.Lesson;
-import com.example.language_alarm.utils.FlashcardAdapter;
-import com.example.language_alarm.utils.InputFlashcardAdapter;
 import com.example.language_alarm.utils.LessonHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
+import com.example.language_alarm.viewmodel.FlashcardViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -55,6 +55,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewLessonActivity extends AppCompatActivity {
+    // TODO: set number of questions for practice
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
     Runnable headersUpdateRunnable;
@@ -93,11 +94,6 @@ public class NewLessonActivity extends AppCompatActivity {
         } else {
             // populate stuff at the end or risk null pointer
             populateLessonData(tempLesson);
-            findViewById(R.id.deleteButton).setVisibility(View.VISIBLE);
-            findViewById(R.id.deleteButton).setOnClickListener(v -> {
-                LessonHandler.deleteLesson(this, tempLesson);
-                finishAfterTransition();
-            });
             findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);
             findViewById(R.id.practiceButton).setOnClickListener(v -> {
                 Intent intent = new Intent(this, MemorisationActivity.class);
@@ -172,11 +168,10 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void startManualFlashcardCreation() {
-        // TODO: create manual input method
         Flashcard newFlashcard = new Flashcard(new ArrayList<>(this.tempLesson.getHeaders().size()));
         this.tempLesson.getFlashcards().add(newFlashcard);
         showEditFlashcardDialog(newFlashcard, this.tempLesson.getFlashcards().size() - 1);
-        Toast.makeText(this, "Manual flashcard creation", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Flashcard successfully created", Toast.LENGTH_SHORT).show();
     }
 
     private void importFromCsv() {

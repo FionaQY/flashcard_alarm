@@ -1,4 +1,4 @@
-package com.example.language_alarm.models;
+package com.example.language_alarm.viewmodel;
 
 import android.app.Application;
 
@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 
 import com.example.language_alarm.database.AlarmDao;
 import com.example.language_alarm.database.AlarmDatabase;
+import com.example.language_alarm.models.Alarm;
 
 import java.util.List;
 

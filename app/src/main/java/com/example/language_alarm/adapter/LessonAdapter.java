@@ -1,5 +1,6 @@
-package com.example.language_alarm.utils;
+package com.example.language_alarm.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.language_alarm.R;
 import com.example.language_alarm.activities.NewLessonActivity;
 import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.utils.LessonHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,12 +84,16 @@ public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonView
             ctx.startActivity(intent);
         });
 
-        // TODO: confirmation dialog
-        holder.deleteButton.setOnClickListener(view -> {
-            Intent intent = new Intent(ctx, NewLessonActivity.class);
-            intent.putExtra("lesson", lesson);
-            ctx.startActivity(intent);
-        });
+        holder.deleteButton.setOnClickListener(view ->
+                new AlertDialog.Builder(ctx)
+                        .setCancelable(true)
+                        .setMessage("Delete this lesson?")
+                        .setPositiveButton("Confirm",
+                                (dialog, which) -> {
+                            LessonHandler.deleteLesson(ctx, lesson);
+                            notifyItemRemoved(position);})
+                        .setNegativeButton("Cancel", null)
+                        .show());
     }
 
     @Override
