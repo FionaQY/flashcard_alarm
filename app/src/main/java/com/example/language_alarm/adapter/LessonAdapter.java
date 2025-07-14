@@ -90,8 +90,9 @@ public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonView
                         .setMessage("Delete this lesson?")
                         .setPositiveButton("Confirm",
                                 (dialog, which) -> {
-                            LessonHandler.deleteLesson(ctx, lesson);
-                            notifyItemRemoved(position);})
+                                    LessonHandler.deleteLesson(ctx, lesson);
+                                    notifyItemRemoved(position);
+                                })
                         .setNegativeButton("Cancel", null)
                         .show());
     }

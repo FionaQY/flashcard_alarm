@@ -1,5 +1,6 @@
 package com.example.language_alarm.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,45 +24,59 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
     public FlashcardAdapter(List<String> headers, List<Flashcard> flashcards, OnFlashcardEditListener listener) {
         this.headers = headers;
-        this.flashcards = flashcards;
+
+        this.flashcards = new ArrayList<>();
+        for (Flashcard flash : flashcards) {
+            this.flashcards.add(flash.clone());
+        }
         this.editListener = listener;
     }
 
     public void setFlashcards(List<Flashcard> newFlashcards) {
-        if (newFlashcards == null || newFlashcards.isEmpty()) {
-            this.flashcards = new ArrayList<>();
+        Log.d("Adapter", "Current list: " + (flashcards != null ? flashcards.hashCode() : "null"));
+        Log.d("Adapter", "New list: " + newFlashcards.hashCode());
+
+        // Create a completely NEW list for the adapter
+        List<Flashcard> newList = new ArrayList<>(newFlashcards);
+
+        if (flashcards == null || flashcards.isEmpty()) {
+            flashcards = newList;
             notifyDataSetChanged();
-        } else if (flashcards == null || flashcards.isEmpty()) {
-            this.flashcards = new ArrayList<>(newFlashcards);
-            notifyDataSetChanged();
-        } else {
-            DiffUtil.Callback diffCallback = new DiffUtil.Callback() {
-                @Override
-                public int getOldListSize() {
-                    return flashcards.size();
-                }
-
-                @Override
-                public int getNewListSize() {
-                    return newFlashcards.size();
-                }
-
-                @Override
-                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return flashcards.get(oldItemPosition) == newFlashcards.get(newItemPosition);
-                }
-
-                @Override
-                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    return flashcards.get(oldItemPosition).equals(newFlashcards.get(newItemPosition));
-                }
-            };
-            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-
-            flashcards.clear();
-            flashcards.addAll(newFlashcards);
-            diffResult.dispatchUpdatesTo(this);
+            return;
         }
+
+        DiffUtil.Callback diffCallback = new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return flashcards.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newList.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                // Use position-based comparison since we don't have stable IDs
+                return oldPos == newPos;
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                Flashcard oldItem = flashcards.get(oldPos);
+                Flashcard newItem = newList.get(newPos);
+                System.out.println(oldItem.toString());
+                System.out.println(newItem.toString());
+                System.out.println(oldItem.equals(newItem));
+                return oldItem.equals(newItem);
+            }
+        };
+
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+        flashcards.clear();
+        flashcards.addAll(newFlashcards);
+        diffResult.dispatchUpdatesTo(this); // This MUST be called
     }
 
     public void setHeaders(List<String> newHeaders) {

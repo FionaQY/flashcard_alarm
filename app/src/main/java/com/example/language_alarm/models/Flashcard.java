@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Flashcard implements Parcelable {
     public static final Creator<Flashcard> CREATOR = new Creator<>() {
@@ -60,5 +61,50 @@ public class Flashcard implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStringList(values);
         dest.writeByte((byte) (isImportant ? 1 : 0));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Flashcard otherFlashcard = (Flashcard) obj;
+        if (this.isImportant != otherFlashcard.isImportant) {
+            return false;
+        }
+        if (otherFlashcard.getVals() == null) {
+            return this.getVals() == null;
+        }
+        if (this.getVals() == null) {
+            return false;
+        }
+        if (this.getVals().size() != otherFlashcard.getVals().size()) {
+            return false;
+        }
+        for (int i = 0; i < this.getVals().size(); i++) {
+            String thisV = this.getVals().get(i);
+            String otherV = otherFlashcard.getVals().get(i);
+            if (!thisV.equals(otherV)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @NonNull
+    public Flashcard clone() {
+        List<String> clone = new ArrayList<>(this.getVals());
+        Flashcard newCard = new Flashcard(clone);
+        newCard.markImportance(this.isImportant);
+        return newCard;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getVals());
     }
 }

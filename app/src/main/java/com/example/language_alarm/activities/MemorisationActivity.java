@@ -22,6 +22,7 @@ import com.example.language_alarm.R;
 import com.example.language_alarm.adapter.InputFlashcardAdapter;
 import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.utils.LessonHandler;
 import com.example.language_alarm.viewmodel.LessonViewModel;
 import com.google.android.material.button.MaterialButton;
 
@@ -266,6 +267,8 @@ public class MemorisationActivity extends AppCompatActivity {
     }
 
     private void handleFinishQuiz() {
+        this.lesson.setFlashcards(this.allFlashcards);
+        LessonHandler.saveLesson(this, this.lesson);
         finishAfterTransition();
     }
 

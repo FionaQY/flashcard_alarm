@@ -66,7 +66,6 @@ public class NewLessonActivity extends AppCompatActivity {
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private FlashcardViewModel flashcardViewModel = null;
     private ActivityResultHelper csvPickerHelper = null;
-    private FlashcardAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +79,7 @@ public class NewLessonActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.flashcard_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new FlashcardAdapter(new ArrayList<>(), new ArrayList<>(),
+        FlashcardAdapter adapter = new FlashcardAdapter(new ArrayList<>(), new ArrayList<>(),
                 this::showEditFlashcardDialog);
         recyclerView.setAdapter(adapter);
 
@@ -137,6 +136,7 @@ public class NewLessonActivity extends AppCompatActivity {
         ((TextInputEditText) findViewById(R.id.searchBar).findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
+                // TODO: fix bug where updating after search duplicates cards
                 if (tempLesson == null || tempLesson.getFlashcards() == null) {
                     return;
                 }
@@ -147,7 +147,7 @@ public class NewLessonActivity extends AppCompatActivity {
                         cards.add(card);
                     }
                 }
-                adapter.setFlashcards(cards);
+                flashcardViewModel.setFlashcards(cards);
             }
 
             @Override
@@ -474,7 +474,7 @@ public class NewLessonActivity extends AppCompatActivity {
             }
         }
         tempLesson.setForeignIndexes(foreignIndices);
-        flashcardViewModel.setHeaders(tempLesson.getHeaders());
+        flashcardViewModel.setHeaders(new ArrayList<>(tempLesson.getHeaders()));
     }
 
     private void setupHeaderMapping(RecyclerView englishRecycler, RecyclerView germanRecycler) {
@@ -563,7 +563,7 @@ public class NewLessonActivity extends AppCompatActivity {
         this.foreignIndexes = new ArrayList<>(lesson.getForeignIndexes());
 
         if (lesson.getFlashcards() != null) {
-            flashcardViewModel.setBothValues(lesson.getFlashcards(), lesson.getHeaders());
+            flashcardViewModel.setBothValues(new ArrayList<>(lesson.getFlashcards()), new ArrayList<>(lesson.getHeaders()));
         }
     }
 
@@ -572,10 +572,10 @@ public class NewLessonActivity extends AppCompatActivity {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
         builder.setView(dialogView);
 
-        RecyclerView recyclerView = dialogView.findViewById(R.id.values_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        RecyclerView recyclerView2 = dialogView.findViewById(R.id.values_list);
+        recyclerView2.setLayoutManager(new LinearLayoutManager(this));
         InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true);
-        recyclerView.setAdapter(inputAdapter);
+        recyclerView2.setAdapter(inputAdapter);
         inputAdapter.setLesson(this.tempLesson);
         inputAdapter.setValues(flashcard);
 
@@ -590,9 +590,9 @@ public class NewLessonActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnSave.setOnClickListener(v -> {
             List<String> newVals = inputAdapter.getUserAnswers();
-            flashcard.setVals(newVals);
-            tempLesson.getFlashcards().set(position, flashcard);
-            flashcardViewModel.setFlashcards(new ArrayList<>(tempLesson.getFlashcards()));
+            tempLesson.getFlashcards().get(position).setVals(newVals);
+            flashcardViewModel.setFlashcards(tempLesson.getFlashcards());
+
             dialog.dismiss();
         });
     }
