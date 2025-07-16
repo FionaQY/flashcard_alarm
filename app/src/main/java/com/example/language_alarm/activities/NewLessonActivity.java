@@ -55,7 +55,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewLessonActivity extends AppCompatActivity {
-    // TODO: set number of questions for practice
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
     Runnable headersUpdateRunnable;
@@ -128,7 +127,7 @@ public class NewLessonActivity extends AppCompatActivity {
         copyButton.setOnClickListener(v -> showCopyPasteDialog());
         preferencesButton.setOnClickListener(v -> showPreferencesDialog());
         saveLessonButton.setOnClickListener(v -> saveLesson());
-        
+
         ((TextInputEditText) findViewById(R.id.searchBar).findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
@@ -447,10 +446,12 @@ public class NewLessonActivity extends AppCompatActivity {
 
         EditText numOfQns = dialogView.findViewById(R.id.numOfQns);
 
+        AlertDialog dialog = builder.create();
+        dialog.show();
         dialogView.findViewById(R.id.cancelButton).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.saveButton).setOnClickListener(v -> {
             String sTextFromET = numOfQns.getText().toString();
-            int nIntFromET = new Integer(sTextFromET).intValue();
+            int nIntFromET = Integer.parseInt(sTextFromET);
             if (nIntFromET <= 0) {
                 Toast.makeText(this, "Invalid number of questions", Toast.LENGTH_SHORT).show();
                 return;

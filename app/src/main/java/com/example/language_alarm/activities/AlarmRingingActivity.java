@@ -58,6 +58,9 @@ public class AlarmRingingActivity extends AppCompatActivity {
             finish();
             if (!alarm.isOneTime()) {
                 AlarmHandler.rescheduleAlarm(this, alarm);
+            } else {
+                alarm.setEnabled(false);
+                AlarmHandler.saveAlarm(this, alarm);
             }
         });
 

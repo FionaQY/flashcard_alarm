@@ -3,6 +3,7 @@ package com.example.language_alarm.activities;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
@@ -10,8 +11,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
-import android.os.CountDownTimer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +25,9 @@ import com.example.language_alarm.adapter.InputFlashcardAdapter;
 import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.Lesson;
 import com.example.language_alarm.utils.LessonHandler;
+import com.example.language_alarm.utils.ToolbarHelper;
 import com.example.language_alarm.viewmodel.LessonViewModel;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,35 +45,14 @@ public class MemorisationActivity extends AppCompatActivity {
     // TODO: progress bar at corner
     private static final String TAG = "MemorisationActivity";
     SparseArray<SparseArray<SpannableString>> progress = new SparseArray<>();
+    CountDownTimer countdownTimer;
     private InputFlashcardAdapter adapter;
     private List<Flashcard> allFlashcards = new ArrayList<>();
     private int currFlashcardIndex = 0;
     private Lesson lesson;
     private Queue<Integer> cardIndexes = new LinkedList<>();
     private boolean secondClick = false;
-    CountDownTimer countdownTimer;
     private boolean isAlarm = false;
-
-    private void startTimer() {
-        if (countdownTimer == null) {
-            countdownTimer = new CountDownTimer(300000, 1000) {
-                public void onTick(long m) {}
-                public void onFinish() {
-                    Toast.makeText(this, "5 minutes have passed", Toast.LENGTH_SHORT).show();
-
-                }
-            };
-        }
-        countdownTimer.cancel();
-        countdownTimer.start();
-    }
-
-    private void cancelTimer() {
-        if (countdownTimer == null) {
-            return
-        }
-        countdownTimer.cancel();
-    }
 
     private static Queue<Integer> generateUniqueRandomNumbers(int count, int max) {
         Queue<Integer> que = new LinkedList<>();
@@ -107,6 +89,28 @@ public class MemorisationActivity extends AppCompatActivity {
         return spannableString;
     }
 
+    private void startTimer() {
+        if (countdownTimer == null) {
+            countdownTimer = new CountDownTimer(300000, 1000) {
+                public void onTick(long m) {
+                }
+
+                public void onFinish() {
+                    Toast.makeText(null, "5 minutes have passed", Toast.LENGTH_SHORT).show();
+                }
+            };
+        }
+        countdownTimer.cancel();
+        countdownTimer.start();
+    }
+
+    private void cancelTimer() {
+        if (countdownTimer == null) {
+            return;
+        }
+        countdownTimer.cancel();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,19 +123,19 @@ public class MemorisationActivity extends AppCompatActivity {
             return;
         }
         int qnCount = getIntent().getIntExtra("qnCount", 3);
-        isAlarm = getIntent().getIntExtra("isAlarm", false);
+        isAlarm = getIntent().getBooleanExtra("isAlarm", false);
         setupToolbar();
-        setupViews();
+        setupViews(lessonId, qnCount);
     }
 
     private void setupToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        ToolbarHelper.setupToolbar(toolbar, isAlarm ? "" : "Practice Mode" , isAlarm, this::showExitDialog);
+        ToolbarHelper.setupToolbar(toolbar, isAlarm ? "" : "Practice Mode", !isAlarm, this::finish);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
     }
 
-    private void setupViews() {
+    private void setupViews(int lessonId, int qnCount) {
         RecyclerView recyclerView = findViewById(R.id.values_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new InputFlashcardAdapter();
@@ -166,14 +170,14 @@ public class MemorisationActivity extends AppCompatActivity {
         Button nextButton = findViewById(R.id.nextButton);
         nextButton.setOnClickListener(v -> {
             if (secondClick) {
-                nextButton.setText("Next Flashcard");
+                nextButton.setText(R.string.next_flashcard);
                 handleNextCard();
             } else {
                 cancelTimer();
-                nextButton.setText("Check Answer");
+                nextButton.setText(R.string.check_answer);
                 validateAnswers();
             }
-            secondClick = !secondClick; 
+            secondClick = !secondClick;
         });
         findViewById(R.id.editButton).setOnClickListener(v -> handleEditCard());
     }
@@ -217,7 +221,7 @@ public class MemorisationActivity extends AppCompatActivity {
         if (isAlarm) {
             startTimer();
         }
-        
+
         Integer nextInd = cardIndexes.poll();
         if (nextInd == null) {
             throw new IllegalStateException("Card Index picked is null");
@@ -239,11 +243,11 @@ public class MemorisationActivity extends AppCompatActivity {
             return;
         }
         SparseArray<SpannableString> stringy = getWrongAnswers(userInput);
+        adapter.showAnswers(stringy);
         if (stringy.size() == 0) {
             Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show();
         } else {
             progress.put(currFlashcardIndex, stringy);
-            adapter.showAnswers(stringy);
             this.cardIndexes.add(currFlashcardIndex);
             Toast.makeText(this, ":(", Toast.LENGTH_SHORT).show();
         }

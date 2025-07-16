@@ -10,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.adapter.AlarmAdapter;
+import com.example.language_alarm.utils.ToolbarHelper;
 import com.example.language_alarm.viewmodel.AlarmViewModel;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
 
@@ -22,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setupToolbar();
 
         RecyclerView recyclerView = findViewById(R.id.alarm_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -43,5 +47,11 @@ public class MainActivity extends AppCompatActivity {
     public void onToggleLessons() {
         Intent intent = new Intent(this, LessonsActivity.class);
         startActivity(intent);
+    }
+
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        ToolbarHelper.setupToolbar(toolbar, "");
+        setSupportActionBar(toolbar);
     }
 }

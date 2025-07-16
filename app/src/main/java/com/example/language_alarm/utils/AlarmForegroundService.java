@@ -86,7 +86,7 @@ public class AlarmForegroundService extends Service {
     }
 
     public void stopAlarm() {
-        if (ringtone != null && ringtone.isPlaying()) {
+        if (ringtone != null) {
             ringtone.stop();
         }
         if (mediaPlayer != null) {

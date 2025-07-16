@@ -9,7 +9,7 @@
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         app:boxStrokeColor="@color/colorPrimary"
         app:endIconMode="custom"
@@ -19,13 +19,11 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/numOfQns"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top|start"
-            android:hint="Input number of questions"
+            android:layout_height="wrap_content"
+            android:hint="@string/input_number_of_questions"
             android:inputType="numberSigned"
             android:minLines="1"
-            android:padding="12dp"
-            android:text="3"/>
+            android:padding="12dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -59,9 +57,9 @@
             android:layout_height="48dp"
             android:layout_columnWeight="1"
             android:layout_marginTop="8dp"
-            android:text="@string/save"
+            android:text="@string/next"
             app:backgroundTint="@color/colorPrimary"
-            app:icon="@drawable/ic_save"
+            app:icon="@drawable/ic_next"
             app:iconGravity="textStart" />
     </GridLayout>
 </LinearLayout>

@@ -43,7 +43,7 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!--TODO: loudness, vibration checkbox, custom sound (ringtone), snooze (number ,duration)-->
+    <!--TODO: snooze (number ,duration), loudness, vibration checkbox, custom sound (ringtone), -->
     <!--TODO: Alarm wallpaper-->
 
     <com.google.android.material.button.MaterialButton

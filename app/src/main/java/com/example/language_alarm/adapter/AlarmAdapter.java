@@ -74,6 +74,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
 
     private void changeStatusOfAlarm(boolean isChecked, Alarm alarm) {
         alarm.setEnabled(isChecked);
+        AlarmHandler.saveAlarm(this.ctx, alarm);
         if (isChecked) {
             AlarmHandler.rescheduleAlarm(this.ctx, alarm);
         } else {
@@ -90,7 +91,6 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
         holder.toggleSwitch.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> changeStatusOfAlarm(isChecked, alarm));
 
-        // go to alarm page when click (maybe have edit button)
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(ctx, NewAlarmActivity.class);
             intent.putExtra("alarm", alarm);

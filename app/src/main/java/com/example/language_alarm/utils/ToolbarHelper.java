@@ -39,10 +39,6 @@ public class ToolbarHelper {
     }
 
     public static void setupToolbar(MaterialToolbar toolbar, String title) {
-        setupToolbar(toolbar, title, true, null);
-    }
-
-    public static void setupToolbar(MaterialToolbar toolbar, String title, boolean showBack) {
-        setupToolbar(toolbar, title, showBack, null);
+        setupToolbar(toolbar, title, false, null);
     }
 }
