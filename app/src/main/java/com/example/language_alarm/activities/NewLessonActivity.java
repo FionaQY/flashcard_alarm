@@ -59,7 +59,7 @@ public class NewLessonActivity extends AppCompatActivity {
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
     Runnable headersUpdateRunnable;
-    private MaterialButton btnAddFlashcards;
+    private MaterialButton addFlashcardButton;
     private LinearLayout optionsContainer;
     private Lesson tempLesson = null;
     private List<String> currentHeaders = new ArrayList<>();
@@ -94,12 +94,7 @@ public class NewLessonActivity extends AppCompatActivity {
             // populate stuff at the end or risk null pointer
             populateLessonData(tempLesson);
             findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);
-            findViewById(R.id.practiceButton).setOnClickListener(v -> {
-                Intent intent = new Intent(this, MemorisationActivity.class);
-                intent.putExtra("lessonId", tempLesson.getId());
-                startActivity(intent);
-                finishAfterTransition();
-            });
+            findViewById(R.id.practiceButton).setOnClickListener(v -> showMemoDialog());
         }
 
         getOnBackPressedDispatcher().addCallback(this,
@@ -119,20 +114,21 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void setupViews() {
-        btnAddFlashcards = findViewById(R.id.btnAddFlashcards);
-        MaterialButton btnManualAdd = findViewById(R.id.btnManualAdd);
-        MaterialButton btnCsvImport = findViewById(R.id.btnCsvImport);
-        MaterialButton btnCopy = findViewById(R.id.btnCopy);
-        MaterialButton btnPreferences = findViewById(R.id.btnPreferences);
-        MaterialButton btnSaveLesson = findViewById(R.id.btnSaveLesson);
+        addFlashcardButton = findViewById(R.id.addFlashcardButton);
+        MaterialButton manuallyAddButton = findViewById(R.id.manuallyAddButton);
+        MaterialButton csvImportButton = findViewById(R.id.csvImportButton);
+        MaterialButton copyButton = findViewById(R.id.copyButton);
+        MaterialButton preferencesButton = findViewById(R.id.preferencesButton);
+        MaterialButton saveLessonButton = findViewById(R.id.saveLessonButton);
         optionsContainer = findViewById(R.id.optionsContainer);
 
-        btnAddFlashcards.setOnClickListener(v -> showAddOptions());
-        btnManualAdd.setOnClickListener(v -> startManualFlashcardCreation());
-        btnCsvImport.setOnClickListener(v -> importFromCsv());
-        btnCopy.setOnClickListener(v -> showCopyPasteDialog());
-        btnPreferences.setOnClickListener(v -> showPreferencesDialog());
-        btnSaveLesson.setOnClickListener(v -> saveLesson());
+        addFlashcardButton.setOnClickListener(v -> showAddOptions());
+        manuallyAddButton.setOnClickListener(v -> startManualFlashcardCreation());
+        csvImportButton.setOnClickListener(v -> importFromCsv());
+        copyButton.setOnClickListener(v -> showCopyPasteDialog());
+        preferencesButton.setOnClickListener(v -> showPreferencesDialog());
+        saveLessonButton.setOnClickListener(v -> saveLesson());
+        
         ((TextInputEditText) findViewById(R.id.searchBar).findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
@@ -163,7 +159,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void showAddOptions() {
-        btnAddFlashcards.setVisibility(View.GONE);
+        addFlashcardButton.setVisibility(View.GONE);
         optionsContainer.setVisibility(View.VISIBLE);
     }
 
@@ -355,8 +351,8 @@ public class NewLessonActivity extends AppCompatActivity {
         EditText editHeaders = dialogView.findViewById(R.id.editHeaders);
         RecyclerView recyclerEnglish = dialogView.findViewById(R.id.recyclerEnglish);
         RecyclerView recyclerGerman = dialogView.findViewById(R.id.recyclerGerman);
-        MaterialButton btnCancel = dialogView.findViewById(R.id.btnCancelPrefs);
-        MaterialButton btnSave = dialogView.findViewById(R.id.btnSavePrefs);
+        MaterialButton btnCancel = dialogView.findViewById(R.id.cancelButton);
+        MaterialButton btnSave = dialogView.findViewById(R.id.saveButton);
 
         recyclerEnglish.setLayoutManager(new LinearLayoutManager(this));
         recyclerGerman.setLayoutManager(new LinearLayoutManager(this));
@@ -440,6 +436,29 @@ public class NewLessonActivity extends AppCompatActivity {
         btnClear.setOnClickListener(v -> pasteText.setText(""));
         btnSave.setOnClickListener(v -> {
             copyFromGoogleSheet(Objects.requireNonNull(pasteText.getText()).toString());
+            dialog.dismiss();
+        });
+    }
+
+    private void showMemoDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_memo, null);
+        builder.setView(dialogView);
+
+        EditText numOfQns = dialogView.findViewById(R.id.numOfQns);
+
+        dialogView.findViewById(R.id.cancelButton).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.saveButton).setOnClickListener(v -> {
+            String sTextFromET = numOfQns.getText().toString();
+            int nIntFromET = new Integer(sTextFromET).intValue();
+            if (nIntFromET <= 0) {
+                Toast.makeText(this, "Invalid number of questions", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent intent = new Intent(this, MemorisationActivity.class);
+            intent.putExtra("lessonId", tempLesson.getId());
+            intent.putExtra("qnCount", nIntFromET);
+            startActivity(intent);
             dialog.dismiss();
         });
     }

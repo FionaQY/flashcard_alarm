@@ -144,8 +144,8 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         public FlashcardViewHolder(View itemView) {
             super(itemView);
             txtValues = itemView.findViewById(R.id.txtValues);
-            editButton = itemView.findViewById(R.id.btnEdit);
-            starButton = itemView.findViewById(R.id.btnStar);
+            editButton = itemView.findViewById(R.id.editButton);
+            starButton = itemView.findViewById(R.id.starButton);
         }
     }
 }

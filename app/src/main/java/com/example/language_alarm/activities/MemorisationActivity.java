@@ -11,6 +11,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
+import android.os.CountDownTimer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,6 +48,29 @@ public class MemorisationActivity extends AppCompatActivity {
     private Lesson lesson;
     private Queue<Integer> cardIndexes = new LinkedList<>();
     private boolean secondClick = false;
+    CountDownTimer countdownTimer;
+    private boolean isAlarm = false;
+
+    private void startTimer() {
+        if (countdownTimer == null) {
+            countdownTimer = new CountDownTimer(300000, 1000) {
+                public void onTick(long m) {}
+                public void onFinish() {
+                    Toast.makeText(this, "5 minutes have passed", Toast.LENGTH_SHORT).show();
+
+                }
+            };
+        }
+        countdownTimer.cancel();
+        countdownTimer.start();
+    }
+
+    private void cancelTimer() {
+        if (countdownTimer == null) {
+            return
+        }
+        countdownTimer.cancel();
+    }
 
     private static Queue<Integer> generateUniqueRandomNumbers(int count, int max) {
         Queue<Integer> que = new LinkedList<>();
@@ -95,7 +119,19 @@ public class MemorisationActivity extends AppCompatActivity {
             return;
         }
         int qnCount = getIntent().getIntExtra("qnCount", 3);
+        isAlarm = getIntent().getIntExtra("isAlarm", false);
+        setupToolbar();
+        setupViews();
+    }
 
+    private void setupToolbar() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        ToolbarHelper.setupToolbar(toolbar, isAlarm ? "" : "Practice Mode" , isAlarm, this::showExitDialog);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
+    }
+
+    private void setupViews() {
         RecyclerView recyclerView = findViewById(R.id.values_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new InputFlashcardAdapter();
@@ -127,15 +163,19 @@ public class MemorisationActivity extends AppCompatActivity {
             handleNextCard();
         });
 
-        findViewById(R.id.nextButton).setOnClickListener(v -> {
+        Button nextButton = findViewById(R.id.nextButton);
+        nextButton.setOnClickListener(v -> {
             if (secondClick) {
+                nextButton.setText("Next Flashcard");
                 handleNextCard();
             } else {
+                cancelTimer();
+                nextButton.setText("Check Answer");
                 validateAnswers();
             }
+            secondClick = !secondClick; 
         });
         findViewById(R.id.editButton).setOnClickListener(v -> handleEditCard());
-
     }
 
     private void handleEditCard() {
@@ -165,7 +205,6 @@ public class MemorisationActivity extends AppCompatActivity {
             currFlashcard.setVals(newVals);
             lesson.getFlashcards().set(currFlashcardIndex, currFlashcard);
             adapter.setValues(currFlashcard);
-            this.secondClick = false;
             dialog.dismiss();
         });
     }
@@ -175,12 +214,15 @@ public class MemorisationActivity extends AppCompatActivity {
             handleFinishQuiz();
             return;
         }
+        if (isAlarm) {
+            startTimer();
+        }
+        
         Integer nextInd = cardIndexes.poll();
         if (nextInd == null) {
             throw new IllegalStateException("Card Index picked is null");
         }
         this.currFlashcardIndex = nextInd;
-        secondClick = false;
         Flashcard nextCard = allFlashcards.get(nextInd);
         if (nextCard == null) {
             Log.e(TAG, String.format("Flashcard at index %d is null", nextInd));
@@ -196,7 +238,7 @@ public class MemorisationActivity extends AppCompatActivity {
             handleFinishQuiz();
             return;
         }
-        SparseArray<SpannableString> stringy = this.isCorrect(userInput);
+        SparseArray<SpannableString> stringy = getWrongAnswers(userInput);
         if (stringy.size() == 0) {
             Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show();
         } else {
@@ -205,10 +247,9 @@ public class MemorisationActivity extends AppCompatActivity {
             this.cardIndexes.add(currFlashcardIndex);
             Toast.makeText(this, ":(", Toast.LENGTH_SHORT).show();
         }
-        secondClick = true;
     }
 
-    private SparseArray<SpannableString> isCorrect(List<String> userInput) {
+    private SparseArray<SpannableString> getWrongAnswers(List<String> userInput) {
         SparseArray<SpannableString> output = new SparseArray<>();
         if (lesson == null || lesson.getFlashcards() == null || this.currFlashcardIndex >= lesson.getFlashcards().size()) {
             return output;
@@ -269,6 +310,7 @@ public class MemorisationActivity extends AppCompatActivity {
     private void handleFinishQuiz() {
         this.lesson.setFlashcards(this.allFlashcards);
         LessonHandler.saveLesson(this, this.lesson);
+        cancelTimer();
         finishAfterTransition();
     }
 

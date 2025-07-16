@@ -53,6 +53,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MemorisationActivity.class);
             intent.putExtra("lessonId", alarm.getLessonId());
             intent.putExtra("qnCount", alarm.getQnNum());
+            intent.putExtra("isAlarm", true);
             startActivity(intent);
             finish();
             if (!alarm.isOneTime()) {

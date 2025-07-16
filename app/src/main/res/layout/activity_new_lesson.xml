@@ -32,7 +32,7 @@
             android:textSize="18sp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddFlashcards"
+            android:id="@+id/addFlashcardButton"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             android:visibility="gone">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnManualAdd"
+                android:id="@+id/manuallyAddButton"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCsvImport"
+                android:id="@+id/csvImportButton"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -85,7 +85,7 @@
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCopy"
+                android:id="@+id/copyButton"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -101,7 +101,7 @@
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPreferences"
+            android:id="@+id/preferencesButton"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -138,7 +138,7 @@
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSaveLesson"
+        android:id="@+id/saveLessonButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
@@ -161,7 +161,7 @@
         android:contentDescription="@string/practice_lesson"
         android:src="@drawable/ic_add_lesson"
         app:backgroundTint="@color/colorPrimary"
-        app:layout_anchor="@id/btnSaveLesson"
+        app:layout_anchor="@id/saveLessonButton"
         app:layout_anchorGravity="top|start"
         app:tint="@android:color/white" />
 
