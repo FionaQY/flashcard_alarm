@@ -31,7 +31,6 @@ import com.example.language_alarm.receiver.AlarmReceiver;
 import java.io.IOException;
 
 public class AlarmForegroundService extends Service {
-    // to ensure the ringtone plays even if system tries to disrupt
     private static final String TAG = "AlarmForegroundService";
     private static final String CHANNEL_ID = "alarm_foreground_channel";
     private static final int NOTIFICATION_ID = 123;
@@ -39,6 +38,7 @@ public class AlarmForegroundService extends Service {
     private Vibrator vibrator = null;
     private AudioManager audioManager;
     private MediaPlayer mediaPlayer;
+    private boolean isMediaPlayerPrepared = false;
 
     @Override
     public void onCreate() {
@@ -86,11 +86,23 @@ public class AlarmForegroundService extends Service {
     }
 
     public void stopAlarm() {
+        Log.d(TAG, "Stopping alarm...");
         if (ringtone != null) {
             ringtone.stop();
+            ringtone = null;
         }
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
+            if (isMediaPlayerPrepared) {
+                mediaPlayer.stop();
+            } else {
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    mp.stop();
+                    mp.release();
+                });
+            }
+            mediaPlayer.release();
+            mediaPlayer = null;
+            isMediaPlayerPrepared = false;
         }
         if (vibrator != null) {
             vibrator.cancel();
@@ -179,8 +191,12 @@ public class AlarmForegroundService extends Service {
                 mediaPlayer.setLooping(true);
                 // TODO: make volume variable
                 mediaPlayer.setVolume(1.0f, 1.0f);
-                mediaPlayer.setOnPreparedListener(MediaPlayer::start);
+//                mediaPlayer.setOnPreparedListener(MediaPlayer::start);
                 mediaPlayer.prepareAsync();
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    isMediaPlayerPrepared = true;
+                    mp.start();
+                });
                 return;
             } catch (IOException e) {
                 Log.e(TAG, "MediaPlayer failed, falling back to Ringtone", e);

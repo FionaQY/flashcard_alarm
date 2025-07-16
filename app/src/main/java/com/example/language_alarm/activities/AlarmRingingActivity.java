@@ -2,6 +2,7 @@ package com.example.language_alarm.activities;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,8 +16,11 @@ import com.example.language_alarm.utils.AlarmForegroundService;
 import com.example.language_alarm.utils.AlarmHandler;
 import com.google.android.material.button.MaterialButton;
 
+import java.util.Locale;
+
 public class AlarmRingingActivity extends AppCompatActivity {
-    Alarm alarm;
+    private static final String PREFS_NAME = "preferences????";
+    private Alarm alarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,13 +38,19 @@ public class AlarmRingingActivity extends AppCompatActivity {
             Log.w("Alarm", "Attempted to ring null alarm");
             supportFinishAfterTransition();
         }
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        int snoozeCount = settings.getInt("snoozeCount", 0);
+
         MaterialButton snoozeButton = findViewById(R.id.snoozeButton);
-        snoozeButton.setVisibility(alarm.allowSnooze() ? View.VISIBLE : View.GONE);
+        snoozeButton.setVisibility(alarm.getSnoozeNum() > snoozeCount ? View.VISIBLE : View.GONE);
+        snoozeButton.setText(String.format(Locale.US, "%d Snoozes Left", alarm.getSnoozeNum() - snoozeCount));
 
         snoozeButton.setOnClickListener(v -> {
             stopRinging();
             AlarmHandler.snoozeAlarm(this, alarm);
-            alarm.incrementSnoozeCount();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putInt("snoozeCount", snoozeCount + 1);
+            editor.apply();
             finish();
         });
 
@@ -48,20 +58,23 @@ public class AlarmRingingActivity extends AppCompatActivity {
             stopRinging();
 
             AlarmHandler.cancelAlarm(this, alarm);
-            alarm.resetSnoozeCount();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putInt("snoozeCount", 0);
+            editor.apply();
 
             Intent intent = new Intent(this, MemorisationActivity.class);
             intent.putExtra("lessonId", alarm.getLessonId());
             intent.putExtra("qnCount", alarm.getQnNum());
             intent.putExtra("isAlarm", true);
             startActivity(intent);
-            finish();
+
             if (!alarm.isOneTime()) {
                 AlarmHandler.rescheduleAlarm(this, alarm);
             } else {
                 alarm.setEnabled(false);
                 AlarmHandler.saveAlarm(this, alarm);
             }
+            finish();
         });
 
     }

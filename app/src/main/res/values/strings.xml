@@ -34,10 +34,10 @@
     <string name="action_back">Go back to previous page</string>
     <string name="select_ringtone">Select Ringtone</string>
     <string name="copy_from_google_sheet">Copy from Google Sheet</string>
-    <string name="paste_text_hint">Paste text after copying from Google Sheet/Excel</string>
+    <string name="paste_text_hint">Paste text from Google Sheet/Excel</string>
     <string name="paste">Paste</string>
     <string name="clear">Clear</string>
-    <string name="choose_lesson">Pick a lesson</string>
+    <string name="choose_lesson">Lesson</string>
     <string name="pick_qns_num">Pick number of questions</string>
     <string name="proceed_to_learn">Proceed to learn</string>
     <string name="snooze">Snooze</string>
@@ -46,5 +46,9 @@
     <string name="next">Next</string>
     <string name="check_answer">Check Answer</string>
     <string name="next_flashcard">Next Flashcard</string>
-    <string name="input_number_of_questions">Input number of questions</string>
+    <string name="input_number_of_questions">Number of questions</string>
+    <string name="choose_number_of_snoozes">Number of Snoozes</string>
+    <string name="pick_snooze_duration">Snooze Duration</string>
+    <string name="_0">0</string>
+    <string name="_5">5</string>
 </resources>

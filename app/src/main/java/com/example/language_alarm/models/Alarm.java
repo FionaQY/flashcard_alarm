@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.Calendar;
@@ -45,15 +44,12 @@ public class Alarm implements Parcelable {
     private int lessonId;
     private int qnNum;
 
-    @Ignore
-    private int snoozesSoFat = 0;
-
     public Alarm() {
     }
 
     public Alarm(int hour, int minute, int numSnoozes, int lenSnooze,
                  boolean isOneTime, boolean sunday, boolean monday, boolean tuesday, boolean wednesday,
-                 boolean thursday, boolean friday, boolean saturday, String uri) {
+                 boolean thursday, boolean friday, boolean saturday, String uri, int qnNum) {
         this.hour = hour;
         this.minute = minute;
         this.snoozeNum = numSnoozes;
@@ -67,6 +63,7 @@ public class Alarm implements Parcelable {
         this.friday = friday;
         this.saturday = saturday;
         this.ringtone = uri;
+        this.qnNum = qnNum;
     }
 
     protected Alarm(Parcel in) {
@@ -88,18 +85,6 @@ public class Alarm implements Parcelable {
         sunday = in.readByte() != 0;
         lessonId = in.readInt();
         qnNum = in.readInt();
-    }
-
-    public void incrementSnoozeCount() {
-        snoozesSoFat += 1;
-    }
-
-    public void resetSnoozeCount() {
-        snoozesSoFat = 0;
-    }
-
-    public boolean allowSnooze() {
-        return this.snoozesSoFat < this.snoozeNum;
     }
 
     // Getters and setters for all fields

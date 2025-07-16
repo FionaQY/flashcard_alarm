@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -49,10 +50,17 @@ import java.util.concurrent.Executors;
 
 public class NewAlarmActivity extends AppCompatActivity {
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private static final Integer[] NUMBER_OF_QNS = new Integer[]{
-            1, 3, 5, 10, 1000
+    private static final Integer[] NUMBER_OF_SNOOZES = new Integer[]{
+            0, 1, 3, 5, 10, 1000
     };
-    AutoCompleteTextView qnNumDropdown;
+    private static final Integer[] SNOOZE_DURATION = new Integer[]{
+            1, 5, 10, 15, 20, 25, 30
+    };
+    AutoCompleteTextView snoozeNumDropdown;
+    Integer selectedSnoozeNum;
+    AutoCompleteTextView snoozeDurationDropdown;
+    Integer selectedSnoozeDuration;
+    private EditText numOfQns;
     private MaterialToolbar header;
     private TimePicker alarmTimePicker;
     private AlarmManager alarmManager;
@@ -63,7 +71,6 @@ public class NewAlarmActivity extends AppCompatActivity {
     private Uri selectedAudio;
     private ActivityResultHelper audioPickerHelper = null;
     private Lesson selectedLesson = null;
-    private Integer selectedQnNum = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +97,15 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void setupDropdown() {
-        ArrayAdapter<Integer> qnsAdapter = new ArrayAdapter<>(this, R.layout.dropdown_item, NUMBER_OF_QNS);
-        qnNumDropdown.setText(String.valueOf(this.selectedQnNum));
-        qnNumDropdown.setAdapter(qnsAdapter);
-        qnNumDropdown.setOnItemClickListener((p, v, pos, id) -> selectedQnNum = NUMBER_OF_QNS[pos]);
+        snoozeNumDropdown.setAdapter(
+                new ArrayAdapter<>(this, R.layout.dropdown_item, NUMBER_OF_SNOOZES)
+        );
+        snoozeNumDropdown.setOnItemClickListener((p, v, pos, id) -> selectedSnoozeNum = NUMBER_OF_SNOOZES[pos]);
+
+        snoozeDurationDropdown.setAdapter(
+                new ArrayAdapter<>(this, R.layout.dropdown_item, SNOOZE_DURATION)
+        );
+        snoozeDurationDropdown.setOnItemClickListener((p, v, pos, id) -> selectedSnoozeDuration = SNOOZE_DURATION[pos]);
 
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
         AutoCompleteTextView lessonsDropdown = findViewById(R.id.lesson_dropdown);
@@ -156,7 +168,9 @@ public class NewAlarmActivity extends AppCompatActivity {
         ToggleButton isSat = findViewById(R.id.isSat);
         this.buttons = new ToggleButton[]{isSun, isMon, isTues, isWed, isThurs, isFri, isSat};
         oneTimeCheckBox = findViewById(R.id.oneTime);
-        qnNumDropdown = findViewById(R.id.qns_num_dropdown);
+        numOfQns = findViewById(R.id.numOfQns);
+        snoozeNumDropdown = findViewById(R.id.numOfSnoozes);
+        snoozeDurationDropdown = findViewById(R.id.snoozeDuration);
     }
 
     private void setupToolbar() {
@@ -228,11 +242,20 @@ public class NewAlarmActivity extends AppCompatActivity {
             buttons[i].setChecked(alarmDays[i]);
         }
 
+        MaterialButton selectRingtoneButton = findViewById(R.id.selectToneButton);
         if (alarmToEdit.getRingtone() != null) {
             selectedAudio = Uri.parse(alarmToEdit.getRingtone());
-            ((MaterialButton) findViewById(R.id.selectToneButton)).setText(getFileName(selectedAudio));
+            selectRingtoneButton.setText(getFileName(selectedAudio));
+        } else {
+            selectRingtoneButton.setText(R.string.select_ringtone);
         }
-        this.selectedQnNum = alarmToEdit.getQnNum();
+        numOfQns.setText(String.valueOf(alarmToEdit.getQnNum()));
+
+        selectedSnoozeNum = alarmToEdit.getSnoozeNum();
+        snoozeNumDropdown.setText(String.valueOf(selectedSnoozeNum));
+
+        selectedSnoozeDuration = alarmToEdit.getLengthOfSnooze();
+        snoozeDurationDropdown.setText(String.valueOf(selectedSnoozeDuration));
     }
 
     private void updateToolbarTitle(int hourOfDay, int minute) {
@@ -307,20 +330,20 @@ public class NewAlarmActivity extends AppCompatActivity {
         boolean isOneTime = oneTimeCheckBox.isChecked() || noneSelected;
 
         String ringtone = selectedAudio == null ? "" : selectedAudio.toString();
+        String selectedNumOfQns = this.numOfQns.getText().toString();
         Alarm newAlarm = new Alarm(
                 hour, minute,
-                0, 5, isOneTime,
+                selectedSnoozeNum == null ? 0 : selectedSnoozeNum,
+                selectedSnoozeDuration == null ? 0 : selectedSnoozeDuration, isOneTime,
                 daysChecked[0], daysChecked[1], daysChecked[2], daysChecked[3],
-                daysChecked[4], daysChecked[5], daysChecked[6], ringtone
+                daysChecked[4], daysChecked[5], daysChecked[6],
+                ringtone, selectedNumOfQns.isEmpty() ? 0 : Integer.parseInt(selectedNumOfQns)
         );
         if (this.alarmToEdit != null) {
             newAlarm.setId(this.alarmToEdit.getId());
         }
         if (selectedLesson != null) {
             newAlarm.setLessonId(selectedLesson.getId());
-        }
-        if (selectedQnNum != null) {
-            newAlarm.setQnNum(selectedQnNum);
         }
         return newAlarm;
     }
