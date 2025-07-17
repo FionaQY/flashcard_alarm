@@ -42,10 +42,10 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
 
     public void setLesson(Lesson lesson) { // one time per lessons
         this.headers = lesson != null && lesson.getHeaders() != null
-            ? new ArrayList<>(lesson.getHeaders()) : new ArrayList<>();
-        
+                ? new ArrayList<>(lesson.getHeaders()) : new ArrayList<>();
+
         this.foreignIndexes = lesson != null && lesson.getForeignIndexes() != null
-            ? new ArrayList<>(lesson.getForeignIndexes()) : new ArrayList<>();
+                ? new ArrayList<>(lesson.getForeignIndexes()) : new ArrayList<>();
 
         notifyDataSetChanged();
     }
@@ -121,7 +121,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         if (position >= this.ans.size()) {
             return;
         }
-        
+
         String valueAns = this.ans.get(position);
         holder.valueName.setText(String.format("%s: ", valueName));
 
@@ -138,15 +138,15 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         input.setEnabled(true);
         if (isNotMemo) { // if editing, show all
             input.setText(valueAns);
-            return
-        } 
-        
+            return;
+        }
+
         if ((this.progress != null && this.progress.get(position) == null)
-        || !this.foreignIndexes.get(position)) {
+                || !this.foreignIndexes.get(position)) {
             input.setText(valueAns);
             input.setEnabled(false);
-        } 
-        
+        }
+
         boolean isNoShow = noInputExpected(valueName, valueAns);
         holder.inputContainer.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
     }

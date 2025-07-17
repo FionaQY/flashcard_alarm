@@ -290,9 +290,9 @@ public class NewAlarmActivity extends AppCompatActivity {
         if (newAlarm == null) return;
         AlarmHandler.saveAlarm(this, newAlarm);
         AlarmHandler.rescheduleAlarm(this, newAlarm);
-        Toast.makeText(this, 
-        String.format(Locale.US, "Alarm set for %s", newAlarm.getTime()),
-        Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,
+                String.format(Locale.US, "Alarm set for %s", newAlarm.getTime()),
+                Toast.LENGTH_SHORT).show();
         supportFinishAfterTransition();
     }
 

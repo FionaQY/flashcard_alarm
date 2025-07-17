@@ -75,7 +75,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
     private void changeStatusOfAlarm(boolean isChecked, Alarm alarm) {
         alarm.setEnabled(isChecked);
         AlarmHandler.saveAlarm(this.ctx, alarm);
-        if (alarm.isEnabled) {
+        if (alarm.isEnabled()) {
             AlarmHandler.rescheduleAlarm(this.ctx, alarm);
         } else {
             AlarmHandler.cancelAlarm(this.ctx, alarm);

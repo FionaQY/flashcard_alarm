@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +64,6 @@ public class NewLessonActivity extends AppCompatActivity {
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private FlashcardViewModel flashcardViewModel = null;
     private ActivityResultHelper csvPickerHelper = null;
-    private SparseArray<Integer> searchIndexes = new SparseArray<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,9 +92,8 @@ public class NewLessonActivity extends AppCompatActivity {
         } else {
             // populate stuff at the end or risk null pointer
             populateLessonData();
-            MaterialButton practiceButton = findViewById(R.id.practiceButton);
-            practiceButton.setVisibility(View.VISIBLE);
-            practiceButton.setOnClickListener(v -> showMemoDialog());
+            findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);
+            findViewById(R.id.practiceButton).setOnClickListener(v -> showMemoDialog());
         }
 
         getOnBackPressedDispatcher().addCallback(this,
@@ -131,7 +128,6 @@ public class NewLessonActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 searchString = s.toString().trim();
-                // TODO: fix bug where updating after search duplicates cards
                 updateFlashcardListView(false);
             }
 
@@ -147,22 +143,15 @@ public class NewLessonActivity extends AppCompatActivity {
         });
     }
 
-
     private void updateFlashcardListView(boolean updateHeaders) {
         if (tempLesson == null) return;
 
-        if (updateHeaders && tempLesson.getHeaders() != null) {
-            List<String> newHeaders = new ArrayList<>(tempLesson.getHeaders());
-            if (!newHeaders.equals(flashcardViewModel.getHeaders().getValue())) {
-                flashcardViewModel.setHeaders(newHeaders);
-            }
-        }
+        if (updateHeaders) flashcardViewModel.setHeaders(tempLesson.getHeaders());
         flashcardViewModel.setFlashcards(getFilteredFlashcards());
     }
 
     private List<Flashcard> getFilteredFlashcards() {
         List<Flashcard> cards = new ArrayList<>();
-        searchIndexes = new SparseArray<>();
         if (tempLesson.getFlashcards() == null) {
             return cards;
         }
@@ -172,7 +161,7 @@ public class NewLessonActivity extends AppCompatActivity {
             if (searchString.isEmpty() || card.toString().toUpperCase().contains(searchString.toUpperCase())) {
                 cards.add(card);
             }
-            searchIndexes.put(cards.size() - 1, i);
+            card.originalIndex = i;
         }
         return cards;
     }
@@ -480,7 +469,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void showEditFlashcardDialog(Flashcard flashcard, int position) {
-        int index = (!searchString.isEmpty() && this.searchIndexes.get(position) != null) ? this.searchIndexes.get(position) :position;
+        int index = (!searchString.isEmpty() && flashcard.originalIndex != -1) ? flashcard.originalIndex : position;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
         builder.setView(dialogView);
@@ -492,16 +481,13 @@ public class NewLessonActivity extends AppCompatActivity {
         inputAdapter.setLesson(this.tempLesson);
         inputAdapter.setValues(flashcard);
 
-        MaterialButton btnCancel = dialogView.findViewById(R.id.cancelButton);
-        MaterialButton btnSave = dialogView.findViewById(R.id.saveButton);
-
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> Objects.requireNonNull(dialog.getWindow()).clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
 
         dialog.show();
 
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-        btnSave.setOnClickListener(v -> {
+        dialogView.findViewById(R.id.cancelButton).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.saveButton).setOnClickListener(v -> {
             List<String> newVals = inputAdapter.getUserAnswers();
             tempLesson.getFlashcards().get(index).setVals(newVals);
             updateFlashcardListView(false);

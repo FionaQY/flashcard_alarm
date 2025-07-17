@@ -17,6 +17,7 @@ import com.example.language_alarm.receiver.AlarmReceiver;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -225,7 +226,7 @@ public class AlarmHandler {
     public static void removeLesson(Context ctx, int lessonId) {
         Context appContext = ctx.getApplicationContext();
         List<Alarm> alarmList = getAlarmDao(appContext).getAllAlarms().getValue();
-        if (alarmList == null) return;
+        if (alarmList == null || lessonId == 0) return;
         executor.execute(() -> {
             try {
                 for (Alarm alarm : alarmList) {
@@ -235,7 +236,7 @@ public class AlarmHandler {
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, String.format(Locale.US, "Error removing Lesson %s (ID: %d) from all alarms", lesson.getLessonName(), lessonId), e);
+                Log.e(TAG, String.format(Locale.US, "Error removing Lesson ID %d from all alarms", lessonId), e);
             }
         });
     }
@@ -252,9 +253,10 @@ public class AlarmHandler {
                 getAlarmDao(appContext).delete(alarm);
                 Log.i(TAG, String.format("Successfully deleted %s", alarm.getLogDesc()));
             } catch (Exception e) {
-                Log.e(TAG, 
-                String.format(Locale.US, "Error deleting %s", alarm.getLogDesc()), 
-                e);
+                assert alarm != null;
+                Log.e(TAG,
+                        String.format(Locale.US, "Error deleting %s", alarm.getLogDesc()),
+                        e);
             }
         });
     }

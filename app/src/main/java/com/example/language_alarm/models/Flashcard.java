@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.room.Ignore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,9 @@ public class Flashcard implements Parcelable {
             return new Flashcard[size];
         }
     };
+    @Ignore
+    public int originalIndex = -1;
     private List<String> values;
-
     private boolean isImportant;
 
     public Flashcard(List<String> cards) {
@@ -100,6 +102,7 @@ public class Flashcard implements Parcelable {
         List<String> clone = new ArrayList<>(this.getVals());
         Flashcard newCard = new Flashcard(clone);
         newCard.markImportance(this.isImportant);
+        newCard.originalIndex = this.originalIndex;
         return newCard;
     }
 

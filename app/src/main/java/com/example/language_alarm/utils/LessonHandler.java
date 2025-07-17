@@ -35,11 +35,11 @@ public class LessonHandler {
                     Log.d(TAG, String.format("New %s saved!", lesson.getLogDesc()));
                 } else {
                     getLessonDao(appContext).update(lesson);
-                    rescheduleAlarmInternal(appContext, lesson);
-                    Log.i(TAG, 
-                    String.format("%s updated and rescheduled", lesson.getLogDesc()));
+                    Log.i(TAG,
+                            String.format("%s updated and rescheduled", lesson.getLogDesc()));
                 }
             } catch (Exception e) {
+                assert lesson != null;
                 Log.e(TAG, String.format("Error saving %s", lesson.getLogDesc()), e);
             }
 
@@ -54,12 +54,12 @@ public class LessonHandler {
                     Log.w(TAG, "Attempted to delete null lesson");
                     return;
                 }
-                AlarmHandler.removeLesson(lesson.getId());
+                AlarmHandler.removeLesson(ctx, lesson.getId());
                 getLessonDao(appContext).delete(lesson);
                 Log.i(TAG, String.format("Successfully deleted %s", lesson.getLogDesc()));
             } catch (Exception e) {
-                Log.e(TAG, 
-                String.format("Error deleting %s", lesson.getLogDesc()), e);
+                Log.e(TAG,
+                        String.format("Error deleting %s", lesson.getLogDesc()), e);
             }
         });
     }

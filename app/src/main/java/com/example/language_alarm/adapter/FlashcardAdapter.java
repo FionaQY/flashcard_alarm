@@ -1,6 +1,5 @@
 package com.example.language_alarm.adapter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +32,6 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     }
 
     public void setFlashcards(List<Flashcard> newFlashcards) {
-        Log.d("Adapter", "Current list: " + (flashcards != null ? flashcards.hashCode() : "null"));
-        Log.d("Adapter", "New list: " + newFlashcards.hashCode());
-
-        // Create a completely NEW list for the adapter
         List<Flashcard> newList = new ArrayList<>(newFlashcards);
 
         if (flashcards == null || flashcards.isEmpty()) {
@@ -58,7 +53,6 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
             @Override
             public boolean areItemsTheSame(int oldPos, int newPos) {
-                // Use position-based comparison since we don't have stable IDs
                 return oldPos == newPos;
             }
 
@@ -66,9 +60,6 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
             public boolean areContentsTheSame(int oldPos, int newPos) {
                 Flashcard oldItem = flashcards.get(oldPos);
                 Flashcard newItem = newList.get(newPos);
-                System.out.println(oldItem.toString());
-                System.out.println(newItem.toString());
-                System.out.println(oldItem.equals(newItem));
                 return oldItem.equals(newItem);
             }
         };
