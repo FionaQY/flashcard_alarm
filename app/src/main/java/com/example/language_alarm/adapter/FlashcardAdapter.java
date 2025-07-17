@@ -107,6 +107,27 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
                 editListener.onFlashcardEdit(flashcard, position);
             }
         });
+        
+        // holder.starButton.setOnClickListener(view -> {
+        //     PopupMenu popup = new PopupMenu(v.getContext(), v);
+        //     popup.inflate(R.menu.flashcard_item_menu); // Define this XML
+
+        //     popup.setOnMenuItemClickListener(item -> {
+        //         int id = item.getItemId();
+        //         if (id == R.id.menu_edit) {
+        //             // handle edit
+        //             onItemEdit(getAdapterPosition());
+        //             return true;
+        //         } else if (id == R.id.menu_delete) {
+        //             // handle delete
+        //             onItemDelete(getAdapterPosition());
+        //             return true;
+        //         }
+        //         return false;
+        //     });
+
+        //     popup.show();
+        // })
 
 //        holder.starButton.setOnClickListener(view -> {
 //
@@ -129,13 +150,15 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
         public TextView txtValues;
         public Button editButton;
-        public Button starButton;
+        public ImageButton menuButton;
+        // public Button starButton;
 
         public FlashcardViewHolder(View itemView) {
             super(itemView);
             txtValues = itemView.findViewById(R.id.txtValues);
             editButton = itemView.findViewById(R.id.editButton);
             starButton = itemView.findViewById(R.id.starButton);
+            // menuButton = itemView.findViewById(R.id.menuButton);
         }
     }
 }
