@@ -32,35 +32,35 @@ public class AlarmHandler {
     }
 
     public static void saveAlarm(Context ctx, Alarm alarm) {
-        Context appContext = ctx.getApplicationContext();
-        executor.execute(() -> {
-            try {
-                if (alarm == null) {
-                    Log.w(TAG, "Attempted to save null alarm");
-                    return;
-                }
-                if (alarm.getId() == 0) {
-                    // new alarm
-                    Log.d(TAG, String.format("Saving new Alarm: %s", alarm.getDescription()));
-                    long id = getAlarmDao(appContext).insert(alarm);
-                    alarm.setId((int) id);
-                    scheduleAlarm(appContext, alarm);
-                    Log.d(TAG, String.format("New alarm scheduled with ID: %d", id));
-                } else {
-                    getAlarmDao(appContext).update(alarm);
-                    rescheduleAlarm(appContext, alarm);
-                    Log.i(TAG, "Alarm updated and rescheduled: " + alarm.getId());
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error saving alarm", e);
-            }
-
-        });
+        executor.execute(() -> saveAlarmInternal(ctx, alarm));
     }
 
-    public static void scheduleAlarm(Context ctx, Alarm alarm) {
-        if (alarm == null || !alarm.isEnabled()) return;
+    private static void saveAlarmInternal(Context ctx, Alarm alarm) {
+        Context appContext = ctx.getApplicationContext();
+        try {
+            if (alarm == null) {
+                Log.w(TAG, "Attempted to save null alarm");
+                return;
+            }
+            if (alarm.getId() == 0) {
+                // new alarm
+                Log.d(TAG, String.format("Saving %s", alarm.getLogDesc()));
+                long id = getAlarmDao(appContext).insert(alarm);
+                alarm.setId((int) id);
+                rescheduleAlarmInternal(appContext, alarm);
+                Log.d(TAG, String.format("New alarm scheduled with ID: %d", id));
+            } else {
+                getAlarmDao(appContext).update(alarm);
+                rescheduleAlarmInternal(appContext, alarm);
+                Log.i(TAG, String.format(Locale.US, "%s updated and rescheduled: ", alarm.getLogDesc()));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving alarm", e);
+        }
+    }
 
+    private static void scheduleAlarmInternal(Context ctx, Alarm alarm) {
+        if (!alarm.isEnabled()) return;
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
 
         if (alarm.isOneTime()) {
@@ -109,7 +109,7 @@ public class AlarmHandler {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.add(Calendar.MINUTE, alarm.getLengthOfSnooze());
+        calendar.add(Calendar.MINUTE, alarm.getSnoozeDuration());
         calendar.set(Calendar.SECOND, 0);
 
         setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
@@ -146,7 +146,7 @@ public class AlarmHandler {
     private static Intent createAlarmIntent(Context ctx, Alarm alarm) {
         Intent intent = new Intent(ctx, AlarmReceiver.class);
         intent.setAction(AlarmReceiver.ACTION_ALARM_TRIGGER);
-        intent.putExtra(RINGTONE_STR, alarm.getRingtone());
+        intent.putExtra(RINGTONE_STR, alarm.getRingtone() != null ? alarm.getRingtone() : "");
         intent.putExtra("alarm", alarm);
         return intent;
     }
@@ -174,6 +174,11 @@ public class AlarmHandler {
     }
 
     public static void cancelAlarm(Context ctx, Alarm alarm) {
+        if (alarm == null || !alarm.isEnabled()) return;
+        executor.execute(() -> cancelAlarmInternal(ctx, alarm));
+    }
+
+    private static void cancelAlarmInternal(Context ctx, Alarm alarm) {
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         if (!alarm.hasDaysSelected()) {
             cancelSingleAlarm(ctx, alarm.getId(), alarmManager, alarm);
@@ -192,8 +197,13 @@ public class AlarmHandler {
     }
 
     public static void rescheduleAlarm(Context ctx, Alarm alarm) {
-        cancelAlarm(ctx, alarm);
-        scheduleAlarm(ctx, alarm);
+        executor.execute(() -> rescheduleAlarmInternal(ctx, alarm));
+    }
+
+    public static void rescheduleAlarmInternal(Context ctx, Alarm alarm) {
+        if (alarm == null) return;
+        cancelAlarmInternal(ctx, alarm);
+        scheduleAlarmInternal(ctx, alarm);
     }
 
     public static void rescheduleAllAlarms(Context ctx) {
@@ -203,29 +213,48 @@ public class AlarmHandler {
         executor.execute(() -> {
             try {
                 for (Alarm alarm : alarmList) {
-                    rescheduleAlarm(appContext, alarm);
+                    rescheduleAlarmInternal(appContext, alarm);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error rescheduling all alarms", e);
             }
 
         });
+    }
 
+    public static void removeLesson(Context ctx, int lessonId) {
+        Context appContext = ctx.getApplicationContext();
+        List<Alarm> alarmList = getAlarmDao(appContext).getAllAlarms().getValue();
+        if (alarmList == null) return;
+        executor.execute(() -> {
+            try {
+                for (Alarm alarm : alarmList) {
+                    if (alarm.getLessonId() == lessonId) {
+                        alarm.deleteLesson();
+                        saveAlarmInternal(ctx, alarm);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, String.format(Locale.US, "Error removing Lesson %s (ID: %d) from all alarms", lesson.getLessonName(), lessonId), e);
+            }
+        });
     }
 
     public static void deleteAlarm(Context ctx, Alarm alarm) {
         Context appContext = ctx.getApplicationContext();
         executor.execute(() -> {
             try {
-                if (alarm.getId() == 0) {
+                if (alarm == null || alarm.getId() == 0) {
                     Log.w(TAG, "Attempted to delete null alarm");
                     return;
                 }
-                cancelAlarm(appContext, alarm);
+                cancelAlarmInternal(appContext, alarm);
                 getAlarmDao(appContext).delete(alarm);
-                Log.i(TAG, String.format("Successfully deleted alarm ID:%d", alarm.getId()));
+                Log.i(TAG, String.format("Successfully deleted %s", alarm.getLogDesc()));
             } catch (Exception e) {
-                Log.e(TAG, "Error deleting alarm", e);
+                Log.e(TAG, 
+                String.format(Locale.US, "Error deleting %s", alarm.getLogDesc()), 
+                e);
             }
         });
     }

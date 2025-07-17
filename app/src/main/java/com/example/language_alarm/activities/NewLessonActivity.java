@@ -58,8 +58,8 @@ public class NewLessonActivity extends AppCompatActivity {
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
     Runnable headersUpdateRunnable;
-    private MaterialButton addFlashcardButton;
-    private LinearLayout optionsContainer;
+    private String searchString = null;
+    private MaterialToolbar toolbar = null;
     private Lesson tempLesson = null;
     private List<String> currentHeaders = new ArrayList<>();
     private List<Boolean> foreignIndexes = new ArrayList<>();
@@ -71,7 +71,9 @@ public class NewLessonActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_lesson);
 
-        setupViews();
+        this.tempLesson = getIntent().getParcelableExtra("lesson");
+
+        setupListeners();
         setupToolbar();
 
         csvPickerHelper = new ActivityResultHelper(this, this::showCsvImportProgress);
@@ -86,14 +88,14 @@ public class NewLessonActivity extends AppCompatActivity {
         flashcardViewModel.getFlashcards().observe(this, adapter::setFlashcards);
         flashcardViewModel.getHeaders().observe(this, adapter::setHeaders);
 
-        this.tempLesson = getIntent().getParcelableExtra("lesson");
         if (tempLesson == null) {
             this.tempLesson = new Lesson();
         } else {
             // populate stuff at the end or risk null pointer
-            populateLessonData(tempLesson);
-            findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);
-            findViewById(R.id.practiceButton).setOnClickListener(v -> showMemoDialog());
+            populateLessonData();
+            MaterialButton practiceButton = findViewById(R.id.practiceButton);
+            practiceButton.setVisibility(View.VISIBLE);
+            practiceButton.setOnClickListener(v -> showMemoDialog());
         }
 
         getOnBackPressedDispatcher().addCallback(this,
@@ -106,43 +108,33 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         ToolbarHelper.setupToolbar(toolbar, "New Lesson", true, this::showExitDialog);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
     }
 
-    private void setupViews() {
-        addFlashcardButton = findViewById(R.id.addFlashcardButton);
-        MaterialButton manuallyAddButton = findViewById(R.id.manuallyAddButton);
-        MaterialButton csvImportButton = findViewById(R.id.csvImportButton);
-        MaterialButton copyButton = findViewById(R.id.copyButton);
-        MaterialButton preferencesButton = findViewById(R.id.preferencesButton);
-        MaterialButton saveLessonButton = findViewById(R.id.saveLessonButton);
-        optionsContainer = findViewById(R.id.optionsContainer);
-
-        addFlashcardButton.setOnClickListener(v -> showAddOptions());
-        manuallyAddButton.setOnClickListener(v -> startManualFlashcardCreation());
-        csvImportButton.setOnClickListener(v -> importFromCsv());
-        copyButton.setOnClickListener(v -> showCopyPasteDialog());
-        preferencesButton.setOnClickListener(v -> showPreferencesDialog());
-        saveLessonButton.setOnClickListener(v -> saveLesson());
+    private void setupListeners() {
+        MaterialButton addFlashcardButton = findViewById(R.id.addFlashcardButton);
+        addFlashcardButton.setOnClickListener(v -> {
+            addFlashcardButton.setVisibility(View.GONE);
+            findViewById(R.id.optionsContainer).setVisibility(View.VISIBLE);
+        });
+        findViewById(R.id.manuallyAddButton).setOnClickListener(v -> startManualFlashcardCreation());
+        findViewById(R.id.csvImportButton).setOnClickListener(v -> importFromCsv());
+        findViewById(R.id.copyButton).setOnClickListener(v -> showCopyPasteDialog());
+        findViewById(R.id.preferencesButton).setOnClickListener(v -> showPreferencesDialog());
+        findViewById(R.id.saveLessonButton).setOnClickListener(v -> saveLesson());
 
         ((TextInputEditText) findViewById(R.id.searchBar).findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
+                this.searchString = s.toString().trim();
                 // TODO: fix bug where updating after search duplicates cards
                 if (tempLesson == null || tempLesson.getFlashcards() == null) {
                     return;
                 }
-                String str = s.toString().trim();
-                List<Flashcard> cards = new ArrayList<>();
-                for (Flashcard card : tempLesson.getFlashcards()) {
-                    if (card.toString().toUpperCase().contains(str.toUpperCase())) {
-                        cards.add(card);
-                    }
-                }
-                flashcardViewModel.setFlashcards(cards);
+                flashcardViewModel.setFlashcards(getFilteredFlashcards());
             }
 
             @Override
@@ -157,11 +149,17 @@ public class NewLessonActivity extends AppCompatActivity {
         });
     }
 
-    private void showAddOptions() {
-        addFlashcardButton.setVisibility(View.GONE);
-        optionsContainer.setVisibility(View.VISIBLE);
+    private List<Flashcard> getFilteredFlashcards() {
+        List<Flashcard> cards = new ArrayList<>();
+        for (Flashcard card : tempLesson.getFlashcards()) {
+            if (card.toString().toUpperCase().contains(str.toUpperCase())) {
+                cards.add(card);
+            }
+        }
+        return cards;
     }
 
+    // Functions to add new flashcards
     private void startManualFlashcardCreation() {
         Flashcard newFlashcard = new Flashcard(new ArrayList<>(this.tempLesson.getHeaders().size()));
         this.tempLesson.getFlashcards().add(newFlashcard);
@@ -288,7 +286,7 @@ public class NewLessonActivity extends AppCompatActivity {
         }
         tempLesson.setHeaders(currentHeaders);
         tempLesson.addFlashcards(cards);
-        flashcardViewModel.setBothValues(new ArrayList<>(tempLesson.getFlashcards()), new ArrayList<>(tempLesson.getHeaders()));
+        flashcardViewModel.setBothValues(getFilteredFlashcards(), new ArrayList<>(tempLesson.getHeaders()));
         new AlertDialog.Builder(this)
                 .setTitle("Import Successful")
                 .setMessage(String.format(Locale.US,
@@ -339,6 +337,7 @@ public class NewLessonActivity extends AppCompatActivity {
         return values;
     }
 
+    // Dialogs
     private void showPreferencesDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_preferences, null);
@@ -464,6 +463,36 @@ public class NewLessonActivity extends AppCompatActivity {
         });
     }
 
+    private void showEditFlashcardDialog(Flashcard flashcard, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
+        builder.setView(dialogView);
+
+        RecyclerView recyclerView2 = dialogView.findViewById(R.id.values_list);
+        recyclerView2.setLayoutManager(new LinearLayoutManager(this));
+        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true);
+        recyclerView2.setAdapter(inputAdapter);
+        inputAdapter.setLesson(this.tempLesson);
+        inputAdapter.setValues(flashcard);
+
+        MaterialButton btnCancel = dialogView.findViewById(R.id.cancelButton);
+        MaterialButton btnSave = dialogView.findViewById(R.id.saveButton);
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(d -> Objects.requireNonNull(dialog.getWindow()).clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
+
+        dialog.show();
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            List<String> newVals = inputAdapter.getUserAnswers();
+            tempLesson.getFlashcards().get(position).setVals(newVals);
+            flashcardViewModel.setFlashcards(getFilteredFlashcards());
+
+            dialog.dismiss();
+        });
+    }
+
     private void savePreferences(boolean capitalization, boolean punctuation,
                                  String lessonName, String headersString,
                                  RecyclerView germanRecycler) {
@@ -474,7 +503,7 @@ public class NewLessonActivity extends AppCompatActivity {
         tempLesson.setIsPunctSensitive(punctuation);
         tempLesson.setLessonName(lessonName);
         if (lessonName != null && !lessonName.trim().isEmpty()) {
-            TextView titleView = findViewById(R.id.toolbar).findViewById(R.id.toolbar_title);
+            TextView titleView = this.toolbar.findViewById(R.id.toolbar_title);
             if (titleView != null) {
                 titleView.setText(tempLesson.getLessonName());
             }
@@ -494,7 +523,7 @@ public class NewLessonActivity extends AppCompatActivity {
             }
         }
         tempLesson.setForeignIndexes(foreignIndices);
-        flashcardViewModel.setHeaders(new ArrayList<>(tempLesson.getHeaders()));
+        flashcardViewModel.setHeaders(tempLesson.getHeaders());
     }
 
     private void setupHeaderMapping(RecyclerView englishRecycler, RecyclerView germanRecycler) {
@@ -556,6 +585,7 @@ public class NewLessonActivity extends AppCompatActivity {
         return currItems.size();
     }
 
+    // functions related to the lesson
     private void saveLesson() {
         if (tempLesson.getLessonName() == null || tempLesson.getLessonName().trim().isEmpty()) {
             Toast.makeText(this, "Please set a lesson name", Toast.LENGTH_SHORT).show();
@@ -568,59 +598,29 @@ public class NewLessonActivity extends AppCompatActivity {
         }
 
         LessonHandler.saveLesson(this, tempLesson);
-        Toast.makeText(this, "Lesson saved", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, String.format(Locale.US, "Lesson %s saved", tempLesson.getLessonName()), Toast.LENGTH_SHORT).show();
         finish();
     }
 
-    private void populateLessonData(Lesson lesson) {
-        if (lesson.getLessonName() != null && !lesson.getLessonName().isEmpty()) {
-            TextView titleView = findViewById(R.id.toolbar).findViewById(R.id.toolbar_title);
+    private void populateLessonData() {
+        if (tempLesson.getLessonName() != null && !tempLesson.getLessonName().isEmpty()) {
+            TextView titleView = this.toolbar.findViewById(R.id.toolbar_title);
             if (titleView != null) {
-                titleView.setText(lesson.getLessonName());
+                titleView.setText(tempLesson.getLessonName());
             }
         }
-        this.currentHeaders = new ArrayList<>(lesson.getHeaders());
-        this.foreignIndexes = new ArrayList<>(lesson.getForeignIndexes());
+        this.currentHeaders = new ArrayList<>(tempLesson.getHeaders());
+        this.foreignIndexes = new ArrayList<>(tempLesson.getForeignIndexes());
 
-        if (lesson.getFlashcards() != null) {
-            flashcardViewModel.setBothValues(new ArrayList<>(lesson.getFlashcards()), new ArrayList<>(lesson.getHeaders()));
+        if (tempLesson.getFlashcards() != null) {
+            flashcardViewModel.setBothValues(getFilteredFlashcards(), new ArrayList<>(tempLesson.getHeaders()));
         }
-    }
-
-    private void showEditFlashcardDialog(Flashcard flashcard, int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
-        builder.setView(dialogView);
-
-        RecyclerView recyclerView2 = dialogView.findViewById(R.id.values_list);
-        recyclerView2.setLayoutManager(new LinearLayoutManager(this));
-        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true);
-        recyclerView2.setAdapter(inputAdapter);
-        inputAdapter.setLesson(this.tempLesson);
-        inputAdapter.setValues(flashcard);
-
-        MaterialButton btnCancel = dialogView.findViewById(R.id.cancelButton);
-        MaterialButton btnSave = dialogView.findViewById(R.id.saveButton);
-
-        AlertDialog dialog = builder.create();
-        dialog.setOnShowListener(d -> Objects.requireNonNull(dialog.getWindow()).clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
-
-        dialog.show();
-
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-        btnSave.setOnClickListener(v -> {
-            List<String> newVals = inputAdapter.getUserAnswers();
-            tempLesson.getFlashcards().get(position).setVals(newVals);
-            flashcardViewModel.setFlashcards(tempLesson.getFlashcards());
-
-            dialog.dismiss();
-        });
     }
 
     public void showExitDialog() {
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setMessage("Cancel this lesson? Changes made will not be saved")
+                .setMessage("Go back? Changes made will not be saved")
                 .setPositiveButton("Confirm",
                         (dialog, which) -> this.finish())
                 .setNegativeButton("Cancel", null)
@@ -632,7 +632,7 @@ public class NewLessonActivity extends AppCompatActivity {
         super.onResume();
 
         if (this.tempLesson != null) {
-            populateLessonData(this.tempLesson);
+            populateLessonData();
         }
     }
 

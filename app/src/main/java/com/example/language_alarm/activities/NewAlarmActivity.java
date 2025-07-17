@@ -45,11 +45,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class NewAlarmActivity extends AppCompatActivity {
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     private static final Integer[] NUMBER_OF_SNOOZES = new Integer[]{
             0, 1, 3, 5, 10, 1000
     };
@@ -86,7 +83,9 @@ public class NewAlarmActivity extends AppCompatActivity {
             FloatingActionButton deleteButt = findViewById(R.id.deleteButton);
             deleteButt.setVisibility(View.VISIBLE);
             deleteButt.setOnClickListener(v -> {
+                // TODO: move delete alarm to main activity
                 AlarmHandler.deleteAlarm(this, alarmToEdit);
+                AlarmHandler.cancelAlarm(this, alarmToEdit);
                 finishAfterTransition();
             });
         }
@@ -254,7 +253,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         selectedSnoozeNum = alarmToEdit.getSnoozeNum();
         snoozeNumDropdown.setText(String.valueOf(selectedSnoozeNum));
 
-        selectedSnoozeDuration = alarmToEdit.getLengthOfSnooze();
+        selectedSnoozeDuration = alarmToEdit.getSnoozeDuration();
         snoozeDurationDropdown.setText(String.valueOf(selectedSnoozeDuration));
     }
 
@@ -289,23 +288,12 @@ public class NewAlarmActivity extends AppCompatActivity {
 
     private void saveAlarm(Alarm newAlarm) {
         if (newAlarm == null) return;
-
-        executor.execute(() -> {
-            try {
-                runOnUiThread(() -> {
-                    AlarmHandler.saveAlarm(this, newAlarm);
-                    AlarmHandler.scheduleAlarm(this, newAlarm);
-                    Toast.makeText(this,
-                            String.format(Locale.US, "Alarm set for %02d:%02d", newAlarm.getHour(), newAlarm.getMinute()),
-                            Toast.LENGTH_SHORT).show();
-                    supportFinishAfterTransition();
-                });
-            } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this,
-                        "Failed to set alarm: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show());
-            }
-        });
+        AlarmHandler.saveAlarm(this, newAlarm);
+        AlarmHandler.rescheduleAlarm(this, newAlarm);
+        Toast.makeText(this, 
+        String.format(Locale.US, "Alarm set for %s", newAlarm.getTime()),
+        Toast.LENGTH_SHORT).show();
+        supportFinishAfterTransition();
     }
 
     private Alarm createAlarm() {

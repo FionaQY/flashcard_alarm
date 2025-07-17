@@ -26,12 +26,12 @@ public class Alarm implements Parcelable {
     };
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private int hour;  // Store hour separately
+    private int hour;
     private int minute;
     private String ringtone;
     private String wallpaper;
     private int snoozeNum;
-    private int lengthOfSnooze; // in minutes
+    private int snoozeDuration; // in minutes
     private boolean isEnabled = true;
     private boolean isOneTime;
     private boolean monday;
@@ -53,7 +53,7 @@ public class Alarm implements Parcelable {
         this.hour = hour;
         this.minute = minute;
         this.snoozeNum = numSnoozes;
-        this.lengthOfSnooze = lenSnooze;
+        this.snoozeDuration = lenSnooze;
         this.isOneTime = isOneTime;
         this.sunday = sunday;
         this.monday = monday;
@@ -73,7 +73,7 @@ public class Alarm implements Parcelable {
         ringtone = in.readString();
         wallpaper = in.readString();
         snoozeNum = in.readInt();
-        lengthOfSnooze = in.readInt();
+        snoozeDuration = in.readInt();
         isEnabled = in.readByte() != 0;
         isOneTime = in.readByte() != 0;
         monday = in.readByte() != 0;
@@ -192,12 +192,12 @@ public class Alarm implements Parcelable {
         this.snoozeNum = snoozeNum;
     }
 
-    public int getLengthOfSnooze() {
-        return lengthOfSnooze;
+    public int getSnoozeDuration() {
+        return snoozeDuration;
     }
 
-    public void setLengthOfSnooze(int lengthOfSnooze) {
-        this.lengthOfSnooze = lengthOfSnooze;
+    public void setSnoozeDuration(int snoozeDuration) {
+        this.snoozeDuration = snoozeDuration;
     }
 
     public boolean isEnabled() {
@@ -228,6 +228,10 @@ public class Alarm implements Parcelable {
         this.lessonId = lessonId;
     }
 
+    public void deleteLesson() {
+        this.lessonId = 0;
+    }
+
     public int getQnNum() {
         return this.qnNum;
     }
@@ -238,17 +242,33 @@ public class Alarm implements Parcelable {
 
     public String getDescription() {
         StringBuilder sb = new StringBuilder();
-        if (isOneTime) sb.append("One time alarm: ");
-        if (sunday) sb.append("Sun ");
-        if (monday) sb.append("Mon ");
-        if (tuesday) sb.append("Tue ");
-        if (wednesday) sb.append("Wed ");
-        if (thursday) sb.append("Thu ");
-        if (friday) sb.append("Fri ");
-        if (saturday) sb.append("Sat ");
-        if (this.lessonId == 0) sb.append("Lesson not yet set");
+
+        boolean[] days = {sunday, monday, tuesday, wednesday, thursday, friday, saturday};
+        String[] dayNames = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+
+        for (int i = 0; i < days.length; i++) {
+            if (days[i]) {
+                sb.append(dayNames[i]).append(" ");
+            }
+        }
+
+        if (isOneTime) {
+            sb.insert(0, sb.length() > 0 ? "One time alarm: " : "One time alarm");
+        }
+
+        if (lessonId == 0) {
+            if (sb.length() > 0) {
+                sb.append("; ");
+            }
+            sb.append("Lesson not yet set");
+        }
         return sb.toString().trim();
     }
+
+    public String getLogDesc() {
+        return String.format("Alarm %s (ID: %d)", this.getTime(), this.getId());
+    }
+
 
     public boolean hasDaysSelected() {
         return this.isSaturday() || this.isFriday() || this.isThursday() || this.isWednesday()
@@ -280,7 +300,7 @@ public class Alarm implements Parcelable {
                 (Objects.equals(ringtone, otherAlarm.getRingtone())) &&
                 (Objects.equals(wallpaper, otherAlarm.getWallpaper())) &&
                 snoozeNum == otherAlarm.getSnoozeNum() &&
-                lengthOfSnooze == otherAlarm.getLengthOfSnooze() &&
+                snoozeDuration == otherAlarm.getSnoozeDuration() &&
                 isEnabled == otherAlarm.isEnabled() &&
                 isOneTime == otherAlarm.isOneTime() &&
                 monday == otherAlarm.isMonday() &&
@@ -307,7 +327,7 @@ public class Alarm implements Parcelable {
         dest.writeString(ringtone);
         dest.writeString(wallpaper);
         dest.writeInt(snoozeNum);
-        dest.writeInt(lengthOfSnooze);
+        dest.writeInt(snoozeDuration);
         dest.writeByte((byte) (isEnabled ? 1 : 0));
         dest.writeByte((byte) (isOneTime ? 1 : 0));
         dest.writeByte((byte) (monday ? 1 : 0));

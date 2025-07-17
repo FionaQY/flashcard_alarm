@@ -132,6 +132,10 @@ public class Lesson implements Parcelable {
         return this.headers == null ? "" : String.join(", ", this.getHeaders());
     }
 
+    public String getLogDesc() {
+        return String.format("Lesson %s (ID: %d)", this.getLessonName(), this.getId());
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

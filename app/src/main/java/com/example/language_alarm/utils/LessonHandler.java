@@ -32,14 +32,15 @@ public class LessonHandler {
                     Log.d(TAG, String.format("Saving new Lesson: %s", lesson.getLessonName()));
                     long id = getLessonDao(appContext).insert(lesson);
                     lesson.setId((int) id);
-                    Log.d(TAG, String.format("New lesson saved with ID: %d", id));
+                    Log.d(TAG, String.format("New %s saved!", lesson.getLogDesc()));
                 } else {
                     getLessonDao(appContext).update(lesson);
-//                    rescheduleAlarm(appContext, lesson);
-                    Log.i(TAG, "Lesson updated and rescheduled: " + lesson.getId());
+                    rescheduleAlarmInternal(appContext, lesson);
+                    Log.i(TAG, 
+                    String.format("%s updated and rescheduled", lesson.getLogDesc()));
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error saving lesson", e);
+                Log.e(TAG, String.format("Error saving %s", lesson.getLogDesc()), e);
             }
 
         });
@@ -53,11 +54,12 @@ public class LessonHandler {
                     Log.w(TAG, "Attempted to delete null lesson");
                     return;
                 }
-                // set lessonID of all alarms with this lessonId to null?
+                AlarmHandler.removeLesson(lesson.getId());
                 getLessonDao(appContext).delete(lesson);
-                Log.i(TAG, String.format("Successfully deleted lesson ID:%d", lesson.getId()));
+                Log.i(TAG, String.format("Successfully deleted %s", lesson.getLogDesc()));
             } catch (Exception e) {
-                Log.e(TAG, "Error deleting lesson", e);
+                Log.e(TAG, 
+                String.format("Error deleting %s", lesson.getLogDesc()), e);
             }
         });
     }
