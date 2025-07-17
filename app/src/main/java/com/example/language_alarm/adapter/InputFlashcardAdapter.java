@@ -41,21 +41,12 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     }
 
     public void setLesson(Lesson lesson) { // one time per lessons
-        if (lesson == null || lesson.getHeaders() == null) {
-            this.headers = new ArrayList<>();
-        } else if (this.headers == null || this.headers.isEmpty()) {
-            this.headers = new ArrayList<>(lesson.getHeaders());
-        } else {
-            this.headers = lesson.getHeaders();
-        }
+        this.headers = lesson != null && lesson.getHeaders() != null
+            ? new ArrayList<>(lesson.getHeaders()) : new ArrayList<>();
+        
+        this.foreignIndexes = lesson != null && lesson.getForeignIndexes() != null
+            ? new ArrayList<>(lesson.getForeignIndexes()) : new ArrayList<>();
 
-        if (lesson == null || lesson.getHeaders() == null) {
-            this.foreignIndexes = new ArrayList<>();
-        } else if (this.foreignIndexes == null || this.foreignIndexes.isEmpty()) {
-            this.foreignIndexes = new ArrayList<>(lesson.getForeignIndexes());
-        } else {
-            this.foreignIndexes = lesson.getForeignIndexes();
-        }
         notifyDataSetChanged();
     }
 
@@ -83,7 +74,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
     public List<String> getUserAnswers() {
         List<String> answers = new ArrayList<>();
         for (int i = 0; i < inputFields.size(); i++) {
-            Editable txt = inputFields.get(i).getText();
+            Editable txt = inputFields.get(i) != null ? inputFields.get(i).getText() : null;
             answers.add(txt == null ? "" : txt.toString());
         }
         return answers;
@@ -130,6 +121,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         if (position >= this.ans.size()) {
             return;
         }
+        
         String valueAns = this.ans.get(position);
         holder.valueName.setText(String.format("%s: ", valueName));
 
@@ -142,25 +134,21 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
         this.inputFields.put(position, input);
         this.answerViews.put(position, ansView);
 
-        if (isNotMemo) {
+        input.setText("");
+        input.setEnabled(true);
+        if (isNotMemo) { // if editing, show all
             input.setText(valueAns);
-            input.setEnabled(true);
-        } else {
-            if (this.progress != null && this.progress.get(position) == null) {
-                input.setText(valueAns);
-                input.setEnabled(false);
-            } else if (!this.foreignIndexes.get(position)) {
-                input.setText(valueAns);
-                input.setEnabled(false);
-            } else {
-                input.setText("");
-                input.setEnabled(true);
-            }
-
-            boolean isNoShow = noInputExpected(valueName, valueAns);
-            holder.inputContainer.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
-        }
-
+            return
+        } 
+        
+        if ((this.progress != null && this.progress.get(position) == null)
+        || !this.foreignIndexes.get(position)) {
+            input.setText(valueAns);
+            input.setEnabled(false);
+        } 
+        
+        boolean isNoShow = noInputExpected(valueName, valueAns);
+        holder.inputContainer.setVisibility(isNoShow ? View.GONE : View.VISIBLE);
     }
 
     @Override

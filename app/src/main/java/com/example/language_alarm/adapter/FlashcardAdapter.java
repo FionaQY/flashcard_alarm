@@ -74,9 +74,8 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         };
 
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-        flashcards.clear();
-        flashcards.addAll(newFlashcards);
-        diffResult.dispatchUpdatesTo(this); // This MUST be called
+        flashcards = newList;
+        diffResult.dispatchUpdatesTo(this);
     }
 
     public void setHeaders(List<String> newHeaders) {

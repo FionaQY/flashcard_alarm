@@ -43,10 +43,4 @@ public class FlashcardViewModel extends AndroidViewModel {
     public void setHeaders(List<String> headers) {
         this.headers.setValue(headers);
     }
-
-    public void setBothValues(List<Flashcard> flashcards, List<String> headers) {
-        this.setFlashcards(flashcards);
-        this.setHeaders(headers);
-    }
-
 }

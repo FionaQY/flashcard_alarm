@@ -55,16 +55,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewLessonActivity extends AppCompatActivity {
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     Handler handler = new Handler(Looper.getMainLooper());
     Runnable headersUpdateRunnable;
-    private String searchString = null;
+    private String searchString = "";
     private MaterialToolbar toolbar = null;
     private Lesson tempLesson = null;
     private List<String> currentHeaders = new ArrayList<>();
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private FlashcardViewModel flashcardViewModel = null;
     private ActivityResultHelper csvPickerHelper = null;
+    private SparseArray<Integer> searchIndexes = new SparseArray<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,12 +130,9 @@ public class NewLessonActivity extends AppCompatActivity {
         ((TextInputEditText) findViewById(R.id.searchBar).findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                this.searchString = s.toString().trim();
+                searchString = s.toString().trim();
                 // TODO: fix bug where updating after search duplicates cards
-                if (tempLesson == null || tempLesson.getFlashcards() == null) {
-                    return;
-                }
-                flashcardViewModel.setFlashcards(getFilteredFlashcards());
+                updateFlashcardListView(false);
             }
 
             @Override
@@ -149,12 +147,32 @@ public class NewLessonActivity extends AppCompatActivity {
         });
     }
 
+
+    private void updateFlashcardListView(boolean updateHeaders) {
+        if (tempLesson == null) return;
+
+        if (updateHeaders && tempLesson.getHeaders() != null) {
+            List<String> newHeaders = new ArrayList<>(tempLesson.getHeaders());
+            if (!newHeaders.equals(flashcardViewModel.getHeaders().getValue())) {
+                flashcardViewModel.setHeaders(newHeaders);
+            }
+        }
+        flashcardViewModel.setFlashcards(getFilteredFlashcards());
+    }
+
     private List<Flashcard> getFilteredFlashcards() {
         List<Flashcard> cards = new ArrayList<>();
-        for (Flashcard card : tempLesson.getFlashcards()) {
-            if (card.toString().toUpperCase().contains(str.toUpperCase())) {
+        searchIndexes = new SparseArray<>();
+        if (tempLesson.getFlashcards() == null) {
+            return cards;
+        }
+        List<Flashcard> currCards = tempLesson.getFlashcards();
+        for (int i = 0; i < currCards.size(); i++) {
+            Flashcard card = currCards.get(i);
+            if (searchString.isEmpty() || card.toString().toUpperCase().contains(searchString.toUpperCase())) {
                 cards.add(card);
             }
+            searchIndexes.put(cards.size() - 1, i);
         }
         return cards;
     }
@@ -286,7 +304,7 @@ public class NewLessonActivity extends AppCompatActivity {
         }
         tempLesson.setHeaders(currentHeaders);
         tempLesson.addFlashcards(cards);
-        flashcardViewModel.setBothValues(getFilteredFlashcards(), new ArrayList<>(tempLesson.getHeaders()));
+        updateFlashcardListView(true);
         new AlertDialog.Builder(this)
                 .setTitle("Import Successful")
                 .setMessage(String.format(Locale.US,
@@ -360,8 +378,6 @@ public class NewLessonActivity extends AppCompatActivity {
             switchPunctuation.setChecked(tempLesson.isPunctSensitive());
             editLessonName.setText(tempLesson.getLessonName());
             editHeaders.setText(tempLesson.getHeadersString());
-            currentHeaders = new ArrayList<>(tempLesson.getHeaders());
-            foreignIndexes = new ArrayList<>(tempLesson.getForeignIndexes());
         }
 
         setupHeaderMapping(recyclerEnglish, recyclerGerman);
@@ -464,6 +480,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void showEditFlashcardDialog(Flashcard flashcard, int position) {
+        int index = (!searchString.isEmpty() && this.searchIndexes.get(position) != null) ? this.searchIndexes.get(position) :position;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
         builder.setView(dialogView);
@@ -486,9 +503,8 @@ public class NewLessonActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnSave.setOnClickListener(v -> {
             List<String> newVals = inputAdapter.getUserAnswers();
-            tempLesson.getFlashcards().get(position).setVals(newVals);
-            flashcardViewModel.setFlashcards(getFilteredFlashcards());
-
+            tempLesson.getFlashcards().get(index).setVals(newVals);
+            updateFlashcardListView(false);
             dialog.dismiss();
         });
     }
@@ -496,9 +512,6 @@ public class NewLessonActivity extends AppCompatActivity {
     private void savePreferences(boolean capitalization, boolean punctuation,
                                  String lessonName, String headersString,
                                  RecyclerView germanRecycler) {
-        if (tempLesson == null) {
-            tempLesson = new Lesson();
-        }
         tempLesson.setIsCaseSensitive(capitalization);
         tempLesson.setIsPunctSensitive(punctuation);
         tempLesson.setLessonName(lessonName);
@@ -612,9 +625,7 @@ public class NewLessonActivity extends AppCompatActivity {
         this.currentHeaders = new ArrayList<>(tempLesson.getHeaders());
         this.foreignIndexes = new ArrayList<>(tempLesson.getForeignIndexes());
 
-        if (tempLesson.getFlashcards() != null) {
-            flashcardViewModel.setBothValues(getFilteredFlashcards(), new ArrayList<>(tempLesson.getHeaders()));
-        }
+        updateFlashcardListView(true);
     }
 
     public void showExitDialog() {
@@ -630,7 +641,6 @@ public class NewLessonActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         if (this.tempLesson != null) {
             populateLessonData();
         }
@@ -654,6 +664,7 @@ public class NewLessonActivity extends AppCompatActivity {
         if (handler != null && headersUpdateRunnable != null) {
             handler.removeCallbacks(headersUpdateRunnable);
         }
+        executor.shutdownNow();
     }
 
     private interface OnItemClickListener {

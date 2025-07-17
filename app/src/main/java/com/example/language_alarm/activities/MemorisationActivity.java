@@ -292,7 +292,6 @@ public class MemorisationActivity extends AppCompatActivity {
 
     private NormalizedResult normalize(String input) {
         NormalizedResult res = new NormalizedResult();
-        res.normalized = "";
         StringBuilder sb = new StringBuilder();
         res.originalIndices = new ArrayList<>();
 
@@ -303,7 +302,7 @@ public class MemorisationActivity extends AppCompatActivity {
             boolean isWhitespace = Character.isWhitespace(ch);
             if (isWhitespace || isPunctuation) continue;
 
-            char normalizedChar = lesson.isCaseSensitive() ? ch : Character.toLowerCase(ch);
+            char normalizedChar = lesson.isCaseSensitive() ? ch : Character.toUpperCase(ch);
             sb.append(normalizedChar);
             res.originalIndices.add(i);
         }
@@ -319,7 +318,7 @@ public class MemorisationActivity extends AppCompatActivity {
     }
 
     private static class NormalizedResult {
-        String normalized;
+        String normalized = "";
         List<Integer> originalIndices;
     }
 
