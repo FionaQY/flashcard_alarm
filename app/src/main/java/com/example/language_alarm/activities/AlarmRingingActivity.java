@@ -15,6 +15,7 @@ import com.example.language_alarm.receiver.AlarmReceiver;
 import com.example.language_alarm.utils.AlarmForegroundService;
 import com.example.language_alarm.utils.AlarmHandler;
 import com.google.android.material.button.MaterialButton;
+import com.example.language_alarm.utils.SettingUtils;
 
 import java.util.Locale;
 
@@ -38,19 +39,16 @@ public class AlarmRingingActivity extends AppCompatActivity {
             Log.w("Alarm", "Attempted to ring null alarm");
             supportFinishAfterTransition();
         }
-        SharedPreferences settings = SettingUtils.getSharedPreferences();
-        int snoozeCount = settings.getInt(SNOOZE_COUNT, 0);
 
+        int snoozeCount = SettingUtils.getSnoozeCount();
+        // set buttons view and listeners
         MaterialButton snoozeButton = findViewById(R.id.snoozeButton);
         snoozeButton.setVisibility(alarm.getSnoozeNum() > snoozeCount ? View.VISIBLE : View.GONE);
         snoozeButton.setText(String.format(Locale.US, "%d Snoozes Left", alarm.getSnoozeNum() - snoozeCount));
 
         snoozeButton.setOnClickListener(v -> {
             stopRinging();
-            AlarmHandler.snoozeAlarm(this, alarm);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putInt(SNOOZE_COUNT, snoozeCount + 1);
-            editor.apply();
+            SettingUtils.incrementSnoozeCount();
             finish();
         });
 
@@ -58,9 +56,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
             stopRinging();
 
             AlarmHandler.cancelAlarm(this, alarm);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putInt(SNOOZE_COUNT, 0);
-            editor.apply();
+            SettingUtils.resetSnoozeCount();
 
             Intent intent = new Intent(this, MemorisationActivity.class);
             intent.putExtra("lessonId", alarm.getLessonId());

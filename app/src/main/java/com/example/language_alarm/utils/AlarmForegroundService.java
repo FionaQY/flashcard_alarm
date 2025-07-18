@@ -191,7 +191,6 @@ public class AlarmForegroundService extends Service {
                 mediaPlayer.setLooping(true);
                 // TODO: make volume variable
                 mediaPlayer.setVolume(1.0f, 1.0f);
-//                mediaPlayer.setOnPreparedListener(MediaPlayer::start);
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {
                     isMediaPlayerPrepared = true;
@@ -223,15 +222,17 @@ public class AlarmForegroundService extends Service {
     }
 
     private Uri getDefaultAlarmUri() {
-        Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        if (alarmUri == null) {
-            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            if (alarmUri == null) {
-                alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-            }
-        }
-        return alarmUri;
-    }
+        int[] types = {
+            RingtoneManager.TYPE_ALARM,
+            RingtoneManager.TYPE_NOTIFICATION,
+            RingtoneManager.TYPE_RINGTONE
+        };
 
+        for (int type : types) {
+            Uri uri = RingtoneManager.getDefaultUri(type);
+            if (uri != null) return uri;
+        }
+        return null;
+    }
 
 }

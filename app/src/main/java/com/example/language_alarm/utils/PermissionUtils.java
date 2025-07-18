@@ -25,6 +25,14 @@ public class PermissionUtils {
         }
     }
 
+    public static boolean hasScheduleAlarmPermission(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager alarmManager = (AlarmManager) activity.getSystemService(ALARM_SERVICE);
+            return alarmManager.canScheduleExactAlarms()
+        }
+        return false;
+    }
+
     public static void requestStoragePermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             List<String> permissionsToRequest = new ArrayList<>();

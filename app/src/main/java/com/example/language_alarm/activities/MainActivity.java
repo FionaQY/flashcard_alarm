@@ -14,6 +14,7 @@ import com.example.language_alarm.adapter.AlarmAdapter;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.example.language_alarm.viewmodel.AlarmViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.example.language_alarm.utils.SettingUtils;
 
 import java.util.ArrayList;
 
@@ -23,13 +24,11 @@ import com.shrikanthravi.library.NightModeButton;
 public class MainActivity extends AppCompatActivity {
     private AlarmAdapter adapter = null;
     private static final String THEME = "isNightMode";
-    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        settings = SettingUtils.getSharedPreferences();
         setAppTheme();
         setContentView(R.layout.activity_main);
         setupToolbar();
@@ -54,14 +53,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setAppTheme() {
-        AppCompatDelegate.setDefaultNightMode(settings.getBoolean(THEME, false) ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(SettingUtils.getIsDarkTheme() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     private void onToggleDarkMode(boolean isNight) {
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(THEME, isNight);
-        editor.apply();
-        
+        SettingUtils.setIsDarkTheme(isNight);
         setAppTheme();
         recreate(); 
     }

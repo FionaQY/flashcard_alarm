@@ -274,13 +274,11 @@ public class NewAlarmActivity extends AppCompatActivity {
             return;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                pendingAlarmToSave = newAlarm;
-                Intent permissionIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                startActivity(permissionIntent);
-                return;
-            }
+        if (!PermissionUtils.hasScheduleAlarmPermission(this)) {
+            pendingAlarmToSave = newAlarm;
+            Intent permissionIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+            startActivity(permissionIntent);
+            return;
         }
 
         saveAlarm(newAlarm);
@@ -402,26 +400,28 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     public void showExitDialog() {
-        new AlertDialog.Builder(this)
+        Alarm tempAlarm = createAlarm();
+        if (tempAlarm() != null && !tempAlarm.equals(alarmToEdit)) {
+            new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setMessage("Cancel this alarm?")
+                .setMessage(alarmToEdit == null ? "Go back?\nAlarm will not be saved." : "Go back?\nChanges will not be saved.")
                 .setPositiveButton("Confirm",
                         (dialog, which) -> this.supportFinishAfterTransition())
                 .setNegativeButton("Cancel", null)
                 .show();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Toast.makeText(this, "Exact alarm permission is required to schedule alarms.", Toast.LENGTH_SHORT).show();
-            } else if (pendingAlarmToSave != null) {
+        if (PermissionUtils.hasScheduleAlarmPermission(this)) {
+            if (pendingAlarmToSave != null) {
                 saveAlarm(pendingAlarmToSave);
                 pendingAlarmToSave = null;
             }
+        } else {
+            Toast.makeText(this, "Exact alarm permission is required to schedule alarms.", Toast.LENGTH_SHORT).show();
         }
     }
 
