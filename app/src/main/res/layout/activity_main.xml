@@ -61,4 +61,12 @@
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white" />
 
+    <com.shrikanthravi.library.NightModeButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/nightModeButton"
+        android:layout_centerVertical="true"/>
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

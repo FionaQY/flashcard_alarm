@@ -51,4 +51,5 @@ dependencies {
     implementation libs.room.runtime
     implementation libs.room.ktx
     implementation(libs.commons.lang3)
+    implementation 'com.github.shrikanth7698:Night-Mode-Button:V1.0'
 }

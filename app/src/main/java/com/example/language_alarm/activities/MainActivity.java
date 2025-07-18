@@ -18,6 +18,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import java.util.ArrayList;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import com.shrikanthravi.library.NightModeButton;
 
 public class MainActivity extends AppCompatActivity {
     private AlarmAdapter adapter = null;
@@ -32,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
         setAppTheme();
         setContentView(R.layout.activity_main);
         setupToolbar();
+
+        findViewById(R.id.nightModeButton).setOnSwitchListener(new NightModeButton.OnSwitchListener() {
+            @Override
+            public void onSwitchListener(boolean isNight) {
+                onToggleDarkMode(isNight);
+            }
+        });
 
         RecyclerView recyclerView = findViewById(R.id.alarm_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -49,9 +57,9 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(settings.getBoolean(THEME, false) ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
     }
 
-    private void onToggleDarkMode() {
+    private void onToggleDarkMode(boolean isNight) {
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean(THEME, !settings.getBoolean(THEME, false));
+        editor.putBoolean(THEME, isNight);
         editor.apply();
         
         setAppTheme();
