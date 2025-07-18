@@ -81,12 +81,12 @@ public class NewLessonActivity extends AppCompatActivity {
         FlashcardAdapter adapter = new FlashcardAdapter(new ArrayList<>(), new ArrayList<>(),
                 new FlashcardAdapter.OnFlashcardEditListener() {
                     @Override
-                    void onFlashcardEdit(Flashcard flashcard, int position) {
-                        showPopupMenu(flashcard, position);
+                    void onFlashcardEdit(Flashcard flashcard, int position, View view) {
+                        showPopupMenu(flashcard, position, view);
                     }
                     @Override
-                    void onFlashcardStar(Flashcard flashcard, int position, View view) {
-                        markFlashcardAsImportant(flashcard, position, view);
+                    void onFlashcardStar(Flashcard flashcard, int position, Boolean setYellow) {
+                        markFlashcardAsImportant(flashcard, position, setYellow);
                     }
                 });
         recyclerView.setAdapter(adapter);
@@ -462,7 +462,7 @@ public class NewLessonActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
         dialogView.findViewById(R.id.cancelButton).setOnClickListener(v -> dialog.dismiss());
-        dialogView.findViewById(R.id.saveButton).setOnClickListener(v -> {
+        dialogView.findViewById(R.id.nextButton).setOnClickListener(v -> {
             String sTextFromET = numOfQns.getText().toString();
             int nIntFromET = Integer.parseInt(sTextFromET);
             if (nIntFromET <= 0) {
@@ -500,9 +500,9 @@ public class NewLessonActivity extends AppCompatActivity {
         return (!searchString.isEmpty() && flashcard.originalIndex != -1) ? flashcard.originalIndex : position;
     }
 
-    private void markFlashcardAsImportant(Flashcard flashcard, int position) {
+    private void markFlashcardAsImportant(Flashcard flashcard, int position, boolean highlight) {
         int index = getIndex(position, flashcard);
-        tempLesson.getFlashcards().get(index).markImportance(true);
+        tempLesson.getFlashcards().get(index).markImportance(highlight);
         updateFlashcardListView();
     }
 

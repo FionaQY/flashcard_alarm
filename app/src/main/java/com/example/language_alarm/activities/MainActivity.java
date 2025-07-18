@@ -1,6 +1,7 @@
 package com.example.language_alarm.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,15 +17,20 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 public class MainActivity extends AppCompatActivity {
     private AlarmAdapter adapter = null;
+    private static final String THEME = "isNightMode";
+    private SharedPreferences settings;
 
-    // TODO: light and dark mode
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+        settings = SettingUtils.getSharedPreferences();
+        setAppTheme();
+        setContentView(R.layout.activity_main);
         setupToolbar();
 
         RecyclerView recyclerView = findViewById(R.id.alarm_list);
@@ -39,12 +45,25 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.addLessonFab).setOnClickListener(v -> onToggleLessons());
     }
 
-    public void onToggleNewAlarm() {
+    private void setAppTheme() {
+        AppCompatDelegate.setDefaultNightMode(settings.getBoolean(THEME, false) ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    private void onToggleDarkMode() {
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(THEME, !settings.getBoolean(THEME, false));
+        editor.apply();
+        
+        setAppTheme();
+        recreate(); 
+    }
+
+    private void onToggleNewAlarm() {
         Intent intent = new Intent(this, NewAlarmActivity.class);
         startActivity(intent);
     }
 
-    public void onToggleLessons() {
+    private void onToggleLessons() {
         Intent intent = new Intent(this, LessonsActivity.class);
         startActivity(intent);
     }

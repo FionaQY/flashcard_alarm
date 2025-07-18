@@ -4,6 +4,7 @@
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorText">@android:color/black</item>
     </style>
 
     <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />

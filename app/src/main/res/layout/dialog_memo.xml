@@ -23,7 +23,8 @@
             android:hint="@string/input_number_of_questions"
             android:inputType="numberSigned"
             android:minLines="1"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:text="@string/_5"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -51,7 +52,7 @@
             app:strokeColor="@color/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/saveButton"
+            android:id="@+id/nextButton"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="48dp"
@@ -60,6 +61,7 @@
             android:text="@string/next"
             app:backgroundTint="@color/colorPrimary"
             app:icon="@drawable/ic_next"
-            app:iconGravity="textStart" />
+            app:iconGravity="textStart"
+            android:textColor="@android:color/white"/>
     </GridLayout>
 </LinearLayout>

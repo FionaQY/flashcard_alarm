@@ -105,7 +105,6 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         }
         holder.txtValues.setText(sb.toString().trim());
 
-        // TODO: set up editing and deleting (3 dots?)
         holder.menuButton.setOnClickListener(view -> {
             if (editListener != null) {
                 editListener.onFlashcardEdit(flashcard, position);
@@ -113,10 +112,17 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         });
 
         Button starButton = holder.starButton;
+        if (flashcard.isImportant()) {
+            starButton.setIconTintResource(R.color.colorAccent);
+        }
+        
         starButton.setOnClickListener(view -> {
+            int currentTint = starButton.getIconTint().getDefaultColor();
+            boolean setYellow = currentTint == holder.itemView.getContext().getResources().getColor(R.color.colorPrimary);
+            starButton.setIconTintResource(setYellow ? R.color.colorAccent : R.color.colorPrimary);
+            
             if (editListener != null) {
-                editListener.onFlashcardStar(flashcard, position, view);
-                // starButton gets highlighted?
+                editListener.onFlashcardStar(flashcard, position, setYellow);
             }
         });
 
@@ -131,20 +137,18 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     }
 
     public interface OnFlashcardEditListener {
-        void onFlashcardEdit(Flashcard flashcard, int position);
-        void onFlashcardStar(Flashcard flashcard, int position, View view);
+        void onFlashcardEdit(Flashcard flashcard, int position, View view);
+        void onFlashcardStar(Flashcard flashcard, int position, Boolean setYellow);
     }
 
     public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
         public TextView txtValues;
-        // public Button editButton;
         public ImageButton menuButton;
         public Button starButton;
 
         public FlashcardViewHolder(View itemView) {
             super(itemView);
             txtValues = itemView.findViewById(R.id.txtValues);
-            // editButton = itemView.findViewById(R.id.editButton);
             starButton = itemView.findViewById(R.id.starButton);
             menuButton = itemView.findViewById(R.id.menuButton);
         }

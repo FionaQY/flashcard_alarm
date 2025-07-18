@@ -19,7 +19,7 @@ import com.google.android.material.button.MaterialButton;
 import java.util.Locale;
 
 public class AlarmRingingActivity extends AppCompatActivity {
-    private static final String PREFS_NAME = "preferences????";
+    private static final String SNOOZE_COUNT = "snoozeCount";
     private Alarm alarm;
 
     @Override
@@ -38,8 +38,8 @@ public class AlarmRingingActivity extends AppCompatActivity {
             Log.w("Alarm", "Attempted to ring null alarm");
             supportFinishAfterTransition();
         }
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        int snoozeCount = settings.getInt("snoozeCount", 0);
+        SharedPreferences settings = SettingUtils.getSharedPreferences();
+        int snoozeCount = settings.getInt(SNOOZE_COUNT, 0);
 
         MaterialButton snoozeButton = findViewById(R.id.snoozeButton);
         snoozeButton.setVisibility(alarm.getSnoozeNum() > snoozeCount ? View.VISIBLE : View.GONE);
@@ -49,7 +49,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
             stopRinging();
             AlarmHandler.snoozeAlarm(this, alarm);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putInt("snoozeCount", snoozeCount + 1);
+            editor.putInt(SNOOZE_COUNT, snoozeCount + 1);
             editor.apply();
             finish();
         });
@@ -59,7 +59,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
 
             AlarmHandler.cancelAlarm(this, alarm);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putInt("snoozeCount", 0);
+            editor.putInt(SNOOZE_COUNT, 0);
             editor.apply();
 
             Intent intent = new Intent(this, MemorisationActivity.class);
