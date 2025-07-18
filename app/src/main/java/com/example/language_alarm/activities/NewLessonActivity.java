@@ -70,8 +70,7 @@ public class NewLessonActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_lesson);
 
-        this.tempLesson = getIntent().getParcelableExtra("lesson");
-
+        
         setupListeners();
         setupToolbar();
 
@@ -80,13 +79,23 @@ public class NewLessonActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.flashcard_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         FlashcardAdapter adapter = new FlashcardAdapter(new ArrayList<>(), new ArrayList<>(),
-                this::showEditFlashcardDialog);
+                new FlashcardAdapter.OnFlashcardEditListener() {
+                    @Override
+                    void onFlashcardEdit(Flashcard flashcard, int position) {
+                        showPopupMenu(flashcard, position);
+                    }
+                    @Override
+                    void onFlashcardStar(Flashcard flashcard, int position, View view) {
+                        markFlashcardAsImportant(flashcard, position, view);
+                    }
+                });
         recyclerView.setAdapter(adapter);
 
         flashcardViewModel = new ViewModelProvider(this).get(FlashcardViewModel.class);
         flashcardViewModel.getFlashcards().observe(this, adapter::setFlashcards);
         flashcardViewModel.getHeaders().observe(this, adapter::setHeaders);
 
+        this.tempLesson = getIntent().getParcelableExtra("lesson");
         if (tempLesson == null) {
             this.tempLesson = new Lesson();
         } else {
@@ -468,8 +477,43 @@ public class NewLessonActivity extends AppCompatActivity {
         });
     }
 
+    private void showPopupMenu(Flashcard flashcard, int position, View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+            popup.inflate(R.layout.popup_menu);
+
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.edit) {
+                    showEditFlashcardDialog(flashcard, position);
+                    return true;
+                } else if (id == R.id.delete) {
+                    deleteFlashcard(flashcard, position);
+                    return true;
+                }
+                return false;
+            });
+
+            popup.show();
+    }
+
+    private int getIndex(int position, Flashcard flashcard) {
+        return (!searchString.isEmpty() && flashcard.originalIndex != -1) ? flashcard.originalIndex : position;
+    }
+
+    private void markFlashcardAsImportant(Flashcard flashcard, int position) {
+        int index = getIndex(position, flashcard);
+        tempLesson.getFlashcards().get(index).markImportance(true);
+        updateFlashcardListView();
+    }
+
+    private void deleteFlashcard(Flashcard flashcard, int position) {
+        int index = getIndex(position, flashcard);
+        tempLesson.getFlashcards().remove(index);
+        updateFlashcardListView(); 
+    }
+
     private void showEditFlashcardDialog(Flashcard flashcard, int position) {
-        int index = (!searchString.isEmpty() && flashcard.originalIndex != -1) ? flashcard.originalIndex : position;
+        int index = getIndex(position, flashcard);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_lesson, null);
         builder.setView(dialogView);

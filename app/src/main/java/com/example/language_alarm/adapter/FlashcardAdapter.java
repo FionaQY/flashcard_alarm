@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
@@ -32,10 +33,8 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     }
 
     public void setFlashcards(List<Flashcard> newFlashcards) {
-        List<Flashcard> newList = new ArrayList<>(newFlashcards);
-
         if (flashcards == null || flashcards.isEmpty()) {
-            flashcards = newList;
+            flashcards = newFlashcards;
             notifyDataSetChanged();
             return;
         }
@@ -48,29 +47,34 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
             @Override
             public int getNewListSize() {
-                return newList.size();
+                return newFlashcards.size();
             }
 
             @Override
             public boolean areItemsTheSame(int oldPos, int newPos) {
-                return oldPos == newPos;
+                Flashcard oldItem = flashcards.get(oldPos);
+                Flashcard newItem = newList.get(newPos);
+                if (oldItem.originalIndex == -1 || newItem.originalIndex == -1) {
+                    return oldPos == newPos;
+                }
+                return oldItem.originalIndex == newItem.originalIndex;
             }
 
             @Override
             public boolean areContentsTheSame(int oldPos, int newPos) {
                 Flashcard oldItem = flashcards.get(oldPos);
-                Flashcard newItem = newList.get(newPos);
+                Flashcard newItem = newFlashcards.get(newPos);
                 return oldItem.equals(newItem);
             }
         };
 
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-        flashcards = newList;
+        flashcards = newFlashcards;
         diffResult.dispatchUpdatesTo(this);
     }
 
     public void setHeaders(List<String> newHeaders) {
-        if (newHeaders == null || newHeaders.isEmpty()) {
+        if ((newHeaders == null || newHeaders.isEmpty()) && (this.headers == null || !this.headers.isEmpty())) {
             this.headers = new ArrayList<>();
             notifyDataSetChanged();
         } else if (this.headers == null || this.headers.isEmpty() || !this.headers.equals(newHeaders)) {
@@ -102,36 +106,20 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         holder.txtValues.setText(sb.toString().trim());
 
         // TODO: set up editing and deleting (3 dots?)
-        holder.editButton.setOnClickListener(view -> {
+        holder.menuButton.setOnClickListener(view -> {
             if (editListener != null) {
                 editListener.onFlashcardEdit(flashcard, position);
             }
         });
-        
-        // holder.starButton.setOnClickListener(view -> {
-        //     PopupMenu popup = new PopupMenu(v.getContext(), v);
-        //     popup.inflate(R.menu.flashcard_item_menu); // Define this XML
 
-        //     popup.setOnMenuItemClickListener(item -> {
-        //         int id = item.getItemId();
-        //         if (id == R.id.menu_edit) {
-        //             // handle edit
-        //             onItemEdit(getAdapterPosition());
-        //             return true;
-        //         } else if (id == R.id.menu_delete) {
-        //             // handle delete
-        //             onItemDelete(getAdapterPosition());
-        //             return true;
-        //         }
-        //         return false;
-        //     });
+        Button starButton = holder.starButton;
+        starButton.setOnClickListener(view -> {
+            if (editListener != null) {
+                editListener.onFlashcardStar(flashcard, position, view);
+                // starButton gets highlighted?
+            }
+        });
 
-        //     popup.show();
-        // })
-
-//        holder.starButton.setOnClickListener(view -> {
-//
-//        });
     }
 
     @Override
@@ -144,21 +132,21 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
     public interface OnFlashcardEditListener {
         void onFlashcardEdit(Flashcard flashcard, int position);
-        // TODO: set something up for the star button
+        void onFlashcardStar(Flashcard flashcard, int position, View view);
     }
 
     public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
         public TextView txtValues;
-        public Button editButton;
+        // public Button editButton;
         public ImageButton menuButton;
-        // public Button starButton;
+        public Button starButton;
 
         public FlashcardViewHolder(View itemView) {
             super(itemView);
             txtValues = itemView.findViewById(R.id.txtValues);
-            editButton = itemView.findViewById(R.id.editButton);
+            // editButton = itemView.findViewById(R.id.editButton);
             starButton = itemView.findViewById(R.id.starButton);
-            // menuButton = itemView.findViewById(R.id.menuButton);
+            menuButton = itemView.findViewById(R.id.menuButton);
         }
     }
 }
