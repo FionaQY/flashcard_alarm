@@ -7,7 +7,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -113,20 +112,14 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
         });
 
         MaterialButton starButton = holder.starButton;
-        if (flashcard.isImportant()) {
-            starButton.setIconTintResource(R.color.colorAccent);
-        }
+        starButton.setIconTintResource(flashcard.isImportant() ? R.color.colorAccent : R.color.colorPrimary);
 
         starButton.setOnClickListener(view -> {
-            int currentTint = starButton.getIconTint() == null
-                    ? ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary)
-                    : starButton.getIconTint().getDefaultColor();
-            boolean setYellow = currentTint == ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary);
-            starButton.setIconTintResource(setYellow ? R.color.colorAccent : R.color.colorPrimary);
-
-            if (editListener != null) {
-                editListener.onFlashcardStar(flashcard, position, setYellow);
-            }
+            if (editListener == null) return;
+            starButton.setIconTintResource(
+                    editListener.onFlashcardStar(flashcard, position)
+                            ? R.color.colorAccent
+                            : R.color.colorPrimary);
         });
 
     }
@@ -142,7 +135,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     public interface OnFlashcardEditListener {
         void onFlashcardEdit(Flashcard flashcard, int position, View view);
 
-        void onFlashcardStar(Flashcard flashcard, int position, Boolean setYellow);
+        boolean onFlashcardStar(Flashcard flashcard, int position);
     }
 
     public static class FlashcardViewHolder extends RecyclerView.ViewHolder {

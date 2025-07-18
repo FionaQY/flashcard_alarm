@@ -36,8 +36,13 @@ public class Flashcard implements Parcelable {
         isImportant = in.readByte() != 0;
     }
 
-    public void markImportance(boolean isImportant) {
-        this.isImportant = isImportant;
+    public boolean flipImportance() {
+        this.isImportant = !this.isImportant;
+        return this.isImportant;
+    }
+
+    public void markImportance(boolean imp) {
+        this.isImportant = imp;
     }
 
     public boolean isImportant() {

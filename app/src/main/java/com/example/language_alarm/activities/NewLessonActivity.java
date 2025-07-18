@@ -87,8 +87,8 @@ public class NewLessonActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFlashcardStar(Flashcard flashcard, int position, Boolean setYellow) {
-                        markFlashcardAsImportant(flashcard, position, setYellow);
+                    public boolean onFlashcardStar(Flashcard flashcard, int position) {
+                        return markFlashcardAsImportant(flashcard, position);
                     }
                 });
         recyclerView.setAdapter(adapter);
@@ -502,10 +502,9 @@ public class NewLessonActivity extends AppCompatActivity {
         return (!searchString.isEmpty() && flashcard.originalIndex != -1) ? flashcard.originalIndex : position;
     }
 
-    private void markFlashcardAsImportant(Flashcard flashcard, int position, boolean highlight) {
+    private boolean markFlashcardAsImportant(Flashcard flashcard, int position) {
         int index = getIndex(position, flashcard);
-        tempLesson.getFlashcards().get(index).markImportance(highlight);
-        updateFlashcardListView(false);
+        return tempLesson.getFlashcards().get(index).flipImportance();
     }
 
     private void deleteFlashcard(Flashcard flashcard, int position) {
