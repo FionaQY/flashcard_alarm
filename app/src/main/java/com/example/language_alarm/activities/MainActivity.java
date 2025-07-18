@@ -1,44 +1,37 @@
 package com.example.language_alarm.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.adapter.AlarmAdapter;
+import com.example.language_alarm.utils.SettingUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.example.language_alarm.viewmodel.AlarmViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.example.language_alarm.utils.SettingUtils;
 
 import java.util.ArrayList;
 
-import androidx.appcompat.app.AppCompatDelegate;
-import com.shrikanthravi.library.NightModeButton;
-
 public class MainActivity extends AppCompatActivity {
+    SettingUtils prefs = null;
     private AlarmAdapter adapter = null;
-    private static final String THEME = "isNightMode";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        prefs = new SettingUtils(this);
 
         setAppTheme();
         setContentView(R.layout.activity_main);
         setupToolbar();
 
-        findViewById(R.id.nightModeButton).setOnSwitchListener(new NightModeButton.OnSwitchListener() {
-            @Override
-            public void onSwitchListener(boolean isNight) {
-                onToggleDarkMode(isNight);
-            }
-        });
+//        ((NightModeButton) findViewById(R.id.nightModeButton)).setOnSwitchListener(v -> onToggleDarkMode());
 
         RecyclerView recyclerView = findViewById(R.id.alarm_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -53,15 +46,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setAppTheme() {
-        AppCompatDelegate.setDefaultNightMode(SettingUtils.getIsDarkTheme() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(prefs.getIsDarkTheme() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
     }
 
-    private void onToggleDarkMode(boolean isNight) {
-        SettingUtils.setIsDarkTheme(isNight);
-        setAppTheme();
-        recreate(); 
-    }
+//    private void onToggleDarkMode() {
+//        prefs.flipIsDarkTheme();
+//        setAppTheme();
 
+    /// /        recreate();
+//    }
     private void onToggleNewAlarm() {
         Intent intent = new Intent(this, NewAlarmActivity.class);
         startActivity(intent);

@@ -14,7 +14,6 @@ import com.example.language_alarm.database.AlarmDao;
 import com.example.language_alarm.database.AlarmDatabase;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.receiver.AlarmReceiver;
-import com.example.language_alarm.utils.PermissionUtils;
 
 import java.util.Calendar;
 import java.util.List;
@@ -154,14 +153,16 @@ public class AlarmHandler {
     }
 
     private static void setExactAlarm(Context ctx, AlarmManager alarmManager, long triggerAttMills, PendingIntent pendingIntent) {
-        if (PermissionUtils.hasScheduleAlarmPermission(ctx)) {
-            Intent permissionIntent = new Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-            // Add flag if context is not an Activity
-            if (!(ctx instanceof Activity)) {
-                permissionIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Intent permissionIntent = new Intent(ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                // Add flag if context is not an Activity
+                if (!(ctx instanceof Activity)) {
+                    permissionIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+                ctx.startActivity(permissionIntent);
+                return;
             }
-            ctx.startActivity(permissionIntent);
-            return;
         }
 
         // For API 21+ use setAlarmClock which shows in status bar and gives priority

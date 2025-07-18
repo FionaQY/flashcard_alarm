@@ -51,4 +51,6 @@
     <string name="pick_snooze_duration">Snooze Duration</string>
     <string name="_0">0</string>
     <string name="_5">5</string>
+    <string name="edit_flashcard">edit flashcard</string>
+    <string name="day_of_theme">day of theme</string>
 </resources>

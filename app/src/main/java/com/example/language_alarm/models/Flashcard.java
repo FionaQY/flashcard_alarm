@@ -40,6 +40,10 @@ public class Flashcard implements Parcelable {
         this.isImportant = isImportant;
     }
 
+    public boolean isImportant() {
+        return this.isImportant;
+    }
+
     @NonNull
     @Override
     public String toString() {

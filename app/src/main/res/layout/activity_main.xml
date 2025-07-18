@@ -61,13 +61,15 @@
         app:backgroundTint="@color/colorPrimary"
         app:tint="@android:color/white" />
 
-    <com.shrikanthravi.library.NightModeButton
+    <com.example.language_alarm.activities.NightModeButton
+        android:id="@+id/nightModeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
         android:elevation="6dp"
-        android:id="@+id/nightModeButton"/>
+        app:layout_scrollFlags="scroll|enterAlways|snap" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -70,7 +71,7 @@ public class NewLessonActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_lesson);
 
-        
+
         setupListeners();
         setupToolbar();
 
@@ -81,11 +82,12 @@ public class NewLessonActivity extends AppCompatActivity {
         FlashcardAdapter adapter = new FlashcardAdapter(new ArrayList<>(), new ArrayList<>(),
                 new FlashcardAdapter.OnFlashcardEditListener() {
                     @Override
-                    void onFlashcardEdit(Flashcard flashcard, int position, View view) {
+                    public void onFlashcardEdit(Flashcard flashcard, int position, View view) {
                         showPopupMenu(flashcard, position, view);
                     }
+
                     @Override
-                    void onFlashcardStar(Flashcard flashcard, int position, Boolean setYellow) {
+                    public void onFlashcardStar(Flashcard flashcard, int position, Boolean setYellow) {
                         markFlashcardAsImportant(flashcard, position, setYellow);
                     }
                 });
@@ -184,7 +186,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void importFromCsv() {
-        if (!PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.noStoragePermission(this)) {
             PermissionUtils.requestStoragePermission(this);
             return;
         }
@@ -479,21 +481,21 @@ public class NewLessonActivity extends AppCompatActivity {
 
     private void showPopupMenu(Flashcard flashcard, int position, View v) {
         PopupMenu popup = new PopupMenu(this, v);
-            popup.inflate(R.layout.popup_menu);
+        popup.inflate(R.menu.popup_menu);
 
-            popup.setOnMenuItemClickListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.edit) {
-                    showEditFlashcardDialog(flashcard, position);
-                    return true;
-                } else if (id == R.id.delete) {
-                    deleteFlashcard(flashcard, position);
-                    return true;
-                }
-                return false;
-            });
+        popup.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.edit) {
+                showEditFlashcardDialog(flashcard, position);
+                return true;
+            } else if (id == R.id.delete) {
+                deleteFlashcard(flashcard, position);
+                return true;
+            }
+            return false;
+        });
 
-            popup.show();
+        popup.show();
     }
 
     private int getIndex(int position, Flashcard flashcard) {
@@ -503,13 +505,13 @@ public class NewLessonActivity extends AppCompatActivity {
     private void markFlashcardAsImportant(Flashcard flashcard, int position, boolean highlight) {
         int index = getIndex(position, flashcard);
         tempLesson.getFlashcards().get(index).markImportance(highlight);
-        updateFlashcardListView();
+        updateFlashcardListView(false);
     }
 
     private void deleteFlashcard(Flashcard flashcard, int position) {
         int index = getIndex(position, flashcard);
         tempLesson.getFlashcards().remove(index);
-        updateFlashcardListView(); 
+        updateFlashcardListView(false);
     }
 
     private void showEditFlashcardDialog(Flashcard flashcard, int position) {

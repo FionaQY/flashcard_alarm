@@ -3,16 +3,17 @@ package com.example.language_alarm.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
 import com.example.language_alarm.models.Flashcard;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
             @Override
             public boolean areItemsTheSame(int oldPos, int newPos) {
                 Flashcard oldItem = flashcards.get(oldPos);
-                Flashcard newItem = newList.get(newPos);
+                Flashcard newItem = newFlashcards.get(newPos);
                 if (oldItem.originalIndex == -1 || newItem.originalIndex == -1) {
                     return oldPos == newPos;
                 }
@@ -74,7 +75,7 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
     }
 
     public void setHeaders(List<String> newHeaders) {
-        if ((newHeaders == null || newHeaders.isEmpty()) && (this.headers == null || !this.headers.isEmpty())) {
+        if ((newHeaders == null || newHeaders.isEmpty())) {
             this.headers = new ArrayList<>();
             notifyDataSetChanged();
         } else if (this.headers == null || this.headers.isEmpty() || !this.headers.equals(newHeaders)) {
@@ -107,20 +108,22 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
         holder.menuButton.setOnClickListener(view -> {
             if (editListener != null) {
-                editListener.onFlashcardEdit(flashcard, position);
+                editListener.onFlashcardEdit(flashcard, position, view);
             }
         });
 
-        Button starButton = holder.starButton;
+        MaterialButton starButton = holder.starButton;
         if (flashcard.isImportant()) {
             starButton.setIconTintResource(R.color.colorAccent);
         }
-        
+
         starButton.setOnClickListener(view -> {
-            int currentTint = starButton.getIconTint().getDefaultColor();
-            boolean setYellow = currentTint == holder.itemView.getContext().getResources().getColor(R.color.colorPrimary);
+            int currentTint = starButton.getIconTint() == null
+                    ? ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary)
+                    : starButton.getIconTint().getDefaultColor();
+            boolean setYellow = currentTint == ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPrimary);
             starButton.setIconTintResource(setYellow ? R.color.colorAccent : R.color.colorPrimary);
-            
+
             if (editListener != null) {
                 editListener.onFlashcardStar(flashcard, position, setYellow);
             }
@@ -138,13 +141,14 @@ public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.Flas
 
     public interface OnFlashcardEditListener {
         void onFlashcardEdit(Flashcard flashcard, int position, View view);
+
         void onFlashcardStar(Flashcard flashcard, int position, Boolean setYellow);
     }
 
     public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
         public TextView txtValues;
         public ImageButton menuButton;
-        public Button starButton;
+        public MaterialButton starButton;
 
         public FlashcardViewHolder(View itemView) {
             super(itemView);

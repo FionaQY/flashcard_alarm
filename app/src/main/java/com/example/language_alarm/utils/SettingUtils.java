@@ -1,5 +1,6 @@
 package com.example.language_alarm.utils;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SettingUtils {
@@ -7,42 +8,39 @@ public class SettingUtils {
     private static final String SNOOZE_COUNT = "snoozeCount";
     private static final String THEME = "isNightMode";
 
-    private static SharedPreferences settings = null;
+    private static SharedPreferences prefs = null;
 
-    private static SharedPreferences getSavedSettings() {
-        if (settings == null) {
-            settings = getSharedPreferences(PREFS_NAME, 0);
-        }
-        return settings;
+    public SettingUtils(Context context) {
+        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
     // for MainActivity (Theme)
-    public static boolean getIsDarkTheme() {
-        return getSavedSettings().getBoolean(THEME, false)
+    public boolean getIsDarkTheme() {
+        return prefs.getBoolean(THEME, false);
     }
 
-    public static boolean setIsDarkTheme(boolean isNight) {
-        SharedPreferences.Editor editor = getSavedSettings().edit();
-        editor.putBoolean(THEME, isNight);
+    public void flipIsDarkTheme() {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(THEME, !getIsDarkTheme());
         editor.apply();
     }
 
     // for AlarmRingingActivity (SnoozeCount)
-    public static int getSnoozeCount() {
-        return getSavedSettings().getInt(SNOOZE_COUNT, 0);
+    public int getSnoozeCount() {
+        return prefs.getInt(SNOOZE_COUNT, 0);
     }
 
-    private static void setSnoozeCount(int i) {
-        SharedPreferences.Editor editor = getSavedSettings().edit();
+    private void setSnoozeCount(int i) {
+        SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(SNOOZE_COUNT, i);
         editor.apply();
     }
-    
-    public static void incrementSnoozeCount() {
+
+    public void incrementSnoozeCount() {
         setSnoozeCount(getSnoozeCount() + 1);
     }
 
-    public static void resetSnoozeCount() {
+    public void resetSnoozeCount() {
         setSnoozeCount(0);
     }
 }

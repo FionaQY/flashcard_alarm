@@ -223,9 +223,9 @@ public class AlarmForegroundService extends Service {
 
     private Uri getDefaultAlarmUri() {
         int[] types = {
-            RingtoneManager.TYPE_ALARM,
-            RingtoneManager.TYPE_NOTIFICATION,
-            RingtoneManager.TYPE_RINGTONE
+                RingtoneManager.TYPE_ALARM,
+                RingtoneManager.TYPE_NOTIFICATION,
+                RingtoneManager.TYPE_RINGTONE
         };
 
         for (int type : types) {

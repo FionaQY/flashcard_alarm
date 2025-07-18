@@ -20,18 +20,23 @@ Learning a new language through repetition is powerful — and what better time 
 - Build & Run on an emulator or physical device
 
 ## 📸 Screenshots
+
 [screenshots to be inserted here]
 
 ## 🔧 Technologies Used
+
 Java
 
 ## 💡 Roadmap / To-Do
+
 - Add streak system / daily goal tracking
 - Leaderboard for vocabulary challenge mode
 - Audio pronunciation
 
 ## 🤝 Contributing
+
 Contributions, issues, and feature requests are welcome!
 
 ## 📄 License
+
 This project is licensed under the MIT License.

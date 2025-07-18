@@ -24,7 +24,7 @@
             android:inputType="numberSigned"
             android:minLines="1"
             android:padding="12dp"
-            android:text="@string/_5"/>
+            android:text="@string/_5" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -59,9 +59,9 @@
             android:layout_columnWeight="1"
             android:layout_marginTop="8dp"
             android:text="@string/next"
+            android:textColor="@android:color/white"
             app:backgroundTint="@color/colorPrimary"
             app:icon="@drawable/ic_next"
-            app:iconGravity="textStart"
-            android:textColor="@android:color/white"/>
+            app:iconGravity="textStart" />
     </GridLayout>
 </LinearLayout>

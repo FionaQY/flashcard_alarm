@@ -2,7 +2,6 @@ package com.example.language_alarm.activities;
 
 import android.app.KeyguardManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,13 +13,12 @@ import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.receiver.AlarmReceiver;
 import com.example.language_alarm.utils.AlarmForegroundService;
 import com.example.language_alarm.utils.AlarmHandler;
-import com.google.android.material.button.MaterialButton;
 import com.example.language_alarm.utils.SettingUtils;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.Locale;
 
 public class AlarmRingingActivity extends AppCompatActivity {
-    private static final String SNOOZE_COUNT = "snoozeCount";
     private Alarm alarm;
 
     @Override
@@ -39,8 +37,8 @@ public class AlarmRingingActivity extends AppCompatActivity {
             Log.w("Alarm", "Attempted to ring null alarm");
             supportFinishAfterTransition();
         }
-
-        int snoozeCount = SettingUtils.getSnoozeCount();
+        SettingUtils prefs = new SettingUtils(this);
+        int snoozeCount = prefs.getSnoozeCount();
         // set buttons view and listeners
         MaterialButton snoozeButton = findViewById(R.id.snoozeButton);
         snoozeButton.setVisibility(alarm.getSnoozeNum() > snoozeCount ? View.VISIBLE : View.GONE);
@@ -48,7 +46,8 @@ public class AlarmRingingActivity extends AppCompatActivity {
 
         snoozeButton.setOnClickListener(v -> {
             stopRinging();
-            SettingUtils.incrementSnoozeCount();
+            prefs.incrementSnoozeCount();
+            AlarmHandler.snoozeAlarm(this, alarm);
             finish();
         });
 
@@ -56,7 +55,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
             stopRinging();
 
             AlarmHandler.cancelAlarm(this, alarm);
-            SettingUtils.resetSnoozeCount();
+            prefs.resetSnoozeCount();
 
             Intent intent = new Intent(this, MemorisationActivity.class);
             intent.putExtra("lessonId", alarm.getLessonId());

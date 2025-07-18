@@ -1,6 +1,5 @@
 package com.example.language_alarm.activities;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -60,7 +59,6 @@ public class NewAlarmActivity extends AppCompatActivity {
     private EditText numOfQns;
     private MaterialToolbar header;
     private TimePicker alarmTimePicker;
-    private AlarmManager alarmManager;
     private Alarm alarmToEdit = null; // if editing existing alarm instead of creating new alarm
     private Alarm pendingAlarmToSave = null; // if permissions not granted
     private ToggleButton[] buttons = null;
@@ -91,7 +89,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         }
 
         setupListeners();
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         setupDropdown();
     }
 
@@ -276,9 +273,10 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         if (!PermissionUtils.hasScheduleAlarmPermission(this)) {
             pendingAlarmToSave = newAlarm;
-            Intent permissionIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-            startActivity(permissionIntent);
-            return;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM));
+                return;
+            }
         }
 
         saveAlarm(newAlarm);
@@ -352,7 +350,7 @@ public class NewAlarmActivity extends AppCompatActivity {
 
 
     private void selectAlarmTone() {
-        if (!PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.noStoragePermission(this)) {
             PermissionUtils.requestStoragePermission(this);
             return;
         }
@@ -401,14 +399,14 @@ public class NewAlarmActivity extends AppCompatActivity {
 
     public void showExitDialog() {
         Alarm tempAlarm = createAlarm();
-        if (tempAlarm() != null && !tempAlarm.equals(alarmToEdit)) {
+        if (tempAlarm != null && !tempAlarm.equals(alarmToEdit)) {
             new AlertDialog.Builder(this)
-                .setCancelable(true)
-                .setMessage(alarmToEdit == null ? "Go back?\nAlarm will not be saved." : "Go back?\nChanges will not be saved.")
-                .setPositiveButton("Confirm",
-                        (dialog, which) -> this.supportFinishAfterTransition())
-                .setNegativeButton("Cancel", null)
-                .show();
+                    .setCancelable(true)
+                    .setMessage(alarmToEdit == null ? "Go back?\nAlarm will not be saved." : "Go back?\nChanges will not be saved.")
+                    .setPositiveButton("Confirm",
+                            (dialog, which) -> this.supportFinishAfterTransition())
+                    .setNegativeButton("Cancel", null)
+                    .show();
         }
     }
 

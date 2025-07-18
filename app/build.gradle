@@ -3,17 +3,17 @@ plugins {
 }
 
 android {
-    namespace 'com.example.language_alarm'
-    compileSdk 36
+    namespace = 'com.example.language_alarm'
+    compileSdk = 36
 
     defaultConfig {
-        applicationId "com.example.language_alarm"
-        minSdk 27
-        targetSdk 36
-        versionCode 1
-        versionName "1.0"
+        applicationId = "com.example.language_alarm"
+        minSdk = 27
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
@@ -28,8 +28,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
@@ -51,5 +51,5 @@ dependencies {
     implementation libs.room.runtime
     implementation libs.room.ktx
     implementation(libs.commons.lang3)
-    implementation 'com.github.shrikanth7698:Night-Mode-Button:V1.0'
+    implementation libs.cardview
 }
