@@ -521,7 +521,7 @@ public class NewLessonActivity extends AppCompatActivity {
 
         RecyclerView recyclerView2 = dialogView.findViewById(R.id.values_list);
         recyclerView2.setLayoutManager(new LinearLayoutManager(this));
-        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true);
+        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true, recyclerView2);
         recyclerView2.setAdapter(inputAdapter);
         inputAdapter.setLesson(this.tempLesson);
         inputAdapter.setValues(flashcard);

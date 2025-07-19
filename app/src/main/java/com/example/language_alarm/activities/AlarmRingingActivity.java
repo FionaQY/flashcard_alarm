@@ -1,8 +1,10 @@
 package com.example.language_alarm.activities;
 
 import android.app.KeyguardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
 
@@ -20,10 +22,20 @@ import java.util.Locale;
 
 public class AlarmRingingActivity extends AppCompatActivity {
     private Alarm alarm;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK |
+                        PowerManager.ON_AFTER_RELEASE,
+                "LanguageAlarm:AlarmWakeLock"
+        );
+        wakeLock.acquire(30 * 1000L /*half a minute*/);
+        Log.d("AlarmRingingActivity", "WakeLock acquired");
 
         setTurnScreenOn(true);
         setShowWhenLocked(true);
@@ -79,4 +91,14 @@ public class AlarmRingingActivity extends AppCompatActivity {
         stopIntent.setAction(AlarmReceiver.ACTION_STOP_ALARM);
         startService(stopIntent);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+            Log.d("AlarmRingingActivity", "WakeLock released");
+        }
+    }
+
 }

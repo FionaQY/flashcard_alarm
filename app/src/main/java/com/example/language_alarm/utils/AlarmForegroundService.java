@@ -119,6 +119,7 @@ public class AlarmForegroundService extends Service {
         channel.setDescription("Keeps the alarm running in the foreground");
         channel.setSound(null, null); // We handle sound separately
         channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);

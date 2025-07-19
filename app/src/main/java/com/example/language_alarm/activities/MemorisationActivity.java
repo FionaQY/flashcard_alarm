@@ -138,7 +138,7 @@ public class MemorisationActivity extends AppCompatActivity {
     private void setupViews(int lessonId, int qnCount) {
         RecyclerView recyclerView = findViewById(R.id.values_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new InputFlashcardAdapter();
+        adapter = new InputFlashcardAdapter(recyclerView);
         recyclerView.setAdapter(adapter);
 
         LessonViewModel lessonViewModel = new ViewModelProvider(this).get(LessonViewModel.class);
@@ -189,7 +189,7 @@ public class MemorisationActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = dialogView.findViewById(R.id.values_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true);
+        InputFlashcardAdapter inputAdapter = new InputFlashcardAdapter(true, recyclerView);
         recyclerView.setAdapter(inputAdapter);
         inputAdapter.setLesson(this.lesson);
         Flashcard currFlashcard = this.lesson.getFlashcards().get(currFlashcardIndex);

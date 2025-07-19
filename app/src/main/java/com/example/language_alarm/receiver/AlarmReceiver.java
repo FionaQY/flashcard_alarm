@@ -32,7 +32,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                         PowerManager.ON_AFTER_RELEASE,
                 "LanguageAlarm:AlarmWakeLock"
         );
-        wakeLock.acquire(30 * 1000L /*half a minute*/);
+        wakeLock.acquire(60 * 1000L);
 
         if (ACTION_ALARM_TRIGGER.equals(action)) {
             Intent serviceIntent = new Intent(ctx, AlarmForegroundService.class);
@@ -49,8 +49,6 @@ public class AlarmReceiver extends BroadcastReceiver {
                     | Intent.FLAG_ACTIVITY_NO_USER_ACTION //
             );
             ctx.startActivity(alarmIntent);
-
-            wakeLock.release();
 
         } else if (ACTION_STOP_ALARM.equals(action)) {
             Intent serviceIntent = new Intent(ctx, AlarmForegroundService.class);
