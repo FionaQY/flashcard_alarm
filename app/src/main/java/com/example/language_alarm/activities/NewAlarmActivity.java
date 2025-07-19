@@ -399,15 +399,17 @@ public class NewAlarmActivity extends AppCompatActivity {
 
     public void showExitDialog() {
         Alarm tempAlarm = createAlarm();
-        if (tempAlarm != null && !tempAlarm.equals(alarmToEdit)) {
-            new AlertDialog.Builder(this)
-                    .setCancelable(true)
-                    .setMessage(alarmToEdit == null ? "Go back?\nAlarm will not be saved." : "Go back?\nChanges will not be saved.")
-                    .setPositiveButton("Confirm",
-                            (dialog, which) -> this.supportFinishAfterTransition())
-                    .setNegativeButton("Cancel", null)
-                    .show();
+        if (tempAlarm == null || tempAlarm.equals(alarmToEdit)) {
+            this.supportFinishAfterTransition();
+            return;
         }
+        new AlertDialog.Builder(this)
+                .setCancelable(true)
+                .setMessage(alarmToEdit == null ? "Go back?\nAlarm will not be saved." : "Go back?\nChanges will not be saved.")
+                .setPositiveButton("Confirm",
+                        (dialog, which) -> this.supportFinishAfterTransition())
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override

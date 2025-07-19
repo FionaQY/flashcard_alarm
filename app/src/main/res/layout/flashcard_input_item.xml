@@ -42,8 +42,9 @@
                     android:id="@+id/inputValue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="text" />
+                    android:imeOptions="flagNoEnterAction"
+                    android:inputType="textMultiLine"
+                    android:maxLines="5" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

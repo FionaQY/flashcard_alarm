@@ -61,6 +61,7 @@ public class NewLessonActivity extends AppCompatActivity {
     private String searchString = "";
     private MaterialToolbar toolbar = null;
     private Lesson tempLesson = null;
+    private Lesson copiedLesson = null;
     private List<String> currentHeaders = new ArrayList<>();
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private FlashcardViewModel flashcardViewModel = null;
@@ -102,6 +103,7 @@ public class NewLessonActivity extends AppCompatActivity {
             this.tempLesson = new Lesson();
         } else {
             // populate stuff at the end or risk null pointer
+            copiedLesson = tempLesson.clone();
             populateLessonData();
             findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);
             findViewById(R.id.practiceButton).setOnClickListener(v -> showMemoDialog());
@@ -660,6 +662,10 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     public void showExitDialog() {
+        if (tempLesson == null || tempLesson.equals(copiedLesson)) {
+            this.supportFinishAfterTransition();
+            return;
+        }
         new AlertDialog.Builder(this)
                 .setCancelable(true)
                 .setMessage("Go back? Changes made will not be saved")

@@ -15,6 +15,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @TypeConverters(Lesson.Converters.class)
@@ -133,7 +134,7 @@ public class Lesson implements Parcelable {
     }
 
     public String getLogDesc() {
-        return String.format("Lesson %s (ID: %d)", this.getLessonName(), this.getId());
+        return String.format(Locale.US, "Lesson %s (ID: %d)", this.getLessonName(), this.getId());
     }
 
     @Override
@@ -152,6 +153,21 @@ public class Lesson implements Parcelable {
                 Objects.equals(this.flashcards, otherLesson.flashcards) &&
                 Objects.equals(this.headers, otherLesson.getHeaders()) &&
                 Objects.equals(this.foreignIndexes, otherLesson.getForeignIndexes());
+    }
+
+    @NonNull
+    public Lesson clone() {
+        Lesson temp = new Lesson(this.getLessonName(), null, this.isPunctSensitive(), this.isCaseSensitive, this.getHeaders(), this.getForeignIndexes());
+
+        List<Flashcard> cards = new ArrayList<>();
+        if (this.flashcards != null) {
+            for (int i = 0; i < this.flashcards.size(); i++) {
+                cards.add(this.flashcards.get(i).clone());
+            }
+        }
+
+        temp.setFlashcards(cards);
+        return temp;
     }
 
     @Override

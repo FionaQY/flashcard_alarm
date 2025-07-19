@@ -2,12 +2,11 @@ package com.example.language_alarm.adapter;
 
 import android.text.Editable;
 import android.text.SpannableString;
+import android.text.TextWatcher;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -21,16 +20,17 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAdapter.InputFlashcardViewHolder> {
     private final SparseArray<TextInputEditText> inputFields;
     private final SparseArray<TextView> answerViews;
+    private final RecyclerView rv;
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private List<String> headers = new ArrayList<>();
     private List<String> ans = new ArrayList<>();
     private boolean isNotMemo = false;
     private SparseArray<SpannableString> progress;
-    private final RecyclerView rv;
 
     public InputFlashcardAdapter(RecyclerView recyclerView) {
         this.rv = recyclerView;
@@ -175,37 +175,55 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
             inputValue = itemView.findViewById(R.id.inputValue);
             displayAnswer = itemView.findViewById(R.id.answer);
 
-            inputValue.setOnEditorActionListener((v, actionId, event) -> {
-                if (rv == null) return false;
-                if (actionId == EditorInfo.IME_ACTION_NEXT ||
-                        (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+            inputValue.addTextChangedListener(new TextWatcher() {
+                private int previousLength = 0;
 
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    previousLength = s.length();
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (s.length() > previousLength) {
+                        char lastChar = s.charAt(s.length() - 1);
+                        if (lastChar == '\n') {
+                            inputValue.setText(s.toString().replace("\n", ""));
+                            goToNextInput();
+                        }
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+
+                private void goToNextInput() {
                     int nextPos = getAbsoluteAdapterPosition() + 1;
                     while (nextPos < getItemCount()) {
                         RecyclerView.ViewHolder temp = rv.findViewHolderForAdapterPosition(nextPos);
                         if (temp instanceof InputFlashcardViewHolder) {
                             InputFlashcardViewHolder nextHolder = (InputFlashcardViewHolder) temp;
-                            if (nextHolder.inputContainer.getVisibility() == View.VISIBLE) {
-                                break;
-                            }
+                            if (nextHolder.inputContainer.getVisibility() == View.VISIBLE) break;
                         }
-                        nextPos += 1;
+                        nextPos++;
                     }
+                    if (nextPos >= getItemCount()) return;
 
-                    if (nextPos < getItemCount()) {
-                        rv.smoothScrollToPosition(nextPos);
-                        int finalNextPos = nextPos;
-                        rv.postDelayed(() -> {
-                            RecyclerView.ViewHolder nextHolder = rv.findViewHolderForAdapterPosition(finalNextPos);
-                            if (nextHolder instanceof InputFlashcardViewHolder) {
-                                ((InputFlashcardViewHolder) nextHolder).inputValue.requestFocus();
-                            }
-                        }, 200);
-                    }
-                    return true;
+                    rv.smoothScrollToPosition(nextPos);
+                    int finalNextPos = nextPos;
+                    rv.postDelayed(() -> {
+                        RecyclerView.ViewHolder nextHolder = rv.findViewHolderForAdapterPosition(finalNextPos);
+                        if (nextHolder instanceof InputFlashcardViewHolder) {
+                            TextInputEditText textbox = ((InputFlashcardViewHolder) nextHolder).inputValue;
+                            textbox.requestFocus();
+                            textbox.setSelection(Objects.requireNonNull(textbox.getText()).length());
+                        }
+                    }, 200);
                 }
-                return false;
             });
+
+
         }
     }
 }

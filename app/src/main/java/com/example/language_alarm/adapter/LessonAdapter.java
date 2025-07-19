@@ -22,12 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonViewHolder> {
+    private final OnPracticeListener practiceListener;
     private final Context ctx;
     private List<Lesson> lessonList;
 
-    public LessonAdapter(Context ctx, List<Lesson> lessons) {
+    public LessonAdapter(Context ctx, List<Lesson> lessons, OnPracticeListener practiceListener) {
         this.ctx = ctx;
         this.lessonList = lessons;
+        this.practiceListener = practiceListener;
     }
 
     public void setLessons(List<Lesson> newLessons) {
@@ -77,6 +79,7 @@ public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonView
     public void onBindViewHolder(LessonViewHolder holder, int position) {
         Lesson lesson = this.lessonList.get(position);
         holder.lessonNameView.setText(lesson.getLessonName());
+        holder.lessonNameView.setOnClickListener(v -> practiceListener.onLessonClick(lessonList.get(position).getId()));
 
         holder.editButton.setOnClickListener(view -> {
             Intent intent = new Intent(ctx, NewLessonActivity.class);
@@ -103,6 +106,10 @@ public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonView
             return 0;
         }
         return this.lessonList.size();
+    }
+
+    public interface OnPracticeListener {
+        void onLessonClick(int lessonId);
     }
 
     public static class LessonViewHolder extends RecyclerView.ViewHolder {

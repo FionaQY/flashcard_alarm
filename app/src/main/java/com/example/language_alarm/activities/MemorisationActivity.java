@@ -170,11 +170,12 @@ public class MemorisationActivity extends AppCompatActivity {
         Button nextButton = findViewById(R.id.nextButton);
         nextButton.setOnClickListener(v -> {
             if (secondClick) {
-                nextButton.setText(R.string.next_flashcard);
+                nextButton.setText(R.string.check_answer);
                 handleNextCard();
             } else {
                 cancelTimer();
-                nextButton.setText(R.string.check_answer);
+                nextButton.setText(R.string.next_flashcard);
+
                 validateAnswers();
             }
             secondClick = !secondClick;
@@ -208,8 +209,14 @@ public class MemorisationActivity extends AppCompatActivity {
             List<String> newVals = inputAdapter.getUserAnswers();
             currFlashcard.setVals(newVals);
             lesson.getFlashcards().set(currFlashcardIndex, currFlashcard);
-            adapter.setValues(currFlashcard);
+            if (!this.cardIndexes.contains(currFlashcardIndex)) {
+                this.cardIndexes.add(currFlashcardIndex);
+                this.progress.delete(currFlashcardIndex);
+            }
+//            adapter.setEditedValues(currFlashcard, this.progress.get(currFlashcardIndex));
+            secondClick = false;
             dialog.dismiss();
+            handleNextCard();
         });
     }
 
@@ -315,6 +322,18 @@ public class MemorisationActivity extends AppCompatActivity {
         LessonHandler.saveLesson(this, this.lesson);
         cancelTimer();
         finishAfterTransition();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        LessonHandler.saveLesson(this, lesson);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LessonHandler.saveLesson(this, lesson);
     }
 
     private static class NormalizedResult {

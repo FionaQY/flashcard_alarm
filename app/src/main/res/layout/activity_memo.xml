@@ -47,7 +47,7 @@
             android:id="@+id/editButton"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="@string/edit"
@@ -59,9 +59,9 @@
             android:id="@+id/nextButton"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Check Answer"
+            android:text="@string/check_answer"
             app:icon="@drawable/ic_next"
             app:iconGravity="textStart" />
     </LinearLayout>
