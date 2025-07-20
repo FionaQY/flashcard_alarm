@@ -1,4 +1,4 @@
-package com.example.language_alarm.models;
+package com.example.language_alarm.utils;
 
 import static android.app.Activity.RESULT_OK;
 

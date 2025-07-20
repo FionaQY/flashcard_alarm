@@ -5,11 +5,13 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 
 @Entity(tableName = "alarms")
 public class Alarm implements Parcelable {
@@ -24,6 +26,14 @@ public class Alarm implements Parcelable {
             return new Alarm[size];
         }
     };
+    // Add these constants at the top of your Alarm class
+    private static final int[] WEEKDAYS = {1, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6}; // 1, 2, 4, 8, 16, 32, 64
+    @Ignore
+    private static final String[] dayNames = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    @Ignore
+    private static final int[] dayInt = {Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
+            Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY};
+    private int daysBitmask = 0;
     @PrimaryKey(autoGenerate = true)
     private int id;
     private int hour;
@@ -34,13 +44,6 @@ public class Alarm implements Parcelable {
     private int snoozeDuration; // in minutes
     private boolean isEnabled = true;
     private boolean isOneTime;
-    private boolean monday;
-    private boolean tuesday;
-    private boolean wednesday;
-    private boolean thursday;
-    private boolean friday;
-    private boolean saturday;
-    private boolean sunday;
     private int lessonId;
     private int qnNum;
 
@@ -48,20 +51,15 @@ public class Alarm implements Parcelable {
     }
 
     public Alarm(int hour, int minute, int numSnoozes, int lenSnooze,
-                 boolean isOneTime, boolean sunday, boolean monday, boolean tuesday, boolean wednesday,
-                 boolean thursday, boolean friday, boolean saturday, String uri, int qnNum) {
+                 boolean isOneTime, boolean[] days, String uri, int qnNum) {
         this.hour = hour;
         this.minute = minute;
         this.snoozeNum = numSnoozes;
         this.snoozeDuration = lenSnooze;
         this.isOneTime = isOneTime;
-        this.sunday = sunday;
-        this.monday = monday;
-        this.tuesday = tuesday;
-        this.wednesday = wednesday;
-        this.thursday = thursday;
-        this.friday = friday;
-        this.saturday = saturday;
+        for (int i = 0; i < days.length; i++) {
+            this.setDayEnabled(WEEKDAYS[i], days[i]);
+        }
         this.ringtone = uri;
         this.qnNum = qnNum;
     }
@@ -76,74 +74,32 @@ public class Alarm implements Parcelable {
         snoozeDuration = in.readInt();
         isEnabled = in.readByte() != 0;
         isOneTime = in.readByte() != 0;
-        monday = in.readByte() != 0;
-        tuesday = in.readByte() != 0;
-        wednesday = in.readByte() != 0;
-        thursday = in.readByte() != 0;
-        friday = in.readByte() != 0;
-        saturday = in.readByte() != 0;
-        sunday = in.readByte() != 0;
+        daysBitmask = in.readInt();
         lessonId = in.readInt();
         qnNum = in.readInt();
     }
 
+    public boolean[] getEnabledDays() {
+        boolean[] outp = new boolean[7];
+        for (int i = 0; i < WEEKDAYS.length; i++) {
+            outp[i] = this.isDayEnabled(WEEKDAYS[i]);
+        }
+        return outp;
+    }
+
+    public boolean isDayEnabled(int dayFlag) {
+        return (daysBitmask & dayFlag) != 0;
+    }
+
+    public void setDayEnabled(int dayFlag, boolean enabled) {
+        if (enabled) {
+            daysBitmask |= dayFlag;
+        } else {
+            daysBitmask &= ~dayFlag;
+        }
+    }
+
     // Getters and setters for all fields
-    public boolean isMonday() {
-        return monday;
-    }
-
-    public void setMonday(boolean monday) {
-        this.monday = monday;
-    }
-
-    public boolean isTuesday() {
-        return tuesday;
-    }
-
-    public void setTuesday(boolean tuesday) {
-        this.tuesday = tuesday;
-    }
-
-    public boolean isWednesday() {
-        return wednesday;
-    }
-
-    public void setWednesday(boolean wednesday) {
-        this.wednesday = wednesday;
-    }
-
-    public boolean isThursday() {
-        return thursday;
-    }
-
-    public void setThursday(boolean thursday) {
-        this.thursday = thursday;
-    }
-
-    public boolean isFriday() {
-        return friday;
-    }
-
-    public void setFriday(boolean friday) {
-        this.friday = friday;
-    }
-
-    public boolean isSaturday() {
-        return saturday;
-    }
-
-    public void setSaturday(boolean saturday) {
-        this.saturday = saturday;
-    }
-
-    public boolean isSunday() {
-        return sunday;
-    }
-
-    public void setSunday(boolean sunday) {
-        this.sunday = sunday;
-    }
-
     public int getId() {
         return id;
     }
@@ -201,11 +157,11 @@ public class Alarm implements Parcelable {
     }
 
     public boolean isEnabled() {
-        return isEnabled;
+        return this.isEnabled;
     }
 
     public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
+        this.isEnabled = enabled;
     }
 
     public boolean isOneTime() {
@@ -216,20 +172,12 @@ public class Alarm implements Parcelable {
         isOneTime = oneTime;
     }
 
-    public String getTime() {
-        return String.format(Locale.US, "%02d:%02d", hour, minute);
-    }
-
     public int getLessonId() {
         return this.lessonId;
     }
 
     public void setLessonId(int lessonId) {
         this.lessonId = lessonId;
-    }
-
-    public void deleteLesson() {
-        this.lessonId = 0;
     }
 
     public int getQnNum() {
@@ -240,14 +188,29 @@ public class Alarm implements Parcelable {
         this.qnNum = qnNum;
     }
 
+    public int getDaysBitmask() {
+        return daysBitmask;
+    }
+
+    public void setDaysBitmask(int daysBitmask) {
+        this.daysBitmask = daysBitmask;
+    }
+
+    public void deleteLesson() {
+        this.lessonId = 0;
+    }
+
+
+    public String getTime() {
+        return String.format(Locale.US, "%02d:%02d", hour, minute);
+    }
+
+
     public String getDescription() {
         StringBuilder sb = new StringBuilder();
 
-        boolean[] days = {sunday, monday, tuesday, wednesday, thursday, friday, saturday};
-        String[] dayNames = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-
-        for (int i = 0; i < days.length; i++) {
-            if (days[i]) {
+        for (int i = 0; i < dayNames.length; i++) {
+            if (isDayEnabled(1 << i)) {
                 sb.append(dayNames[i]).append(" ");
             }
         }
@@ -258,31 +221,58 @@ public class Alarm implements Parcelable {
 
         if (lessonId == 0) {
             if (sb.length() > 0) {
-                sb.append("; ");
+                sb.append("\n");
             }
             sb.append("Lesson not yet set");
         }
         return sb.toString().trim();
     }
 
+    public Calendar getNextAlarmTime() {
+        if (!this.isEnabled()) {
+            return null;
+        }
+        Calendar cal = null;
+        for (int i = 0; i < dayInt.length; i++) {
+            if (isDayEnabled(1 << i)) {
+                Calendar temp = getAlarmTimeForDay(dayInt[i]);
+                if (cal == null || temp.before(cal)) {
+                    cal = temp;
+                }
+            }
+        }
+
+        long now = System.currentTimeMillis();
+        if (cal == null) {
+            Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+            calendar.setTimeInMillis(now);
+            calendar.set(Calendar.HOUR_OF_DAY, this.getHour());
+            calendar.set(Calendar.MINUTE, this.getMinute());
+            calendar.set(Calendar.SECOND, 0);
+            if (calendar.getTimeInMillis() <= now) {
+                calendar.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
+            }
+            return calendar;
+        }
+        return cal;
+    }
+
+    private Calendar getAlarmTimeForDay(int dayOfWeek) {
+        long now = System.currentTimeMillis();
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+        calendar.setTimeInMillis(now);
+        calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        calendar.set(Calendar.HOUR_OF_DAY, this.getHour());
+        calendar.set(Calendar.MINUTE, this.getMinute());
+        calendar.set(Calendar.SECOND, 0);
+        if (calendar.getTimeInMillis() <= now) {
+            calendar.add(Calendar.DAY_OF_YEAR, 7); //set next day if time passed alr
+        }
+        return calendar;
+    }
+
     public String getLogDesc() {
-        return String.format("Alarm %s (ID: %d)", this.getTime(), this.getId());
-    }
-
-
-    public boolean hasDaysSelected() {
-        return this.isSaturday() || this.isFriday() || this.isThursday() || this.isWednesday()
-                || this.isTuesday() || this.isMonday() || this.isSunday();
-    }
-
-    public void forEachEnabledDay(DayConsumer consumer) {
-        if (isSunday()) consumer.accept(Calendar.SUNDAY);
-        if (isMonday()) consumer.accept(Calendar.MONDAY);
-        if (isTuesday()) consumer.accept(Calendar.TUESDAY);
-        if (isWednesday()) consumer.accept(Calendar.WEDNESDAY);
-        if (isThursday()) consumer.accept(Calendar.THURSDAY);
-        if (isFriday()) consumer.accept(Calendar.FRIDAY);
-        if (isSaturday()) consumer.accept(Calendar.SATURDAY);
+        return String.format(Locale.US, "Alarm %s (ID: %d)", this.getTime(), this.getId());
     }
 
     @Override
@@ -303,13 +293,7 @@ public class Alarm implements Parcelable {
                 snoozeDuration == otherAlarm.getSnoozeDuration() &&
                 isEnabled == otherAlarm.isEnabled() &&
                 isOneTime == otherAlarm.isOneTime() &&
-                monday == otherAlarm.isMonday() &&
-                tuesday == otherAlarm.isTuesday() &&
-                wednesday == otherAlarm.isWednesday() &&
-                thursday == otherAlarm.isThursday() &&
-                friday == otherAlarm.isFriday() &&
-                saturday == otherAlarm.isSaturday() &&
-                sunday == otherAlarm.isSunday() &&
+                daysBitmask == otherAlarm.daysBitmask &&
                 lessonId == otherAlarm.getLessonId() &&
                 qnNum == otherAlarm.getQnNum();
     }
@@ -330,18 +314,9 @@ public class Alarm implements Parcelable {
         dest.writeInt(snoozeDuration);
         dest.writeByte((byte) (isEnabled ? 1 : 0));
         dest.writeByte((byte) (isOneTime ? 1 : 0));
-        dest.writeByte((byte) (monday ? 1 : 0));
-        dest.writeByte((byte) (tuesday ? 1 : 0));
-        dest.writeByte((byte) (wednesday ? 1 : 0));
-        dest.writeByte((byte) (thursday ? 1 : 0));
-        dest.writeByte((byte) (friday ? 1 : 0));
-        dest.writeByte((byte) (saturday ? 1 : 0));
-        dest.writeByte((byte) (sunday ? 1 : 0));
+        dest.writeInt(daysBitmask);
         dest.writeInt(lessonId);
         dest.writeInt(qnNum);
     }
 
-    public interface DayConsumer {
-        void accept(int dayOfWeek);
-    }
 }

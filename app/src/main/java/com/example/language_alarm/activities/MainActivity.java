@@ -31,8 +31,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setupToolbar();
 
-//        ((NightModeButton) findViewById(R.id.nightModeButton)).setOnSwitchListener(v -> onToggleDarkMode());
-
         RecyclerView recyclerView = findViewById(R.id.alarm_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new AlarmAdapter(this, new ArrayList<>());
@@ -49,12 +47,6 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(prefs.getIsDarkTheme() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
     }
 
-//    private void onToggleDarkMode() {
-//        prefs.flipIsDarkTheme();
-//        setAppTheme();
-
-    /// /        recreate();
-//    }
     private void onToggleNewAlarm() {
         Intent intent = new Intent(this, NewAlarmActivity.class);
         startActivity(intent);

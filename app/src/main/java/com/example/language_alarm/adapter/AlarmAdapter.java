@@ -1,13 +1,17 @@
 package com.example.language_alarm.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -72,29 +76,59 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
         return new AlarmViewHolder(view);
     }
 
-    private void changeStatusOfAlarm(boolean isChecked, Alarm alarm) {
-        alarm.setEnabled(isChecked);
-        AlarmHandler.saveAlarm(this.ctx, alarm);
-        if (alarm.isEnabled()) {
-            AlarmHandler.rescheduleAlarm(this.ctx, alarm);
-        } else {
-            AlarmHandler.cancelAlarm(this.ctx, alarm);
-        }
-    }
-
     @Override
     public void onBindViewHolder(AlarmViewHolder holder, int position) {
         Alarm alarm = this.alarmList.get(position);
         holder.timeTextView.setText(alarm.getTime());
         holder.labelTextView.setText(alarm.getDescription());
         holder.toggleSwitch.setChecked(alarm.isEnabled());
-        holder.toggleSwitch.setOnCheckedChangeListener(
-                (buttonView, isChecked) -> changeStatusOfAlarm(isChecked, alarm));
+
+        holder.toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            alarm.setEnabled(isChecked);
+            AlarmHandler.rescheduleAlarm(ctx, alarm);
+            AlarmHandler.saveAlarm(ctx, alarm);
+            Toast.makeText(ctx, isChecked ? "Alarm enabled" : "Alarm disabled", Toast.LENGTH_SHORT).show();
+        });
 
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(ctx, NewAlarmActivity.class);
             intent.putExtra("alarm", alarm);
             ctx.startActivity(intent);
+        });
+
+        holder.menuButton.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(this.ctx, v);
+            popup.inflate(R.menu.alarm_popup_menu);
+
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.edit) {
+                    Intent intent = new Intent(ctx, NewAlarmActivity.class);
+                    intent.putExtra("alarm", alarm);
+                    ctx.startActivity(intent);
+                    return true;
+                } else if (id == R.id.delete) {
+                    new AlertDialog.Builder(ctx)
+                            .setCancelable(true)
+                            .setMessage("Delete this alarm?")
+                            .setPositiveButton("Confirm",
+                                    (dialog, which) -> {
+                                        AlarmHandler.cancelAlarm(this.ctx, alarm);
+                                        AlarmHandler.deleteAlarm(this.ctx, alarm);
+                                        notifyItemRemoved(position);
+                                    })
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                    return true;
+                } else if (id == R.id.skip) {
+//                    TODO: cancel next alarm and schedule the alarm after that
+                    AlarmHandler.cancelAlarm(this.ctx, alarm);
+                    return true;
+                }
+                return false;
+            });
+
+            popup.show();
         });
     }
 
@@ -109,12 +143,14 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
     public static class AlarmViewHolder extends RecyclerView.ViewHolder {
         public TextView timeTextView, labelTextView;
         public SwitchCompat toggleSwitch;
+        public ImageButton menuButton;
 
         public AlarmViewHolder(View itemView) {
             super(itemView);
             timeTextView = itemView.findViewById(R.id.alarm_time);
             labelTextView = itemView.findViewById(R.id.alarm_label);
             toggleSwitch = itemView.findViewById(R.id.alarm_toggle);
+            menuButton = itemView.findViewById(R.id.menuButton);
         }
     }
 }

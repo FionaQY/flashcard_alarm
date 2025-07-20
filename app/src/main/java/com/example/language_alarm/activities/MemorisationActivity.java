@@ -318,8 +318,10 @@ public class MemorisationActivity extends AppCompatActivity {
     }
 
     private void handleFinishQuiz() {
-        this.lesson.setFlashcards(this.allFlashcards);
-        LessonHandler.saveLesson(this, this.lesson);
+        if (this.lesson != null) {
+            this.lesson.setFlashcards(this.allFlashcards);
+            LessonHandler.saveLesson(this, this.lesson);
+        }
         cancelTimer();
         finishAfterTransition();
     }

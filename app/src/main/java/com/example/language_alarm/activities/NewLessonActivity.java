@@ -30,9 +30,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.language_alarm.R;
 import com.example.language_alarm.adapter.FlashcardAdapter;
 import com.example.language_alarm.adapter.InputFlashcardAdapter;
-import com.example.language_alarm.models.ActivityResultHelper;
 import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.utils.ActivityResultHelper;
 import com.example.language_alarm.utils.LessonHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
@@ -483,7 +483,7 @@ public class NewLessonActivity extends AppCompatActivity {
 
     private void showPopupMenu(Flashcard flashcard, int position, View v) {
         PopupMenu popup = new PopupMenu(this, v);
-        popup.inflate(R.menu.popup_menu);
+        popup.inflate(R.menu.flashcard_popup_menu);
 
         popup.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();

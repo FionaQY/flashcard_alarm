@@ -18,7 +18,7 @@ import com.example.language_alarm.receiver.AlarmReceiver;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,15 +45,12 @@ public class AlarmHandler {
             }
             if (alarm.getId() == 0) {
                 // new alarm
-                Log.d(TAG, String.format("Saving %s", alarm.getLogDesc()));
+                Log.d(TAG, String.format("Saving new %s", alarm.getLogDesc()));
                 long id = getAlarmDao(appContext).insert(alarm);
                 alarm.setId((int) id);
-                rescheduleAlarmInternal(appContext, alarm);
-                Log.d(TAG, String.format("New alarm scheduled with ID: %d", id));
             } else {
                 getAlarmDao(appContext).update(alarm);
-                rescheduleAlarmInternal(appContext, alarm);
-                Log.i(TAG, String.format(Locale.US, "%s updated and rescheduled: ", alarm.getLogDesc()));
+                Log.d(TAG, String.format("Updated %s", alarm.getLogDesc()));
             }
         } catch (Exception e) {
             Log.e(TAG, "Error saving alarm", e);
@@ -64,51 +61,25 @@ public class AlarmHandler {
         if (!alarm.isEnabled()) return;
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
 
-        if (alarm.isOneTime()) {
-            scheduleOneTimeAlarm(ctx, alarmManager, alarm);
-        } else {
-            scheduleRecurringAlarm(ctx, alarmManager, alarm);
-        }
-    }
+        PendingIntent pendingIntent = createAlarmPendingIntent(ctx, alarm);
 
-    private static void scheduleOneTimeAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm) {
-        if (alarm.hasDaysSelected()) {
-            scheduleRecurringAlarm(ctx, alarmManager, alarm);
+        Calendar calendar = alarm.getNextAlarmTime();
+        if (calendar == null) {
+            Log.w(TAG, String.format(Locale.US, "Unable to schedule %s", alarm.getLogDesc()));
             return;
         }
-        Intent intent = createAlarmIntent(ctx, alarm);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                ctx,
-                alarm.getId(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, alarm.getHour());
-        calendar.set(Calendar.MINUTE, alarm.getMinute());
-        calendar.set(Calendar.SECOND, 0);
-
-        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
-        }
         setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
+        Log.d(TAG, String.format(Locale.US, "Successfully set %s on %s", alarm.getLogDesc(), calendar.getTime()));
     }
 
     public static void snoozeAlarm(Context ctx, Alarm alarm) {
         cancelAlarm(ctx, alarm);
 
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = createAlarmIntent(ctx, alarm);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                ctx,
-                alarm.getId(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
+        PendingIntent pendingIntent = createAlarmPendingIntent(ctx, alarm);
 
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.add(Calendar.MINUTE, alarm.getSnoozeDuration());
         calendar.set(Calendar.SECOND, 0);
@@ -116,40 +87,17 @@ public class AlarmHandler {
         setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
     }
 
-    private static void scheduleRecurringAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm) {
-        alarm.forEachEnabledDay(day -> scheduleDayAlarm(ctx, alarmManager, alarm, day));
-    }
-
-    private static int getRequestCode(Alarm alarm, int dayOfWeek) {
-        return Objects.hash(alarm.getId(), dayOfWeek);
-    }
-
-    private static void scheduleDayAlarm(Context ctx, AlarmManager alarmManager, Alarm alarm, int dayOfWeek) {
-        Intent intent = createAlarmIntent(ctx, alarm);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                ctx,
-                getRequestCode(alarm, dayOfWeek),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
-        calendar.set(Calendar.HOUR_OF_DAY, alarm.getHour());
-        calendar.set(Calendar.MINUTE, alarm.getMinute());
-        calendar.set(Calendar.SECOND, 0);
-        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
-            calendar.add(Calendar.DAY_OF_YEAR, 7);
-        }
-        setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
-    }
-
-    private static Intent createAlarmIntent(Context ctx, Alarm alarm) {
+    private static PendingIntent createAlarmPendingIntent(Context ctx, Alarm alarm) {
         Intent intent = new Intent(ctx, AlarmReceiver.class);
         intent.setAction(AlarmReceiver.ACTION_ALARM_TRIGGER);
         intent.putExtra(RINGTONE_STR, alarm.getRingtone() != null ? alarm.getRingtone() : "");
         intent.putExtra("alarm", alarm);
-        return intent;
+        return PendingIntent.getBroadcast(
+                ctx,
+                alarm.getId(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
     }
 
     private static void setExactAlarm(Context ctx, AlarmManager alarmManager, long triggerAttMills, PendingIntent pendingIntent) {
@@ -175,26 +123,16 @@ public class AlarmHandler {
     }
 
     public static void cancelAlarm(Context ctx, Alarm alarm) {
-        if (alarm == null || !alarm.isEnabled()) return;
+        if (alarm == null) return;
         executor.execute(() -> cancelAlarmInternal(ctx, alarm));
     }
 
     private static void cancelAlarmInternal(Context ctx, Alarm alarm) {
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        if (!alarm.hasDaysSelected()) {
-            cancelSingleAlarm(ctx, alarm.getId(), alarmManager, alarm);
-        } else {
-            alarm.forEachEnabledDay(day -> cancelSingleAlarm(ctx,
-                    getRequestCode(alarm, day), alarmManager, alarm));
-        }
-    }
-
-    private static void cancelSingleAlarm(Context ctx, int requestCode, AlarmManager alarmManager, Alarm alarm) {
-        Intent intent = new Intent(ctx, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = createAlarmPendingIntent(ctx, alarm);
         alarmManager.cancel(pendingIntent);
         pendingIntent.cancel();
-        Log.i(TAG, "Cancelled alarm: " + alarm.getId());
+        Log.i(TAG, "Successfully cancelled " + alarm.getLogDesc());
     }
 
     public static void rescheduleAlarm(Context ctx, Alarm alarm) {
@@ -204,7 +142,10 @@ public class AlarmHandler {
     public static void rescheduleAlarmInternal(Context ctx, Alarm alarm) {
         if (alarm == null) return;
         cancelAlarmInternal(ctx, alarm);
-        scheduleAlarmInternal(ctx, alarm);
+        if (alarm.isEnabled()) {
+            scheduleAlarmInternal(ctx, alarm);
+        }
+        Log.i(TAG, String.format(Locale.US, "%s has been successfully rescheduled", alarm.getLogDesc()));
     }
 
     public static void rescheduleAllAlarms(Context ctx) {

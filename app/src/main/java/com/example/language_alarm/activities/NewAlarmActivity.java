@@ -29,16 +29,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.language_alarm.R;
-import com.example.language_alarm.models.ActivityResultHelper;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.models.Lesson;
+import com.example.language_alarm.utils.ActivityResultHelper;
 import com.example.language_alarm.utils.AlarmHandler;
 import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.example.language_alarm.viewmodel.LessonViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +56,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     AutoCompleteTextView snoozeDurationDropdown;
     Integer selectedSnoozeDuration;
     private EditText numOfQns;
-    private MaterialToolbar header;
+    private MaterialToolbar toolbar;
     private TimePicker alarmTimePicker;
     private Alarm alarmToEdit = null; // if editing existing alarm instead of creating new alarm
     private Alarm pendingAlarmToSave = null; // if permissions not granted
@@ -78,14 +77,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         this.alarmToEdit = getIntent().getParcelableExtra("alarm");
         if (alarmToEdit != null) {
             populateAlarmData();
-            FloatingActionButton deleteButt = findViewById(R.id.deleteButton);
-            deleteButt.setVisibility(View.VISIBLE);
-            deleteButt.setOnClickListener(v -> {
-                // TODO: move delete alarm to main activity
-                AlarmHandler.deleteAlarm(this, alarmToEdit);
-                AlarmHandler.cancelAlarm(this, alarmToEdit);
-                finishAfterTransition();
-            });
         }
 
         setupListeners();
@@ -170,9 +161,9 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        header = findViewById(R.id.toolbar);
-        ToolbarHelper.setupToolbar(header, "New Alarm", true, this::showExitDialog);
-        setSupportActionBar(header);
+        toolbar = findViewById(R.id.toolbar);
+        ToolbarHelper.setupToolbar(toolbar, "New Alarm", true, this::showExitDialog);
+        setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
     }
 
@@ -224,15 +215,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         alarmTimePicker.setMinute(alarmToEdit.getMinute());
 
         updateToolbarTitle(alarmToEdit.getHour(), alarmToEdit.getMinute());
-        boolean[] alarmDays = {
-                alarmToEdit.isSunday(),
-                alarmToEdit.isMonday(),
-                alarmToEdit.isTuesday(),
-                alarmToEdit.isWednesday(),
-                alarmToEdit.isThursday(),
-                alarmToEdit.isFriday(),
-                alarmToEdit.isSaturday()
-        };
+        boolean[] alarmDays = alarmToEdit.getEnabledDays();
 
         for (int i = 0; i < buttons.length; i++) {
             buttons[i].setChecked(alarmDays[i]);
@@ -259,7 +242,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         int displayHour = hourOfDay % 12 == 0 ? 12 : hourOfDay % 12;
         String title = String.format(Locale.US, "Alarm set for %d:%02d %s", displayHour, minute, amPm);
 
-        TextView titleView = header.findViewById(R.id.toolbar_title);
+        TextView titleView = toolbar.findViewById(R.id.toolbar_title);
         if (titleView != null) {
             titleView.setText(title);
         }
@@ -287,7 +270,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         AlarmHandler.saveAlarm(this, newAlarm);
         AlarmHandler.rescheduleAlarm(this, newAlarm);
         Toast.makeText(this,
-                String.format(Locale.US, "Alarm set for %s", newAlarm.getTime()),
+                String.format(Locale.US, "Alarm set for %s", newAlarm.getNextAlarmTime().getTime()),
                 Toast.LENGTH_SHORT).show();
         supportFinishAfterTransition();
     }
@@ -316,12 +299,9 @@ public class NewAlarmActivity extends AppCompatActivity {
         String ringtone = selectedAudio == null ? "" : selectedAudio.toString();
         String selectedNumOfQns = this.numOfQns.getText().toString();
         Alarm newAlarm = new Alarm(
-                hour, minute,
-                selectedSnoozeNum == null ? 0 : selectedSnoozeNum,
+                hour, minute, selectedSnoozeNum == null ? 0 : selectedSnoozeNum,
                 selectedSnoozeDuration == null ? 0 : selectedSnoozeDuration, isOneTime,
-                daysChecked[0], daysChecked[1], daysChecked[2], daysChecked[3],
-                daysChecked[4], daysChecked[5], daysChecked[6],
-                ringtone, selectedNumOfQns.isEmpty() ? 0 : Integer.parseInt(selectedNumOfQns)
+                daysChecked, ringtone, selectedNumOfQns.isEmpty() ? 0 : Integer.parseInt(selectedNumOfQns)
         );
         if (this.alarmToEdit != null) {
             newAlarm.setId(this.alarmToEdit.getId());
