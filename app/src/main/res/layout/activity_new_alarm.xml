@@ -180,7 +180,7 @@
 
     </LinearLayout>
 
-    <!--TODO: loudness, vibration checkbox, -->
+    <!--TODO: loudness scale -->
     <!--TODO: Alarm wallpaper-->
 
     <com.google.android.material.button.MaterialButton

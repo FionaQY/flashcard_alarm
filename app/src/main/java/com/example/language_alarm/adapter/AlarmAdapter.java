@@ -121,7 +121,8 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
                             .show();
                     return true;
                 } else if (id == R.id.skip) {
-//                    TODO: cancel next alarm and schedule the alarm after that
+                    // TODO: cancel next alarm and schedule the alarm after that
+                    // TODO: unskip
                     AlarmHandler.cancelAlarm(this.ctx, alarm);
                     return true;
                 }
