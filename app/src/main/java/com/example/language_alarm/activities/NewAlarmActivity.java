@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class NewAlarmActivity extends AppCompatActivity {
     private static final Integer[] NUMBER_OF_SNOOZES = new Integer[]{
@@ -51,6 +52,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     private static final Integer[] SNOOZE_DURATION = new Integer[]{
             1, 5, 10, 15, 20, 25, 30
     };
+    private static final String TAG = "NewAlarmActivity";
     AutoCompleteTextView snoozeNumDropdown;
     Integer selectedSnoozeNum;
     AutoCompleteTextView snoozeDurationDropdown;
@@ -172,8 +174,10 @@ public class NewAlarmActivity extends AppCompatActivity {
     private void setupListeners() {
         findViewById(R.id.saveButton).setOnClickListener(v -> checkPermissionAndSave());
         findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
-        findViewById(R.id.selectToneButton).setOnClickListener(v -> selectAlarmTone());
-        findViewById(R.id.selectWallpaper).setOnClickListener(v -> selectWallpaper());
+        findViewById(R.id.selectToneButton).setOnClickListener(v ->
+                audioPickerHelper.launchFilePicker(ActivityResultHelper.FileType.AUDIO));
+        findViewById(R.id.selectWallpaper).setOnClickListener(v ->
+                wallpaperPickerHelper.launchFilePicker(ActivityResultHelper.FileType.IMAGE));
         alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
 
         audioPickerHelper = new ActivityResultHelper(this, this::handleAudioSelection);
@@ -188,54 +192,36 @@ public class NewAlarmActivity extends AppCompatActivity {
                 });
     }
 
-    private void handleAudioSelection(Uri uri) {
-        try {
-            try {
-                getContentResolver().takePersistableUriPermission(
-                        uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
-            } catch (SecurityException e) {
-                Log.w("NewAlarmActivity", "Couldn't get persistable permission, will use temporary permission");
+    private void handleFileSelection(Uri uri, Consumer<Uri> onSuccess, String filetype) {
+        try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
+            if (pfd != null) {
+                onSuccess.accept(uri);
             }
-
-            try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
-                if (pfd != null) {
-                    selectedAudio = uri;
-                    String filename = getFileName(selectedAudio);
-                    ((MaterialButton) findViewById(R.id.selectToneButton)).setText(filename);
-                }
-            } catch (IOException e) {
-                Log.e("NewAlarmActivity", "Error accessing selected audio file", e);
-            }
-        } catch (Exception e) {
-            Log.e("NewAlarmActivity", "Error handling audio selection", e);
+        } catch (IOException e) {
+            Log.e(TAG, String.format(Locale.US, "Error accessing selected %s file", filetype), e);
         }
     }
 
-    private void handleWallpaperSelection(Uri uri) {
-        try {
-            try {
-                getContentResolver().takePersistableUriPermission(
-                        uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
-            } catch (SecurityException e) {
-                Log.w("NewAlarmActivity", "Couldn't get persistable permission, will use temporary permission");
-            }
+    private void handleAudioSelection(Uri uri) {
+        handleFileSelection(
+                uri,
+                u -> {
+                    selectedAudio = uri;
+                    String filename = getFileName(selectedAudio);
+                    ((MaterialButton) findViewById(R.id.selectToneButton)).setText(filename);
+                },
+                "audio");
+    }
 
-            try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
-                if (pfd != null) {
+    private void handleWallpaperSelection(Uri uri) {
+        handleFileSelection(
+                uri,
+                u -> {
                     selectedWallpaper = uri;
                     String filename = getFileName(selectedWallpaper);
                     ((MaterialButton) findViewById(R.id.selectWallpaper)).setText(filename);
-                }
-            } catch (IOException e) {
-                Log.e("NewAlarmActivity", "Error accessing selected audio file", e);
-            }
-        } catch (Exception e) {
-            Log.e("NewAlarmActivity", "Error handling audio selection", e);
-        }
+                },
+                "video");
     }
 
     private void populateAlarmData() {
@@ -254,8 +240,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         if (alarmToEdit.getRingtone() != null) {
             selectedAudio = Uri.parse(alarmToEdit.getRingtone());
             selectRingtoneButton.setText(getFileName(selectedAudio));
-        } else {
-            selectRingtoneButton.setText(R.string.select_ringtone);
         }
         if (alarmToEdit.getWallpaper() != null) {
             selectedWallpaper = Uri.parse(alarmToEdit.getWallpaper());
@@ -369,30 +353,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         }
     }
 
-    private void selectAlarmTone() {
-        if (!PermissionUtils.hasStoragePermission(this)) {
-            PermissionUtils.requestStoragePermission(this);
-            return;
-        }
-        openAudioPicker();
-    }
-
-    private void selectWallpaper() {
-        if (!PermissionUtils.hasStoragePermission(this)) {
-            PermissionUtils.requestStoragePermission(this);
-            return;
-        }
-        openWallpaperPicker();
-    }
-
-    private void openAudioPicker() {
-        audioPickerHelper.launchAudioPicker();
-    }
-
-    private void openWallpaperPicker() {
-        wallpaperPickerHelper.launchWallpaperPicker();
-    }
-
     private String getFileName(Uri uri) {
         String res = null;
         if (Objects.equals(uri.getScheme(), "content")) {
@@ -414,15 +374,16 @@ public class NewAlarmActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PermissionUtils.REQUEST_CODE_STORAGE_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openAudioPicker();
-            } else {
-                Toast.makeText(this, "Permission required to select alarm tones",
+            if (grantResults.length == 0 || grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission required to set custom ringtone/wallpaper",
                         Toast.LENGTH_SHORT).show();
                 new AlertDialog.Builder(this)
                         .setTitle("No Permission")
-                        .setMessage("Use default alarm tone instead?")
-                        .setPositiveButton("Yes", (d, w) -> selectedAudio = null)
+                        .setMessage("Use default ringtone/wallpaper instead?")
+                        .setPositiveButton("Yes", (d, w) -> {
+                            selectedAudio = null;
+                            selectedWallpaper = null;
+                        })
                         .setNegativeButton("Cancel", null)
                         .show();
             }

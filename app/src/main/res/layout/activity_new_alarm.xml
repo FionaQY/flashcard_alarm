@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!--Header: back button < with a confirmation, TODO: Ring in "..."-->
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar_main"

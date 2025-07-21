@@ -203,7 +203,6 @@ public class AlarmForegroundService extends Service {
                 mediaPlayer.setDataSource(this, alarmUri);
                 mediaPlayer.setAudioAttributes(audioAttributes);
                 mediaPlayer.setLooping(true);
-                // TODO: make volume variable
                 mediaPlayer.setVolume(1.0f, 1.0f);
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(mp -> {

@@ -34,7 +34,6 @@ import com.example.language_alarm.models.Flashcard;
 import com.example.language_alarm.models.Lesson;
 import com.example.language_alarm.utils.ActivityResultHelper;
 import com.example.language_alarm.utils.LessonHandler;
-import com.example.language_alarm.utils.PermissionUtils;
 import com.example.language_alarm.utils.ToolbarHelper;
 import com.example.language_alarm.viewmodel.FlashcardViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -71,7 +70,6 @@ public class NewLessonActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_lesson);
-
 
         setupListeners();
         setupToolbar();
@@ -188,15 +186,10 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void importFromCsv() {
-        if (!PermissionUtils.hasStoragePermission(this)) {
-            PermissionUtils.requestStoragePermission(this);
-            return;
-        }
-
         if (this.currentHeaders == null || currentHeaders.isEmpty()) {
             Toast.makeText(this, "As you have not set the headers in settings, the headers will be derived form the first row of the CSV file", Toast.LENGTH_LONG).show();
         }
-        csvPickerHelper.launchCsvPicker();
+        csvPickerHelper.launchFilePicker(ActivityResultHelper.FileType.CSV);
     }
 
     private void showCsvImportProgress(Uri uri) {

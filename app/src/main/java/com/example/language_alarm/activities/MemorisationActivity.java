@@ -41,8 +41,6 @@ import java.util.Queue;
 import java.util.Random;
 
 public class MemorisationActivity extends AppCompatActivity {
-    // TODO: countdown timer: 5mins -> alarm
-    // TODO: progress bar at corner
     private static final String TAG = "MemorisationActivity";
     SparseArray<SparseArray<SpannableString>> progress = new SparseArray<>();
     CountDownTimer countdownTimer;
