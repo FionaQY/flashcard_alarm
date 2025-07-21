@@ -38,15 +38,13 @@ public class AlarmReceiver extends BroadcastReceiver {
             Intent serviceIntent = new Intent(ctx, AlarmForegroundService.class);
             serviceIntent.setAction(action);
             serviceIntent.putExtra("alarm", alarm);
-
             ctx.startForegroundService(serviceIntent);
 
             Intent alarmIntent = new Intent(ctx, AlarmRingingActivity.class);
             alarmIntent.putExtra("alarm", alarm);
             alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS //
-                    | Intent.FLAG_ACTIVITY_NO_USER_ACTION //
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
             );
             ctx.startActivity(alarmIntent);
 

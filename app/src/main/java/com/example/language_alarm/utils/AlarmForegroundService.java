@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.example.language_alarm.R;
+import com.example.language_alarm.activities.AlarmRingingActivity;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.receiver.AlarmReceiver;
 
@@ -39,6 +40,7 @@ public class AlarmForegroundService extends Service {
     private AudioManager audioManager;
     private MediaPlayer mediaPlayer;
     private boolean isMediaPlayerPrepared = false;
+    private Alarm alarm;
 
     @Override
     public void onCreate() {
@@ -52,7 +54,7 @@ public class AlarmForegroundService extends Service {
             return START_STICKY;
         }
         String action = intent.getAction();
-        Alarm alarm = intent.getParcelableExtra("alarm");
+        alarm = intent.getParcelableExtra("alarm");
 
         if (AlarmReceiver.ACTION_ALARM_TRIGGER.equals(action)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -135,6 +137,17 @@ public class AlarmForegroundService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
+        Intent alarmIntent = new Intent(this, AlarmRingingActivity.class);
+        alarmIntent.putExtra("alarm", alarm);
+        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
+                this,
+                alarm.getId(),
+                alarmIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_add_alarm_24)
                 .setContentTitle("Alarm")
@@ -144,7 +157,7 @@ public class AlarmForegroundService extends Service {
                 .setAutoCancel(true)
                 .setOngoing(true)
                 .setSound(null)
-                .setFullScreenIntent(pendingIntent, true)
+                .setFullScreenIntent(fullScreenPendingIntent, true)
                 .build();
     }
 

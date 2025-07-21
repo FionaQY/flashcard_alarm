@@ -80,6 +80,7 @@
             android:name=".activities.AlarmRingingActivity"
             android:exported="false"
             android:parentActivityName=".activities.MainActivity"
+            android:resumeWhilePausing="true"
             android:showOnLockScreen="true"
             android:showWhenLocked="true"
             android:turnScreenOn="true">

@@ -262,6 +262,11 @@ public class NewAlarmActivity extends AppCompatActivity {
             }
         }
 
+        if (PermissionUtils.noNotificationPermission(this)) {
+            pendingAlarmToSave = newAlarm;
+            PermissionUtils.requestNotificationPermission(this);
+        }
+
         saveAlarm(newAlarm);
     }
 
