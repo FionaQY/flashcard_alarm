@@ -50,8 +50,8 @@ public class Alarm implements Parcelable {
     public Alarm() {
     }
 
-    public Alarm(int hour, int minute, int numSnoozes, int lenSnooze,
-                 boolean isOneTime, boolean[] days, String uri, int qnNum) {
+    public Alarm(int hour, int minute, int numSnoozes, int lenSnooze, boolean isOneTime,
+                 boolean[] days, String uri, String wallpaper, int qnNum) {
         this.hour = hour;
         this.minute = minute;
         this.snoozeNum = numSnoozes;
@@ -61,6 +61,7 @@ public class Alarm implements Parcelable {
             this.setDayEnabled(WEEKDAYS[i], days[i]);
         }
         this.ringtone = uri;
+        this.wallpaper = wallpaper;
         this.qnNum = qnNum;
     }
 

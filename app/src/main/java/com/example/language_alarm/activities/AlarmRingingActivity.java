@@ -3,6 +3,8 @@ package com.example.language_alarm.activities;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -21,6 +23,7 @@ import com.google.android.material.button.MaterialButton;
 import java.util.Locale;
 
 public class AlarmRingingActivity extends AppCompatActivity {
+    private static final String TAG = "AlarmRingingActivity";
     private Alarm alarm;
     private PowerManager.WakeLock wakeLock;
 
@@ -35,7 +38,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
                 "LanguageAlarm:AlarmWakeLock"
         );
         wakeLock.acquire(30 * 1000L /*half a minute*/);
-        Log.d("AlarmRingingActivity", "WakeLock acquired");
+        Log.d(TAG, "WakeLock acquired");
 
         setTurnScreenOn(true);
         setShowWhenLocked(true);
@@ -46,9 +49,14 @@ public class AlarmRingingActivity extends AppCompatActivity {
 
         alarm = getIntent().getParcelableExtra("alarm");
         if (alarm == null) {
-            Log.w("Alarm", "Attempted to ring null alarm");
+            Log.w(TAG, "Attempted to ring null alarm");
             supportFinishAfterTransition();
+            return;
         }
+        if (alarm.getWallpaper() != null) {
+            setWallpaperFromUri(Uri.parse(alarm.getWallpaper()));
+        }
+
         SettingUtils prefs = new SettingUtils(this);
         int snoozeCount = prefs.getSnoozeCount();
         // set buttons view and listeners
@@ -84,6 +92,19 @@ public class AlarmRingingActivity extends AppCompatActivity {
             finish();
         });
 
+    }
+
+    private void setWallpaperFromUri(Uri uri) {
+        try {
+            Drawable d = Drawable.createFromStream(
+                    getContentResolver().openInputStream(uri),
+                    null
+            );
+            findViewById(R.id.rl).setBackground(d);
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading wallpaper", e);
+            findViewById(R.id.rl).setBackgroundResource(R.drawable.default_background);
+        }
     }
 
     private void stopRinging() {

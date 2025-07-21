@@ -188,7 +188,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     private void importFromCsv() {
-        if (PermissionUtils.noStoragePermission(this)) {
+        if (!PermissionUtils.hasStoragePermission(this)) {
             PermissionUtils.requestStoragePermission(this);
             return;
         }

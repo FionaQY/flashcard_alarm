@@ -63,7 +63,9 @@ public class NewAlarmActivity extends AppCompatActivity {
     private ToggleButton[] buttons = null;
     private CheckBox oneTimeCheckBox;
     private Uri selectedAudio;
+    private Uri selectedWallpaper;
     private ActivityResultHelper audioPickerHelper = null;
+    private ActivityResultHelper wallpaperPickerHelper = null;
     private Lesson selectedLesson = null;
 
     @Override
@@ -171,9 +173,11 @@ public class NewAlarmActivity extends AppCompatActivity {
         findViewById(R.id.saveButton).setOnClickListener(v -> checkPermissionAndSave());
         findViewById(R.id.oneTime).setOnClickListener(this::onClickOneTime);
         findViewById(R.id.selectToneButton).setOnClickListener(v -> selectAlarmTone());
+        findViewById(R.id.selectWallpaper).setOnClickListener(v -> selectWallpaper());
         alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
 
         audioPickerHelper = new ActivityResultHelper(this, this::handleAudioSelection);
+        wallpaperPickerHelper = new ActivityResultHelper(this, this::handleWallpaperSelection);
 
         getOnBackPressedDispatcher().addCallback(this,
                 new OnBackPressedCallback(true) {
@@ -209,6 +213,31 @@ public class NewAlarmActivity extends AppCompatActivity {
         }
     }
 
+    private void handleWallpaperSelection(Uri uri) {
+        try {
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+            } catch (SecurityException e) {
+                Log.w("NewAlarmActivity", "Couldn't get persistable permission, will use temporary permission");
+            }
+
+            try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
+                if (pfd != null) {
+                    selectedWallpaper = uri;
+                    String filename = getFileName(selectedWallpaper);
+                    ((MaterialButton) findViewById(R.id.selectWallpaper)).setText(filename);
+                }
+            } catch (IOException e) {
+                Log.e("NewAlarmActivity", "Error accessing selected audio file", e);
+            }
+        } catch (Exception e) {
+            Log.e("NewAlarmActivity", "Error handling audio selection", e);
+        }
+    }
+
     private void populateAlarmData() {
         Objects.requireNonNull(buttons);
         alarmTimePicker.setHour(alarmToEdit.getHour());
@@ -228,6 +257,11 @@ public class NewAlarmActivity extends AppCompatActivity {
         } else {
             selectRingtoneButton.setText(R.string.select_ringtone);
         }
+        if (alarmToEdit.getWallpaper() != null) {
+            selectedWallpaper = Uri.parse(alarmToEdit.getWallpaper());
+            ((MaterialButton) findViewById(R.id.selectWallpaper)).setText(getFileName(selectedWallpaper));
+        }
+
         numOfQns.setText(String.valueOf(alarmToEdit.getQnNum()));
 
         selectedSnoozeNum = alarmToEdit.getSnoozeNum();
@@ -262,8 +296,8 @@ public class NewAlarmActivity extends AppCompatActivity {
             }
         }
 
-        if (PermissionUtils.noNotificationPermission(this)) {
-            pendingAlarmToSave = newAlarm;
+        if (!PermissionUtils.hasNotificationPermission(this)) {
+//            pendingAlarmToSave = newAlarm;
             PermissionUtils.requestNotificationPermission(this);
         }
 
@@ -302,11 +336,13 @@ public class NewAlarmActivity extends AppCompatActivity {
         boolean isOneTime = oneTimeCheckBox.isChecked() || noneSelected;
 
         String ringtone = selectedAudio == null ? "" : selectedAudio.toString();
+        String wallpaper = selectedWallpaper == null ? "" : selectedWallpaper.toString();
         String selectedNumOfQns = this.numOfQns.getText().toString();
         Alarm newAlarm = new Alarm(
                 hour, minute, selectedSnoozeNum == null ? 0 : selectedSnoozeNum,
                 selectedSnoozeDuration == null ? 0 : selectedSnoozeDuration, isOneTime,
-                daysChecked, ringtone, selectedNumOfQns.isEmpty() ? 0 : Integer.parseInt(selectedNumOfQns)
+                daysChecked, ringtone, wallpaper,
+                selectedNumOfQns.isEmpty() ? 0 : Integer.parseInt(selectedNumOfQns)
         );
         if (this.alarmToEdit != null) {
             newAlarm.setId(this.alarmToEdit.getId());
@@ -333,17 +369,28 @@ public class NewAlarmActivity extends AppCompatActivity {
         }
     }
 
-
     private void selectAlarmTone() {
-        if (PermissionUtils.noStoragePermission(this)) {
+        if (!PermissionUtils.hasStoragePermission(this)) {
             PermissionUtils.requestStoragePermission(this);
             return;
         }
         openAudioPicker();
     }
 
+    private void selectWallpaper() {
+        if (!PermissionUtils.hasStoragePermission(this)) {
+            PermissionUtils.requestStoragePermission(this);
+            return;
+        }
+        openWallpaperPicker();
+    }
+
     private void openAudioPicker() {
         audioPickerHelper.launchAudioPicker();
+    }
+
+    private void openWallpaperPicker() {
+        wallpaperPickerHelper.launchWallpaperPicker();
     }
 
     private String getFileName(Uri uri) {

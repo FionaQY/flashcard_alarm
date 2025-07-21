@@ -21,21 +21,21 @@ public class PermissionUtils {
     public static final int REQUEST_CODE_STORAGE_PERMISSION = 100;
     private static final int REQUEST_CODE_NOTIFICATION_PERMISSION = 200; // Can be any unique number
 
-    public static boolean noStoragePermission(Activity activity) {
+    public static boolean hasStoragePermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(activity, READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED;
+            return ContextCompat.checkSelfPermission(activity, READ_MEDIA_AUDIO) == PackageManager.PERMISSION_GRANTED;
         } else {
-            return ContextCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+            return ContextCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         }
     }
 
-    public static boolean noNotificationPermission(Context ctx) {
-        return !NotificationManagerCompat.from(ctx).areNotificationsEnabled();
+    public static boolean hasNotificationPermission(Context ctx) {
+        return NotificationManagerCompat.from(ctx).areNotificationsEnabled();
     }
 
     public static void requestNotificationPermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (noNotificationPermission(activity)) {
+            if (!hasNotificationPermission(activity)) {
                 activity.requestPermissions(
                         new String[]{POST_NOTIFICATIONS},
                         REQUEST_CODE_NOTIFICATION_PERMISSION
@@ -55,7 +55,7 @@ public class PermissionUtils {
     public static void requestStoragePermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             List<String> permissionsToRequest = new ArrayList<>();
-            if (noStoragePermission(activity)) {
+            if (!hasStoragePermission(activity)) {
                 permissionsToRequest.add(READ_MEDIA_AUDIO);
             }
             if (!permissionsToRequest.isEmpty()) {
@@ -65,7 +65,7 @@ public class PermissionUtils {
                 );
             }
         } else {
-            if (noStoragePermission(activity)) {
+            if (!hasStoragePermission(activity)) {
                 activity.requestPermissions(
                         new String[]{READ_EXTERNAL_STORAGE},
                         REQUEST_CODE_STORAGE_PERMISSION
