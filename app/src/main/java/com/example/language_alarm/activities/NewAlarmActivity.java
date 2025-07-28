@@ -69,6 +69,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     private ActivityResultHelper audioPickerHelper = null;
     private ActivityResultHelper wallpaperPickerHelper = null;
     private Lesson selectedLesson = null;
+    private boolean hasChanges = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +123,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         lessonsDropdown.setAdapter(lessonAdapter);
         lessonsDropdown.setOnItemClickListener((p, v, pos, id) -> {
             selectedLesson = lessonAdapter.getItem(pos);
+            hasChanges = true;
             if (selectedLesson != null) {
                 lessonsDropdown.setText(selectedLesson.getLessonName(), false);
             }
@@ -178,7 +180,13 @@ public class NewAlarmActivity extends AppCompatActivity {
                 audioPickerHelper.launchFilePicker(ActivityResultHelper.FileType.AUDIO));
         findViewById(R.id.selectWallpaper).setOnClickListener(v ->
                 wallpaperPickerHelper.launchFilePicker(ActivityResultHelper.FileType.IMAGE));
-        alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> updateToolbarTitle(hourOfDay, minute));
+        alarmTimePicker.setOnTimeChangedListener((view, hourOfDay, minute) -> {
+            updateToolbarTitle();
+            hasChanges = true;
+        });
+        for (ToggleButton button : buttons) {
+            button.setOnClickListener(v -> hasChanges = true);
+        }
 
         audioPickerHelper = new ActivityResultHelper(this, this::handleAudioSelection);
         wallpaperPickerHelper = new ActivityResultHelper(this, this::handleWallpaperSelection);
@@ -207,6 +215,7 @@ public class NewAlarmActivity extends AppCompatActivity {
                 uri,
                 u -> {
                     selectedAudio = uri;
+                    hasChanges = true;
                     String filename = getFileName(selectedAudio);
                     ((MaterialButton) findViewById(R.id.selectToneButton)).setText(filename);
                 },
@@ -218,6 +227,7 @@ public class NewAlarmActivity extends AppCompatActivity {
                 uri,
                 u -> {
                     selectedWallpaper = uri;
+                    hasChanges = true;
                     String filename = getFileName(selectedWallpaper);
                     ((MaterialButton) findViewById(R.id.selectWallpaper)).setText(filename);
                 },
@@ -229,7 +239,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         alarmTimePicker.setHour(alarmToEdit.getHour());
         alarmTimePicker.setMinute(alarmToEdit.getMinute());
 
-        updateToolbarTitle(alarmToEdit.getHour(), alarmToEdit.getMinute());
         boolean[] alarmDays = alarmToEdit.getEnabledDays();
 
         for (int i = 0; i < buttons.length; i++) {
@@ -253,16 +262,13 @@ public class NewAlarmActivity extends AppCompatActivity {
 
         selectedSnoozeDuration = alarmToEdit.getSnoozeDuration();
         snoozeDurationDropdown.setText(String.valueOf(selectedSnoozeDuration));
+        updateToolbarTitle();
     }
 
-    private void updateToolbarTitle(int hourOfDay, int minute) {
-        String amPm = hourOfDay < 12 ? "AM" : "PM";
-        int displayHour = hourOfDay % 12 == 0 ? 12 : hourOfDay % 12;
-        String title = String.format(Locale.US, "Alarm set for %d:%02d %s", displayHour, minute, amPm);
-
+    private void updateToolbarTitle() {
         TextView titleView = toolbar.findViewById(R.id.toolbar_title);
         if (titleView != null) {
-            titleView.setText(title);
+            titleView.setText("Ringing in " + createAlarm().getNextTimeString());
         }
     }
 
@@ -281,7 +287,6 @@ public class NewAlarmActivity extends AppCompatActivity {
         }
 
         if (!PermissionUtils.hasNotificationPermission(this)) {
-//            pendingAlarmToSave = newAlarm;
             PermissionUtils.requestNotificationPermission(this);
         }
 
@@ -295,6 +300,7 @@ public class NewAlarmActivity extends AppCompatActivity {
         Toast.makeText(this,
                 String.format(Locale.US, "Alarm set for %s", newAlarm.getNextAlarmTime().getTime()),
                 Toast.LENGTH_SHORT).show();
+        hasChanges = false;
         supportFinishAfterTransition();
     }
 
@@ -349,7 +355,7 @@ public class NewAlarmActivity extends AppCompatActivity {
                 }
                 button.setEnabled(!box.isChecked());
             }
-
+            hasChanges = true;
         }
     }
 
@@ -391,8 +397,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     }
 
     public void showExitDialog() {
-        Alarm tempAlarm = createAlarm();
-        if (tempAlarm == null || tempAlarm.equals(alarmToEdit)) {
+        if (!hasChanges) {
             this.supportFinishAfterTransition();
             return;
         }

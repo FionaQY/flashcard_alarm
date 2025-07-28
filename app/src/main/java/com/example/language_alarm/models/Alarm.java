@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 @Entity(tableName = "alarms")
 public class Alarm implements Parcelable {
@@ -26,7 +27,6 @@ public class Alarm implements Parcelable {
             return new Alarm[size];
         }
     };
-    // Add these constants at the top of your Alarm class
     private static final int[] WEEKDAYS = {1, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6}; // 1, 2, 4, 8, 16, 32, 64
     @Ignore
     private static final String[] dayNames = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -245,15 +245,14 @@ public class Alarm implements Parcelable {
 
         long now = System.currentTimeMillis();
         if (cal == null) {
-            Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
-            calendar.setTimeInMillis(now);
-            calendar.set(Calendar.HOUR_OF_DAY, this.getHour());
-            calendar.set(Calendar.MINUTE, this.getMinute());
-            calendar.set(Calendar.SECOND, 0);
-            if (calendar.getTimeInMillis() <= now) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
+            cal = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+            cal.setTimeInMillis(now);
+            calcalendar.set(Calendar.HOUR_OF_DAY, this.getHour());
+            cal.set(Calendar.MINUTE, this.getMinute());
+            cal.set(Calendar.SECOND, 0);
+            if (cal.getTimeInMillis() <= now) {
+                cal.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
             }
-            return calendar;
         }
         return cal;
     }
@@ -270,6 +269,37 @@ public class Alarm implements Parcelable {
             calendar.add(Calendar.DAY_OF_YEAR, 7); //set next day if time passed alr
         }
         return calendar;
+    }
+
+    public String getNextTimeString() {
+        long next = getNextAlarmTime().getTimeInMillis();
+        long now = System.currentTimeMillis();
+        long diff = next - now;
+
+        long diffDays = TimeUnit.MILLISECONDS.toDays(diff);
+        diff -= TimeUnit.DAYS.toMillis(diffDays);
+
+        long diffHours = TimeUnit.MILLISECONDS.toHours(diff);
+        diff -= TimeUnit.HOURS.toMillis(diffHours);
+
+        long diffMinutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+
+        if (diffDays == 0 && diffHours == 0 && diffMinutes == 0) {
+            return "less than a minute";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (diffDays > 0) sb.append(String.format(Locale.US, "%d day%s", diffDays, diffDays > 1 ? "s" : ""));
+        if (diffHours > 0) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(String.format(Locale.US, "%d hour%s", diffHours, diffHours > 1 ? "s" : ""));
+        }
+        if (diffMinutes > 0) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(String.format(Locale.US, "%d minute%s", diffMinutes, diffMinutes > 1 ? "s" : ""));
+        }
+        
+        return sb.toString();
     }
 
     public String getLogDesc() {

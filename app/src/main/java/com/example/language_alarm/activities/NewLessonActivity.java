@@ -60,11 +60,11 @@ public class NewLessonActivity extends AppCompatActivity {
     private String searchString = "";
     private MaterialToolbar toolbar = null;
     private Lesson tempLesson = null;
-    private Lesson copiedLesson = null;
     private List<String> currentHeaders = new ArrayList<>();
     private List<Boolean> foreignIndexes = new ArrayList<>();
     private FlashcardViewModel flashcardViewModel = null;
     private ActivityResultHelper csvPickerHelper = null;
+    private boolean hasChanges = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +101,6 @@ public class NewLessonActivity extends AppCompatActivity {
             this.tempLesson = new Lesson();
         } else {
             // populate stuff at the end or risk null pointer
-            copiedLesson = tempLesson.clone();
             populateLessonData();
             findViewById(R.id.practiceButton).setVisibility(View.VISIBLE);
             findViewById(R.id.practiceButton).setOnClickListener(v -> showMemoDialog());
@@ -181,6 +180,7 @@ public class NewLessonActivity extends AppCompatActivity {
     private void startManualFlashcardCreation() {
         Flashcard newFlashcard = new Flashcard(new ArrayList<>(this.tempLesson.getHeaders().size()));
         this.tempLesson.getFlashcards().add(newFlashcard);
+        hasChanges = true;
         showEditFlashcardDialog(newFlashcard, this.tempLesson.getFlashcards().size() - 1);
         Toast.makeText(this, "Flashcard successfully created", Toast.LENGTH_SHORT).show();
     }
@@ -300,6 +300,7 @@ public class NewLessonActivity extends AppCompatActivity {
         tempLesson.setHeaders(currentHeaders);
         tempLesson.addFlashcards(cards);
         updateFlashcardListView(true);
+        hasChanges = true;
         new AlertDialog.Builder(this)
                 .setTitle("Import Successful")
                 .setMessage(String.format(Locale.US,
@@ -414,6 +415,7 @@ public class NewLessonActivity extends AppCompatActivity {
                     Objects.requireNonNull(editHeaders.getText()).toString(),
                     recyclerGerman
             );
+            hasChanges = true;
             dialog.dismiss();
         });
     }
@@ -445,6 +447,7 @@ public class NewLessonActivity extends AppCompatActivity {
         btnClear.setOnClickListener(v -> pasteText.setText(""));
         btnSave.setOnClickListener(v -> {
             copyFromGoogleSheet(Objects.requireNonNull(pasteText.getText()).toString());
+            hasChanges = true;
             dialog.dismiss();
         });
     }
@@ -499,12 +502,14 @@ public class NewLessonActivity extends AppCompatActivity {
 
     private boolean markFlashcardAsImportant(Flashcard flashcard, int position) {
         int index = getIndex(position, flashcard);
+        hasChanges = true;
         return tempLesson.getFlashcards().get(index).flipImportance();
     }
 
     private void deleteFlashcard(Flashcard flashcard, int position) {
         int index = getIndex(position, flashcard);
         tempLesson.getFlashcards().remove(index);
+        hasChanges = true;
         updateFlashcardListView(false);
     }
 
@@ -531,6 +536,7 @@ public class NewLessonActivity extends AppCompatActivity {
             List<String> newVals = inputAdapter.getUserAnswers();
             tempLesson.getFlashcards().get(index).setVals(newVals);
             updateFlashcardListView(false);
+            hasChanges = true;
             dialog.dismiss();
         });
     }
@@ -563,6 +569,7 @@ public class NewLessonActivity extends AppCompatActivity {
         }
         tempLesson.setForeignIndexes(foreignIndices);
         flashcardViewModel.setHeaders(tempLesson.getHeaders());
+        hasChanges = true;
     }
 
     private void setupHeaderMapping(RecyclerView englishRecycler, RecyclerView germanRecycler) {
@@ -655,7 +662,7 @@ public class NewLessonActivity extends AppCompatActivity {
     }
 
     public void showExitDialog() {
-        if (tempLesson == null || tempLesson.equals(copiedLesson)) {
+        if (tempLesson == null || !hasChanges) {
             this.supportFinishAfterTransition();
             return;
         }

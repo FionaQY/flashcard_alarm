@@ -70,7 +70,7 @@ public class AlarmHandler {
         }
 
         setExactAlarm(ctx, alarmManager, calendar.getTimeInMillis(), pendingIntent);
-        Log.d(TAG, String.format(Locale.US, "Successfully set %s on %s", alarm.getLogDesc(), calendar.getTime()));
+        Log.d(TAG, String.format(Locale.US, "Alarm will ring in %s", alarm.getNextTimeString()));
     }
 
     public static void snoozeAlarm(Context ctx, Alarm alarm) {
