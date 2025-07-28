@@ -247,7 +247,7 @@ public class Alarm implements Parcelable {
         if (cal == null) {
             cal = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
             cal.setTimeInMillis(now);
-            calcalendar.set(Calendar.HOUR_OF_DAY, this.getHour());
+            cal.set(Calendar.HOUR_OF_DAY, this.getHour());
             cal.set(Calendar.MINUTE, this.getMinute());
             cal.set(Calendar.SECOND, 0);
             if (cal.getTimeInMillis() <= now) {
