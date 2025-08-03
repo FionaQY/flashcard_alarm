@@ -2,12 +2,18 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f8d074ad0e8b9175f2b2527c633605b8",
+    "identityHash": "e47be047d91a10ba61056d7da315ce7f",
     "entities": [
       {
         "tableName": "alarms",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hour` INTEGER NOT NULL, `minute` INTEGER NOT NULL, `ringtone` TEXT, `wallpaper` TEXT, `snoozeNum` INTEGER NOT NULL, `snoozeDuration` INTEGER NOT NULL, `isEnabled` INTEGER NOT NULL, `isOneTime` INTEGER NOT NULL, `monday` INTEGER NOT NULL, `tuesday` INTEGER NOT NULL, `wednesday` INTEGER NOT NULL, `thursday` INTEGER NOT NULL, `friday` INTEGER NOT NULL, `saturday` INTEGER NOT NULL, `sunday` INTEGER NOT NULL, `lessonId` INTEGER NOT NULL, `qnNum` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`daysBitmask` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hour` INTEGER NOT NULL, `minute` INTEGER NOT NULL, `ringtone` TEXT, `wallpaper` TEXT, `snoozeNum` INTEGER NOT NULL, `snoozeDuration` INTEGER NOT NULL, `isEnabled` INTEGER NOT NULL, `isOneTime` INTEGER NOT NULL, `lessonId` INTEGER NOT NULL, `qnNum` INTEGER NOT NULL, `isSkipped` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "daysBitmask",
+            "columnName": "daysBitmask",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "id",
             "columnName": "id",
@@ -61,48 +67,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "monday",
-            "columnName": "monday",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "tuesday",
-            "columnName": "tuesday",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "wednesday",
-            "columnName": "wednesday",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "thursday",
-            "columnName": "thursday",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "friday",
-            "columnName": "friday",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "saturday",
-            "columnName": "saturday",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sunday",
-            "columnName": "sunday",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "lessonId",
             "columnName": "lessonId",
             "affinity": "INTEGER",
@@ -111,6 +75,12 @@
           {
             "fieldPath": "qnNum",
             "columnName": "qnNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSkipped",
+            "columnName": "isSkipped",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -125,7 +95,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f8d074ad0e8b9175f2b2527c633605b8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e47be047d91a10ba61056d7da315ce7f')"
     ]
   }
 }

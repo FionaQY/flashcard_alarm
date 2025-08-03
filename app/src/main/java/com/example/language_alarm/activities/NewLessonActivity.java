@@ -179,7 +179,7 @@ public class NewLessonActivity extends AppCompatActivity {
     // Functions to add new flashcards
     private void startManualFlashcardCreation() {
         Flashcard newFlashcard = new Flashcard(new ArrayList<>(this.tempLesson.getHeaders().size()));
-        this.tempLesson.getFlashcards().add(newFlashcard);
+        this.tempLesson.addFlashcards(newFlashcard);
         hasChanges = true;
         showEditFlashcardDialog(newFlashcard, this.tempLesson.getFlashcards().size() - 1);
         Toast.makeText(this, "Flashcard successfully created", Toast.LENGTH_SHORT).show();

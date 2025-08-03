@@ -50,7 +50,7 @@ public class NewAlarmActivity extends AppCompatActivity {
             0, 1, 3, 5, 10, 1000
     };
     private static final Integer[] SNOOZE_DURATION = new Integer[]{
-            1, 5, 10, 15, 20, 25, 30
+            0, 1, 5, 10, 15, 20, 25, 30
     };
     private static final String TAG = "NewAlarmActivity";
     AutoCompleteTextView snoozeNumDropdown;
@@ -185,7 +185,10 @@ public class NewAlarmActivity extends AppCompatActivity {
             hasChanges = true;
         });
         for (ToggleButton button : buttons) {
-            button.setOnClickListener(v -> hasChanges = true);
+            button.setOnClickListener(v -> {
+                hasChanges = true;
+                updateToolbarTitle();
+            });
         }
 
         audioPickerHelper = new ActivityResultHelper(this, this::handleAudioSelection);

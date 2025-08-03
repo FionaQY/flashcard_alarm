@@ -1,10 +1,11 @@
 package com.example.language_alarm.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         prefs = new SettingUtils(this);
 
-        setAppTheme();
         setContentView(R.layout.activity_main);
         setupToolbar();
 
@@ -41,10 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.addAlarmFab).setOnClickListener(v -> onToggleNewAlarm());
         findViewById(R.id.addLessonFab).setOnClickListener(v -> onToggleLessons());
-    }
-
-    private void setAppTheme() {
-        AppCompatDelegate.setDefaultNightMode(prefs.getIsDarkTheme() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        findViewById(R.id.settingsFab).setOnClickListener(v -> showSettingsDialog());
     }
 
     private void onToggleNewAlarm() {
@@ -62,4 +59,13 @@ public class MainActivity extends AppCompatActivity {
         ToolbarHelper.setupToolbar(toolbar, "");
         setSupportActionBar(toolbar);
     }
+
+    private void showSettingsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_settings, null);
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
 }

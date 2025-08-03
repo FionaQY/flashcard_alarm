@@ -36,7 +36,7 @@ public class LessonHandler {
                 } else {
                     getLessonDao(appContext).update(lesson);
                     Log.i(TAG,
-                            String.format("%s updated and rescheduled", lesson.getLogDesc()));
+                            String.format("%s updated", lesson.getLogDesc()));
                 }
             } catch (Exception e) {
                 assert lesson != null;

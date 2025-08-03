@@ -55,4 +55,9 @@
     <string name="day_of_theme">day of theme</string>
     <string name="skip">Skip Next Alarm</string>
     <string name="select_wallpaper">Select Wallpaper</string>
+    <string name="practice_foreign_language">Practice Foreign Language</string>
+    <string name="repeat_wrong_answers">Repeat Wrong Answers</string>
+    <string name="_10">10</string>
+    <string name="alarm_volume">Alarm Volume</string>
+    <string name="skip_question">Skip Question</string>
 </resources>

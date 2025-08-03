@@ -7,4 +7,5 @@
     <color name="colorErrorLight">#20F44336</color>
     <color name="colorErrorDark">#D32F2F</color>
     <color name="colorDisabled">#D3D3D3</color>
+    <color name="buttonStrokeColor">#6200EE</color>
 </resources>

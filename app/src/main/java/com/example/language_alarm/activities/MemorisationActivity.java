@@ -32,12 +32,12 @@ import com.google.android.material.button.MaterialButton;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.Random;
 
 public class MemorisationActivity extends AppCompatActivity {
@@ -48,12 +48,12 @@ public class MemorisationActivity extends AppCompatActivity {
     private List<Flashcard> allFlashcards = new ArrayList<>();
     private int currFlashcardIndex = 0;
     private Lesson lesson;
-    private Queue<Integer> cardIndexes = new LinkedList<>();
+    private Deque<Integer> cardIndexes = new ArrayDeque<>();
     private boolean secondClick = false;
     private boolean isAlarm = false;
 
-    private static Queue<Integer> generateUniqueRandomNumbers(int count, int max) {
-        Queue<Integer> que = new LinkedList<>();
+    private static Deque<Integer> generateUniqueRandomNumbers(int count, int max) {
+        Deque<Integer> que = new ArrayDeque<>();
         if (count <= 0 || max < 0) {
             Log.w(TAG, "Invalid parameters - count: " + count + ", max: " + max);
             return que;
@@ -179,6 +179,7 @@ public class MemorisationActivity extends AppCompatActivity {
             secondClick = !secondClick;
         });
         findViewById(R.id.editButton).setOnClickListener(v -> handleEditCard());
+        findViewById(R.id.skipButton).setOnClickListener(v -> handleSkipQuestion());
     }
 
     private void handleEditCard() {
@@ -211,14 +212,28 @@ public class MemorisationActivity extends AppCompatActivity {
                 this.cardIndexes.add(currFlashcardIndex);
                 this.progress.delete(currFlashcardIndex);
             }
-//            adapter.setEditedValues(currFlashcard, this.progress.get(currFlashcardIndex));
-            secondClick = false;
             dialog.dismiss();
             handleNextCard();
         });
     }
 
+    private void handleSkipQuestion() {
+        new AlertDialog.Builder(this)
+                .setCancelable(true)
+                .setMessage("Skip Question")
+                .setPositiveButton("Confirm", (dialog, which) -> {
+                    this.cardIndexes.add(currFlashcardIndex);
+                    if (!this.cardIndexes.isEmpty() && this.cardIndexes.getLast() == currFlashcardIndex) {
+                        this.cardIndexes.pollLast();
+                    }
+                    handleNextCard();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     private void handleNextCard() {
+        secondClick = false;
         if (cardIndexes.isEmpty()) {
             handleFinishQuiz();
             return;

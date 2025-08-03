@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -23,6 +24,7 @@ import com.example.language_alarm.utils.AlarmHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHolder> {
     private final Context ctx;
@@ -100,6 +102,11 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             PopupMenu popup = new PopupMenu(this.ctx, v);
             popup.inflate(R.menu.alarm_popup_menu);
 
+            MenuItem skipItem = popup.getMenu().findItem(R.id.skip);
+            if (alarm.isSkipped()) {
+                skipItem.setTitle("Unskip");
+            }
+
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
                 if (id == R.id.edit) {
@@ -121,7 +128,11 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
                             .show();
                     return true;
                 } else if (id == R.id.skip) {
-                    AlarmHandler.cancelAlarm(this.ctx, alarm);
+                    alarm.toggleSkip();
+                    AlarmHandler.rescheduleAlarm(this.ctx, alarm);
+                    Toast.makeText(this.ctx,
+                            String.format(Locale.US, "Alarm will ring in %s", alarm.getNextTimeString()),
+                            Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 return false;

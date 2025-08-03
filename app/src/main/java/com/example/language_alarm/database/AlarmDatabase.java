@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase;
 
 import com.example.language_alarm.models.Alarm;
 
-@Database(entities = {Alarm.class}, version = 2)
+@Database(entities = {Alarm.class}, version = 1)
 public abstract class AlarmDatabase extends RoomDatabase {
     private static volatile AlarmDatabase INSTANCE;
 

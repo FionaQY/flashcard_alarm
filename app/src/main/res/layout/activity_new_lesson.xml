@@ -163,6 +163,7 @@
         app:backgroundTint="@color/colorPrimary"
         app:layout_anchor="@id/saveLessonButton"
         app:layout_anchorGravity="top|start"
+        app:maxImageSize="32dp"
         app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

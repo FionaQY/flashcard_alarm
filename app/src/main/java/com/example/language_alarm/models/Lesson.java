@@ -73,6 +73,13 @@ public class Lesson implements Parcelable {
         }
     }
 
+    public void addFlashcards(Flashcard flash) {
+        if (this.flashcards == null) {
+            this.flashcards = new ArrayList<>();
+        }
+        this.flashcards.add(flash);
+    }
+
     public int getId() {
         return id;
     }

@@ -46,6 +46,7 @@ public class Alarm implements Parcelable {
     private boolean isOneTime;
     private int lessonId;
     private int qnNum;
+    private boolean isSkipped = false;
 
     public Alarm() {
     }
@@ -78,6 +79,7 @@ public class Alarm implements Parcelable {
         daysBitmask = in.readInt();
         lessonId = in.readInt();
         qnNum = in.readInt();
+        isSkipped = in.readByte() != 0;
     }
 
     public boolean[] getEnabledDays() {
@@ -189,6 +191,14 @@ public class Alarm implements Parcelable {
         this.qnNum = qnNum;
     }
 
+    public boolean isSkipped() {
+        return this.isSkipped;
+    }
+
+    public void setSkipped(boolean enabled) {
+        this.isSkipped = enabled;
+    }
+
     public int getDaysBitmask() {
         return daysBitmask;
     }
@@ -201,11 +211,9 @@ public class Alarm implements Parcelable {
         this.lessonId = 0;
     }
 
-
     public String getTime() {
         return String.format(Locale.US, "%02d:%02d", hour, minute);
     }
-
 
     public String getDescription() {
         StringBuilder sb = new StringBuilder();
@@ -242,23 +250,33 @@ public class Alarm implements Parcelable {
                 }
             }
         }
-
-        long now = System.currentTimeMillis();
         if (cal == null) {
-            cal = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
-            cal.setTimeInMillis(now);
-            cal.set(Calendar.HOUR_OF_DAY, this.getHour());
-            cal.set(Calendar.MINUTE, this.getMinute());
-            cal.set(Calendar.SECOND, 0);
-            if (cal.getTimeInMillis() <= now) {
-                cal.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
-            }
+            cal = getDailyTime();
+        }
+        return cal;
+    }
+
+    private Calendar getDailyTime() {
+        long now = System.currentTimeMillis();
+        if (isSkipped) {
+            now += TimeUnit.DAYS.toMillis(1);
+        }
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
+        cal.setTimeInMillis(now);
+        cal.set(Calendar.HOUR_OF_DAY, this.getHour());
+        cal.set(Calendar.MINUTE, this.getMinute());
+        cal.set(Calendar.SECOND, 0);
+        if (cal.getTimeInMillis() <= now) {
+            cal.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
         }
         return cal;
     }
 
     private Calendar getAlarmTimeForDay(int dayOfWeek) {
         long now = System.currentTimeMillis();
+        if (isSkipped) {
+            now += TimeUnit.DAYS.toMillis(1);
+        }
         Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
         calendar.setTimeInMillis(now);
         calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
@@ -266,9 +284,13 @@ public class Alarm implements Parcelable {
         calendar.set(Calendar.MINUTE, this.getMinute());
         calendar.set(Calendar.SECOND, 0);
         if (calendar.getTimeInMillis() <= now) {
-            calendar.add(Calendar.DAY_OF_YEAR, 7); //set next day if time passed alr
+            calendar.add(Calendar.DAY_OF_YEAR, 7); //set next week if time passed alr
         }
         return calendar;
+    }
+
+    public void toggleSkip() {
+        this.isSkipped = !this.isSkipped;
     }
 
     public String getNextTimeString() {
@@ -289,7 +311,8 @@ public class Alarm implements Parcelable {
         }
 
         StringBuilder sb = new StringBuilder();
-        if (diffDays > 0) sb.append(String.format(Locale.US, "%d day%s", diffDays, diffDays > 1 ? "s" : ""));
+        if (diffDays > 0)
+            sb.append(String.format(Locale.US, "%d day%s", diffDays, diffDays > 1 ? "s" : ""));
         if (diffHours > 0) {
             if (sb.length() > 0) sb.append(", ");
             sb.append(String.format(Locale.US, "%d hour%s", diffHours, diffHours > 1 ? "s" : ""));
@@ -298,7 +321,7 @@ public class Alarm implements Parcelable {
             if (sb.length() > 0) sb.append(", ");
             sb.append(String.format(Locale.US, "%d minute%s", diffMinutes, diffMinutes > 1 ? "s" : ""));
         }
-        
+
         return sb.toString();
     }
 
@@ -324,9 +347,10 @@ public class Alarm implements Parcelable {
                 snoozeDuration == otherAlarm.getSnoozeDuration() &&
                 isEnabled == otherAlarm.isEnabled() &&
                 isOneTime == otherAlarm.isOneTime() &&
-                daysBitmask == otherAlarm.daysBitmask &&
+                daysBitmask == otherAlarm.getDaysBitmask() &&
                 lessonId == otherAlarm.getLessonId() &&
-                qnNum == otherAlarm.getQnNum();
+                qnNum == otherAlarm.getQnNum() &&
+                isSkipped == otherAlarm.isSkipped();
     }
 
     @Override
@@ -348,6 +372,7 @@ public class Alarm implements Parcelable {
         dest.writeInt(daysBitmask);
         dest.writeInt(lessonId);
         dest.writeInt(qnNum);
+        dest.writeByte((byte) (isSkipped ? 1 : 0));
     }
 
 }

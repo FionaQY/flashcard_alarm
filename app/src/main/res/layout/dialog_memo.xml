@@ -47,9 +47,11 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/cancel"
+            android:textColor="@color/buttonStrokeColor"
             app:icon="@drawable/ic_cancel"
             app:iconGravity="textStart"
-            app:strokeColor="@color/colorPrimary" />
+            app:iconTint="@color/buttonStrokeColor"
+            app:strokeColor="@color/buttonStrokeColor" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/nextButton"
@@ -60,8 +62,9 @@
             android:layout_marginTop="8dp"
             android:text="@string/next"
             android:textColor="@android:color/white"
-            app:backgroundTint="@color/colorPrimary"
+            app:backgroundTint="@color/buttonStrokeColor"
             app:icon="@drawable/ic_next"
-            app:iconGravity="textStart" />
+            app:iconGravity="textStart"
+            app:iconTint="@android:color/white" />
     </GridLayout>
 </LinearLayout>
