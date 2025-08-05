@@ -32,3 +32,5 @@ Java
 - Add streak system / daily goal tracking
 - Leaderboard for vocabulary challenge mode
 - Audio pronunciation
+
+Icon from <a href="https://www.flaticon.com/free-icons/study" title="study icons">Study icons created by Uniconlabs - Flaticon</a>
