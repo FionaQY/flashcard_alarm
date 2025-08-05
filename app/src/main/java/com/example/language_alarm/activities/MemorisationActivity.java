@@ -49,7 +49,6 @@ public class MemorisationActivity extends AppCompatActivity {
     private int currFlashcardIndex = 0;
     private Lesson lesson;
     private Deque<Integer> cardIndexes = new ArrayDeque<>();
-    private boolean secondClick = false;
     private boolean isAlarm = false;
 
     private static Deque<Integer> generateUniqueRandomNumbers(int count, int max) {
@@ -167,16 +166,13 @@ public class MemorisationActivity extends AppCompatActivity {
 
         Button nextButton = findViewById(R.id.nextButton);
         nextButton.setOnClickListener(v -> {
-            if (secondClick) {
-                nextButton.setText(R.string.check_answer);
+            if (nextButton.getText().toString().equals(getString(R.string.next_flashcard))) {
                 handleNextCard();
             } else {
                 cancelTimer();
                 nextButton.setText(R.string.next_flashcard);
-
                 validateAnswers();
             }
-            secondClick = !secondClick;
         });
         findViewById(R.id.editButton).setOnClickListener(v -> handleEditCard());
         findViewById(R.id.skipButton).setOnClickListener(v -> handleSkipQuestion());
@@ -232,8 +228,7 @@ public class MemorisationActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void handleNextCard() {
-        secondClick = false;
+    private void reset() {
         if (cardIndexes.isEmpty()) {
             handleFinishQuiz();
             return;
@@ -241,6 +236,11 @@ public class MemorisationActivity extends AppCompatActivity {
         if (isAlarm) {
             startTimer();
         }
+        ((Button) findViewById(R.id.nextButton)).setText(R.string.check_answer);
+    }
+
+    private void handleNextCard() {
+        this.reset();
 
         Integer nextInd = cardIndexes.poll();
         if (nextInd == null) {
@@ -265,7 +265,7 @@ public class MemorisationActivity extends AppCompatActivity {
         SparseArray<SpannableString> stringy = getWrongAnswers(userInput);
         adapter.showAnswers(stringy);
         if (stringy.size() == 0) {
-            Toast.makeText(this, "You got this correct!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "You got this correct!", Toast.LENGTH_SHORT).show();
         } else {
             progress.put(currFlashcardIndex, stringy);
             this.cardIndexes.add(currFlashcardIndex);
