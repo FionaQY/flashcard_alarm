@@ -28,11 +28,20 @@ import java.util.Locale;
 
 public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHolder> {
     private final Context ctx;
+    private final OnAlarmEditListener editListener;
     private List<Alarm> alarmList;
 
-    public AlarmAdapter(Context ctx, List<Alarm> alarms) {
+    public AlarmAdapter(Context ctx, List<Alarm> alarms, OnAlarmEditListener editListener) {
         this.ctx = ctx;
         this.alarmList = alarms;
+        this.editListener = editListener;
+    }
+
+    private void updateToolbar() {
+        if (this.editListener == null) {
+            return;
+        }
+        this.editListener.onAlarmEdit(this.alarmList);
     }
 
     public void setAlarms(List<Alarm> newAlarms) {
@@ -67,6 +76,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             alarmList.clear();
             alarmList.addAll(newAlarms);
             diffResult.dispatchUpdatesTo(this);
+            updateToolbar();
         }
     }
 
@@ -90,6 +100,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             AlarmHandler.rescheduleAlarm(ctx, alarm);
             AlarmHandler.saveAlarm(ctx, alarm);
             Toast.makeText(ctx, isChecked ? "Alarm enabled" : "Alarm disabled", Toast.LENGTH_SHORT).show();
+            updateToolbar();
         });
 
         holder.itemView.setOnClickListener(view -> {
@@ -123,6 +134,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
                                         AlarmHandler.cancelAlarm(this.ctx, alarm);
                                         AlarmHandler.deleteAlarm(this.ctx, alarm);
                                         notifyItemRemoved(position);
+                                        updateToolbar();
                                     })
                             .setNegativeButton("Cancel", null)
                             .show();
@@ -133,6 +145,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
                     Toast.makeText(this.ctx,
                             String.format(Locale.US, "Alarm will ring in %s", alarm.getNextTimeString()),
                             Toast.LENGTH_SHORT).show();
+                    updateToolbar();
                     return true;
                 }
                 return false;
@@ -148,6 +161,10 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             return 0;
         }
         return this.alarmList.size();
+    }
+
+    public interface OnAlarmEditListener {
+        void onAlarmEdit(List<Alarm> alarms);
     }
 
     public static class AlarmViewHolder extends RecyclerView.ViewHolder {

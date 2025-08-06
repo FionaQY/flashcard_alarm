@@ -270,8 +270,9 @@ public class NewAlarmActivity extends AppCompatActivity {
 
     private void updateToolbarTitle() {
         TextView titleView = toolbar.findViewById(R.id.toolbar_title);
-        if (titleView != null) {
-            titleView.setText("Ringing in " + createAlarm().getNextTimeString());
+        Alarm temp = createAlarm();
+        if (titleView != null && temp != null) {
+            titleView.setText(String.format(Locale.US, "Ringing in %s", temp.getNextTimeString()));
         }
     }
 
