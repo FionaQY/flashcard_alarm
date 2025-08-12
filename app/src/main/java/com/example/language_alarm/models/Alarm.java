@@ -46,7 +46,7 @@ public class Alarm implements Parcelable {
     private boolean isOneTime;
     private int lessonId;
     private int qnNum;
-    private boolean isSkipped = false;
+    private long skipUntilMillis; // 0 means no skip active
 
     public Alarm() {
     }
@@ -79,7 +79,7 @@ public class Alarm implements Parcelable {
         daysBitmask = in.readInt();
         lessonId = in.readInt();
         qnNum = in.readInt();
-        isSkipped = in.readByte() != 0;
+        skipUntilMillis = in.readLong();
     }
 
     public boolean[] getEnabledDays() {
@@ -191,12 +191,12 @@ public class Alarm implements Parcelable {
         this.qnNum = qnNum;
     }
 
-    public boolean isSkipped() {
-        return this.isSkipped;
+    public long getSkipUntilMillis() {
+        return skipUntilMillis;
     }
 
-    public void setSkipped(boolean enabled) {
-        this.isSkipped = enabled;
+    public void setSkipUntilMillis(long skipUntilMillis) {
+        this.skipUntilMillis = skipUntilMillis;
     }
 
     public int getDaysBitmask() {
@@ -218,68 +218,86 @@ public class Alarm implements Parcelable {
     public String getDescription() {
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < dayNames.length; i++) {
-            if (isDayEnabled(1 << i)) {
-                sb.append(dayNames[i]).append(" ");
-            }
+        if (isOneTime) {
+            sb.append("One time alarm");
         }
 
-        if (isOneTime) {
-            sb.insert(0, sb.length() > 0 ? "One time alarm: " : "One time alarm");
+        StringBuilder temp = new StringBuilder();
+        boolean isAll = true;
+        for (int i = 0; i < dayNames.length; i++) {
+            if (isDayEnabled(1 << i)) {
+                temp.append(dayNames[i]).append(" ");
+            } else {
+                isAll = false;
+            }
+        }
+        if (isAll) {
+            sb.append("Every day");
+        } else {
+            if (sb.length() > 0) {
+                sb.append(": ");
+            }
+            sb.append(temp.toString().trim());
         }
 
         if (lessonId == 0) {
             if (sb.length() > 0) {
                 sb.append("\n");
             }
-            sb.append("Lesson not yet set");
+            sb.append("No lesson");
+        }
+
+        if (this.isSkipped()) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append("(Skipped)");
         }
         return sb.toString().trim();
     }
 
     public Calendar getNextAlarmTime() {
+        if (this.isSkipped()) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(this.getNextTimeInMillis());
+            return cal;
+        }
+        return getNextAlarmTime(false);
+    }
+
+    public Calendar getNextAlarmTime(boolean skipOnce) {
         if (!this.isEnabled()) {
             return null;
         }
         Calendar cal = null;
         for (int i = 0; i < dayInt.length; i++) {
             if (isDayEnabled(1 << i)) {
-                Calendar temp = getAlarmTimeForDay(dayInt[i]);
+                Calendar temp = getAlarmTimeForDay(skipOnce, dayInt[i]);
                 if (cal == null || temp.before(cal)) {
                     cal = temp;
                 }
             }
         }
         if (cal == null) {
-            cal = getDailyTime();
+            cal = getDailyTime(skipOnce);
         }
         return cal;
     }
 
-    private Calendar getDailyTime() {
-        long now = System.currentTimeMillis();
-        if (isSkipped) {
-            now += TimeUnit.DAYS.toMillis(1);
-        }
-        Calendar cal = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
-        cal.setTimeInMillis(now);
-        cal.set(Calendar.HOUR_OF_DAY, this.getHour());
-        cal.set(Calendar.MINUTE, this.getMinute());
-        cal.set(Calendar.SECOND, 0);
-        if (cal.getTimeInMillis() <= now) {
-            cal.add(Calendar.DAY_OF_YEAR, 1); //set next day if time passed alr
-        }
-        return cal;
+    private Calendar getDailyTime(boolean skipOnce) {
+        return getAlarmTimeForDay(skipOnce, 0);
     }
 
-    private Calendar getAlarmTimeForDay(int dayOfWeek) {
+    private Calendar getAlarmTimeForDay(boolean skipOnce, int dayOfWeek) {
         long now = System.currentTimeMillis();
-        if (isSkipped) {
+        if (skipOnce) {
             now += TimeUnit.DAYS.toMillis(1);
         }
         Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
         calendar.setTimeInMillis(now);
-        calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        if (dayOfWeek != 0) {
+            calendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        }
         calendar.set(Calendar.HOUR_OF_DAY, this.getHour());
         calendar.set(Calendar.MINUTE, this.getMinute());
         calendar.set(Calendar.SECOND, 0);
@@ -289,8 +307,23 @@ public class Alarm implements Parcelable {
         return calendar;
     }
 
+    public boolean isSkipped() {
+        return this.skipUntilMillis > 0 && this.skipUntilMillis > System.currentTimeMillis();
+    }
+
     public void toggleSkip() {
-        this.isSkipped = !this.isSkipped;
+        if (this.isSkipped()) {
+            this.skipUntilMillis = 0;
+            return;
+        }
+        this.skipUntilMillis = this.getNextAlarmTime(true).getTimeInMillis();
+    }
+
+    private long getNextTimeInMillis() {
+        if (this.isSkipped()) {
+            return this.getSkipUntilMillis();
+        }
+        return System.currentTimeMillis();
     }
 
     public String getNextTimeString() {
@@ -315,11 +348,11 @@ public class Alarm implements Parcelable {
             sb.append(String.format(Locale.US, "%d day%s", diffDays, diffDays > 1 ? "s" : ""));
         if (diffHours > 0) {
             if (sb.length() > 0) sb.append(", ");
-            sb.append(String.format(Locale.US, "%d hour%s", diffHours, diffHours > 1 ? "s" : ""));
+            sb.append(String.format(Locale.US, "%d hr%s", diffHours, diffHours > 1 ? "s" : ""));
         }
         if (diffMinutes > 0) {
             if (sb.length() > 0) sb.append(", ");
-            sb.append(String.format(Locale.US, "%d minute%s", diffMinutes, diffMinutes > 1 ? "s" : ""));
+            sb.append(String.format(Locale.US, "%d min%s", diffMinutes, diffMinutes > 1 ? "s" : ""));
         }
 
         return sb.toString();
@@ -350,7 +383,7 @@ public class Alarm implements Parcelable {
                 daysBitmask == otherAlarm.getDaysBitmask() &&
                 lessonId == otherAlarm.getLessonId() &&
                 qnNum == otherAlarm.getQnNum() &&
-                isSkipped == otherAlarm.isSkipped();
+                skipUntilMillis == otherAlarm.getSkipUntilMillis();
     }
 
     @Override
@@ -372,7 +405,7 @@ public class Alarm implements Parcelable {
         dest.writeInt(daysBitmask);
         dest.writeInt(lessonId);
         dest.writeInt(qnNum);
-        dest.writeByte((byte) (isSkipped ? 1 : 0));
+        dest.writeLong(skipUntilMillis);
     }
 
 }

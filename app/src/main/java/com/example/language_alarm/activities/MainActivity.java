@@ -27,7 +27,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
     SettingUtils prefs = null;
     private AlarmAdapter adapter = null;
-    private MaterialToolbar toolbar = null;
+    private TextView nextAlarmBanner = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +36,11 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         setupToolbar();
+        nextAlarmBanner = findViewById(R.id.nextAlarmText);
 
         RecyclerView recyclerView = findViewById(R.id.alarm_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new AlarmAdapter(this, new ArrayList<>(), this::updateToolbarTitle);
+        adapter = new AlarmAdapter(this, new ArrayList<>(), this::updateNextAlarmBanner);
         recyclerView.setAdapter(adapter);
 
         AlarmViewModel alarmViewModel = new ViewModelProvider(this).get(AlarmViewModel.class);
@@ -50,13 +51,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.settingsFab).setOnClickListener(v -> showSettingsDialog());
     }
 
-    private void updateToolbarTitle(List<Alarm> alarms) {
-        TextView titleView = toolbar.findViewById(R.id.toolbar_title);
-        if (titleView == null) {
+    private void updateNextAlarmBanner(List<Alarm> alarms) {
+        if (nextAlarmBanner == null) {
             return;
         }
+        String noAlarm = "No alarm set";
         if (alarms == null || alarms.isEmpty()) {
-            titleView.setText("");
+            nextAlarmBanner.setText(noAlarm);
             return;
         }
         Calendar cal = null;
@@ -71,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (latestAlarm != null) {
-            titleView.setText(String.format(Locale.US, "Ringing in %s", latestAlarm.getNextTimeString()));
+            nextAlarmBanner.setText(String.format(Locale.US, "Ringing in %s", latestAlarm.getNextTimeString()));
+        } else {
+            nextAlarmBanner.setText(noAlarm);
         }
     }
 
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        toolbar = findViewById(R.id.toolbar);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
         ToolbarHelper.setupToolbar(toolbar, "");
         setSupportActionBar(toolbar);
     }

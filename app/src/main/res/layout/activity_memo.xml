@@ -62,8 +62,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/check_answer"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@color/buttonStrokeColor"
             app:icon="@drawable/ic_next"
-            app:iconGravity="textStart" />
+            app:iconGravity="textStart"
+            app:iconTint="@android:color/white" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

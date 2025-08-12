@@ -40,6 +40,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -56,7 +57,7 @@ public class NewAlarmActivity extends AppCompatActivity {
     AutoCompleteTextView snoozeNumDropdown;
     Integer selectedSnoozeNum;
     AutoCompleteTextView snoozeDurationDropdown;
-    Integer selectedSnoozeDuration;
+    Integer selectedSnoozeDuration = 5;
     private EditText numOfQns;
     private MaterialToolbar toolbar;
     private TimePicker alarmTimePicker;
@@ -301,8 +302,10 @@ public class NewAlarmActivity extends AppCompatActivity {
         if (newAlarm == null) return;
         AlarmHandler.saveAlarm(this, newAlarm);
         AlarmHandler.rescheduleAlarm(this, newAlarm);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, h:mm a", Locale.US);
+        String formattedTime = sdf.format(newAlarm.getNextAlarmTime().getTime());
         Toast.makeText(this,
-                String.format(Locale.US, "Alarm set for %s", newAlarm.getNextAlarmTime().getTime()),
+                String.format(Locale.US, "Alarm set for %s", formattedTime),
                 Toast.LENGTH_SHORT).show();
         hasChanges = false;
         supportFinishAfterTransition();

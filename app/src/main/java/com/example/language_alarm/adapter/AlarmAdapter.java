@@ -37,7 +37,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
         this.editListener = editListener;
     }
 
-    private void updateToolbar() {
+    private void updateBanner() {
         if (this.editListener == null) {
             return;
         }
@@ -76,7 +76,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             alarmList.clear();
             alarmList.addAll(newAlarms);
             diffResult.dispatchUpdatesTo(this);
-            updateToolbar();
+            updateBanner();
         }
     }
 
@@ -100,7 +100,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
             AlarmHandler.rescheduleAlarm(ctx, alarm);
             AlarmHandler.saveAlarm(ctx, alarm);
             Toast.makeText(ctx, isChecked ? "Alarm enabled" : "Alarm disabled", Toast.LENGTH_SHORT).show();
-            updateToolbar();
+            updateBanner();
         });
 
         holder.itemView.setOnClickListener(view -> {
@@ -134,7 +134,7 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
                                         AlarmHandler.cancelAlarm(this.ctx, alarm);
                                         AlarmHandler.deleteAlarm(this.ctx, alarm);
                                         notifyItemRemoved(position);
-                                        updateToolbar();
+                                        updateBanner();
                                     })
                             .setNegativeButton("Cancel", null)
                             .show();
@@ -142,10 +142,12 @@ public class AlarmAdapter extends RecyclerView.Adapter<AlarmAdapter.AlarmViewHol
                 } else if (id == R.id.skip) {
                     alarm.toggleSkip();
                     AlarmHandler.rescheduleAlarm(this.ctx, alarm);
+                    AlarmHandler.saveAlarm(ctx, alarm);
                     Toast.makeText(this.ctx,
                             String.format(Locale.US, "Alarm will ring in %s", alarm.getNextTimeString()),
                             Toast.LENGTH_SHORT).show();
-                    updateToolbar();
+                    notifyItemChanged(position);
+                    updateBanner();
                     return true;
                 }
                 return false;
