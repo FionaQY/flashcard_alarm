@@ -82,7 +82,6 @@ public class AlarmRingingActivity extends AppCompatActivity {
             intent.putExtra("qnCount", alarm.getQnNum());
             intent.putExtra("isAlarm", true);
             startActivity(intent);
-            alarm.setSkipUntilMillis(0);
             if (!alarm.isOneTime()) {
                 AlarmHandler.rescheduleAlarm(this, alarm);
             } else {

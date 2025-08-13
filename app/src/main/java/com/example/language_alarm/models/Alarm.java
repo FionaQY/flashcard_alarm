@@ -46,7 +46,7 @@ public class Alarm implements Parcelable {
     private boolean isOneTime;
     private int lessonId;
     private int qnNum;
-    private long skipUntilMillis; // 0 means no skip active
+    private long skipUntilMillis = 0; // 0 means no skip active
 
     public Alarm() {
     }
@@ -259,7 +259,7 @@ public class Alarm implements Parcelable {
     public Calendar getNextAlarmTime() {
         if (this.isSkipped()) {
             Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(this.getNextTimeInMillis());
+            cal.setTimeInMillis(this.getSkipUntilMillis());
             return cal;
         }
         return getNextAlarmTime(false);
@@ -308,22 +308,26 @@ public class Alarm implements Parcelable {
     }
 
     public boolean isSkipped() {
-        return this.skipUntilMillis > 0 && this.skipUntilMillis > System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        if (skipUntilMillis == 0 || skipUntilMillis <= now) {
+            skipUntilMillis = 0;
+            return false;
+        }
+        Calendar cal = getNextAlarmTime(false);
+        if (cal == null || Math.abs(skipUntilMillis - cal.getTimeInMillis()) < 1000) {
+            skipUntilMillis = 0;
+            return false;
+        }
+        return true;
     }
 
     public void toggleSkip() {
-        if (this.isSkipped()) {
-            this.skipUntilMillis = 0;
-            return;
+        if (isSkipped()) {
+            skipUntilMillis = 0;
+        } else {
+            Calendar cal = getNextAlarmTime(true); // next time if we skip once
+            skipUntilMillis = cal != null ? cal.getTimeInMillis() : 0;
         }
-        this.skipUntilMillis = this.getNextAlarmTime(true).getTimeInMillis();
-    }
-
-    private long getNextTimeInMillis() {
-        if (this.isSkipped()) {
-            return this.getSkipUntilMillis();
-        }
-        return System.currentTimeMillis();
     }
 
     public String getNextTimeString() {
