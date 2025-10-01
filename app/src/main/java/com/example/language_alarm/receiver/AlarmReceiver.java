@@ -9,6 +9,7 @@ import android.util.Log;
 import com.example.language_alarm.activities.AlarmRingingActivity;
 import com.example.language_alarm.models.Alarm;
 import com.example.language_alarm.utils.AlarmForegroundService;
+import com.example.language_alarm.utils.AlarmHandler;
 
 public class AlarmReceiver extends BroadcastReceiver {
     public static final String ACTION_ALARM_TRIGGER = "com.example.language_alarm.ACTION_ALARM_TRIGGER";
@@ -30,7 +31,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK |
                         PowerManager.ON_AFTER_RELEASE,
-                "LanguageAlarm:AlarmWakeLock"
+                AlarmRingingActivity.ALARM_WAKELOCK
         );
         wakeLock.acquire(60 * 1000L);
 
@@ -47,6 +48,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
             );
             ctx.startActivity(alarmIntent);
+
+            // cancel/repeat alarm
+            if (alarm.isOneTime()) {
+                alarm.setEnabled(false);
+                AlarmHandler.saveAlarm(ctx, alarm);
+            } else {
+                AlarmHandler.rescheduleAlarm(ctx, alarm);
+            }
 
         } else if (ACTION_STOP_ALARM.equals(action)) {
             Intent serviceIntent = new Intent(ctx, AlarmForegroundService.class);

@@ -60,4 +60,7 @@
     <string name="_10">10</string>
     <string name="alarm_volume">Alarm Volume</string>
     <string name="skip_question">Skip Question</string>
+    <string name="quiz_results">Quiz Results</string>
+    <string name="try_again">Try Again</string>
+    <string name="back_to_lessons">Back to Lessons</string>
 </resources>

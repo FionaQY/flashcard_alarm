@@ -1,6 +1,7 @@
 package com.example.language_alarm.activities;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -47,6 +48,7 @@ public class MemorisationActivity extends AppCompatActivity {
     private InputFlashcardAdapter adapter;
     private List<Flashcard> allFlashcards = new ArrayList<>();
     private int currFlashcardIndex = 0;
+    private int qnCount = 0;
     private Lesson lesson;
     private Deque<Integer> cardIndexes = new ArrayDeque<>();
     private boolean isAlarm = false;
@@ -119,10 +121,10 @@ public class MemorisationActivity extends AppCompatActivity {
             handleFinishQuiz();
             return;
         }
-        int qnCount = getIntent().getIntExtra("qnCount", 3);
+        qnCount = getIntent().getIntExtra("qnCount", 3);
         isAlarm = getIntent().getBooleanExtra("isAlarm", false);
         setupToolbar();
-        setupViews(lessonId, qnCount);
+        setupViews(lessonId);
     }
 
     private void setupToolbar() {
@@ -132,7 +134,7 @@ public class MemorisationActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
     }
 
-    private void setupViews(int lessonId, int qnCount) {
+    private void setupViews(int lessonId) {
         RecyclerView recyclerView = findViewById(R.id.values_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new InputFlashcardAdapter(recyclerView);
@@ -336,7 +338,16 @@ public class MemorisationActivity extends AppCompatActivity {
             LessonHandler.saveLesson(this, this.lesson);
         }
         cancelTimer();
-        finishAfterTransition();
+
+        int totalQuestions = qnCount;
+        int correctCount = totalQuestions - cardIndexes.size(); // Need to set up something to save incorrect questions
+
+        Intent resultsIntent = new Intent(this, ResultsActivity.class);
+        resultsIntent.putExtra("totalQuestions", totalQuestions);
+        resultsIntent.putExtra("correctAnswers", correctCount);
+
+        startActivity(resultsIntent);
+        finish();
     }
 
     @Override

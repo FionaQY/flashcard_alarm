@@ -24,6 +24,7 @@ import java.util.Locale;
 
 public class AlarmRingingActivity extends AppCompatActivity {
     private static final String TAG = "AlarmRingingActivity";
+    public static final String ALARM_WAKELOCK = "LanguageAlarm:AlarmWakeLock";
     private Alarm alarm;
     private PowerManager.WakeLock wakeLock;
 
@@ -35,9 +36,9 @@ public class AlarmRingingActivity extends AppCompatActivity {
         wakeLock = powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK |
                         PowerManager.ON_AFTER_RELEASE,
-                "LanguageAlarm:AlarmWakeLock"
+                ALARM_WAKELOCK
         );
-        wakeLock.acquire(30 * 1000L /*half a minute*/);
+        wakeLock.acquire(30 * 1000L);
         Log.d(TAG, "WakeLock acquired");
 
         setTurnScreenOn(true);
@@ -82,12 +83,7 @@ public class AlarmRingingActivity extends AppCompatActivity {
             intent.putExtra("qnCount", alarm.getQnNum());
             intent.putExtra("isAlarm", true);
             startActivity(intent);
-            if (!alarm.isOneTime()) {
-                AlarmHandler.rescheduleAlarm(this, alarm);
-            } else {
-                alarm.setEnabled(false);
-                AlarmHandler.saveAlarm(this, alarm);
-            }
+
             finish();
         });
 

@@ -101,6 +101,15 @@
                 android:value=".activities.AlarmRingingActivity" />
         </activity>
 
+        <activity
+            android:name=".activities.ResultsActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.MemorisationActivity" />
+        </activity>
+
         <receiver
             android:name=".receiver.AlarmReceiver"
             android:enabled="true"

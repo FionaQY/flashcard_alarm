@@ -204,7 +204,7 @@ public class InputFlashcardAdapter extends RecyclerView.Adapter<InputFlashcardAd
                         RecyclerView.ViewHolder temp = rv.findViewHolderForAdapterPosition(nextPos);
                         if (temp instanceof InputFlashcardViewHolder) {
                             InputFlashcardViewHolder nextHolder = (InputFlashcardViewHolder) temp;
-                            if (nextHolder.inputContainer.getVisibility() == View.VISIBLE) break;
+                            if (nextHolder.inputContainer.getVisibility() == View.VISIBLE && nextHolder.inputValue.isTextInputLayoutFocusedRectEnabled()) break;
                         }
                         nextPos++;
                     }
