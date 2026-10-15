@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="4dp"
-            android:background="?attr/colorPrimaryVariant"
+            android:background="?attr/colorPrimaryContainer"
             android:elevation="4dp"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
@@ -44,14 +44,14 @@
                 android:layout_marginEnd="12dp"
                 android:contentDescription="Next Alarm Time"
                 android:src="@drawable/outline_alarm_24"
-                app:tint="@android:color/white" />
+                app:tint="?attr/colorOnPrimaryContainer" />
 
             <TextView
                 android:id="@+id/nextAlarmText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="No Alarm Set"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/colorOnPrimaryContainer"
                 android:textSize="16sp" />
 
         </LinearLayout>

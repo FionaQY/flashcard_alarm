@@ -74,7 +74,7 @@ public class AlarmHandler {
     }
 
     public static void snoozeAlarm(Context ctx, Alarm alarm) {
-        cancelAlarm(ctx, alarm);
+        cancelAlarmInternal(ctx, alarm);
 
         AlarmManager alarmManager = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
         PendingIntent pendingIntent = createAlarmPendingIntent(ctx, alarm);

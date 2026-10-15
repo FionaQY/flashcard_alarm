@@ -75,7 +75,6 @@ public class AlarmRingingActivity extends AppCompatActivity {
         findViewById(R.id.stopButton).setOnClickListener(v -> {
             stopRinging();
 
-            AlarmHandler.cancelAlarm(this, alarm);
             prefs.resetSnoozeCount();
 
             Intent intent = new Intent(this, MemorisationActivity.class);

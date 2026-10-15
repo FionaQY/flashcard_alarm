@@ -62,7 +62,7 @@
             android:layout_marginTop="8dp"
             android:text="@string/next"
             android:textColor="@android:color/white"
-            app:backgroundTint="@color/buttonStrokeColor"
+            app:backgroundTint="@color/colorPrimary"
             app:icon="@drawable/ic_next"
             app:iconGravity="textStart"
             app:iconTint="@android:color/white" />

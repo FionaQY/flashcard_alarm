@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@android:color/white"
+        android:background="?attr/colorSurface"
         android:elevation="8dp"
         android:orientation="horizontal"
         android:padding="8dp">
@@ -63,7 +63,7 @@
             android:layout_weight="1"
             android:text="@string/check_answer"
             android:textColor="@android:color/white"
-            app:backgroundTint="@color/buttonStrokeColor"
+            app:backgroundTint="@color/colorPrimary"
             app:icon="@drawable/ic_next"
             app:iconGravity="textStart"
             app:iconTint="@android:color/white" />

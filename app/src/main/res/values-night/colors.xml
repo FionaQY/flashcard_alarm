@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3700B3</color>           <!-- lighter purple for dark bg -->
-    <color name="colorAccent">#03DAC5</color>            <!-- same accent -->
-    <color name="colorError">#CF6679</color>             <!-- error color for dark mode -->
-    <color name="colorErrorLight">#20CF6679</color>
-    <color name="colorErrorDark">#B00020</color>
-    <color name="colorDisabled">#555555</color>          <!-- dark gray for disabled -->
-    <color name="buttonStrokeColor">#BB86FC</color>
+    <color name="colorPrimary">#38685A</color>
+    <color name="colorPrimaryDark">#244A3D</color>
+    <color name="colorPrimaryContainer">#314B40</color>
+    <color name="colorOnPrimaryContainer">#DCEBE3</color>
+    <color name="colorAccent">#91C5AE</color>
+    <color name="colorOnAccent">#15352A</color>
+    <color name="colorSecondary">#91C5AE</color>
+    <color name="colorOnSecondary">#15352A</color>
+    <color name="colorSurface">#1B221E</color>
+    <color name="colorSurfaceVariant">#303A34</color>
+    <color name="colorOnSurface">#E3EAE5</color>
+    <color name="colorOnSurfaceVariant">#C0CAC3</color>
+    <color name="colorOutline">#89958D</color>
+    <color name="colorBackground">#141A16</color>
+    <color name="colorError">#F2B8B5</color>
+    <color name="colorErrorLight">#30F2B8B5</color>
+    <color name="colorErrorDark">#B3261E</color>
+    <color name="colorDisabled">#46524B</color>
+    <color name="buttonStrokeColor">#91C5AE</color>
 </resources>

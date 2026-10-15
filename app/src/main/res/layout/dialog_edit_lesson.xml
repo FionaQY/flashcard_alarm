@@ -46,7 +46,7 @@
             android:layout_weight="1"
             android:text="@string/save"
             android:textColor="@android:color/white"
-            app:backgroundTint="@color/buttonStrokeColor"
+            app:backgroundTint="@color/colorPrimary"
             app:icon="@drawable/ic_save"
             app:iconGravity="textStart"
             app:iconTint="@android:color/white" />

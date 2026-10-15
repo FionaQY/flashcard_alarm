@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
-    <color name="colorError">#F44336</color>
-    <color name="colorErrorLight">#20F44336</color>
-    <color name="colorErrorDark">#D32F2F</color>
-    <color name="colorDisabled">#D3D3D3</color>
-    <color name="buttonStrokeColor">#6200EE</color>
+    <color name="colorPrimary">#38685A</color>
+    <color name="colorPrimaryDark">#244A3D</color>
+    <color name="colorPrimaryContainer">#DCEBE4</color>
+    <color name="colorOnPrimaryContainer">#18352B</color>
+    <color name="colorAccent">#527D6D</color>
+    <color name="colorOnAccent">#FFFFFF</color>
+    <color name="colorSecondary">#527D6D</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorSurface">#FBFCFA</color>
+    <color name="colorSurfaceVariant">#E8EEEA</color>
+    <color name="colorOnSurface">#18211C</color>
+    <color name="colorOnSurfaceVariant">#46534B</color>
+    <color name="colorOutline">#77847C</color>
+    <color name="colorBackground">#F3F6F3</color>
+    <color name="colorError">#B3261E</color>
+    <color name="colorErrorLight">#20B3261E</color>
+    <color name="colorErrorDark">#8C1D18</color>
+    <color name="colorDisabled">#C8D0CB</color>
+    <color name="buttonStrokeColor">#527D6D</color>
 </resources>

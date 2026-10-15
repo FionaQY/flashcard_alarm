@@ -10,7 +10,7 @@
         android:layout_width="2dp"
         android:layout_height="60dp"
         android:layout_centerHorizontal="true"
-        android:background="#444" />
+        android:background="?attr/colorSurfaceVariant" />
 
     <ImageView
         android:id="@+id/light_bulb"

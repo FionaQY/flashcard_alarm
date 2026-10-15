@@ -6,20 +6,10 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.language_alarm.R;
-import com.example.language_alarm.models.Flashcard;
-
-import java.util.ArrayList;
-import java.util.Locale;
 
 public class ResultsActivity extends AppCompatActivity {
-
-    private ArrayList<Flashcard> flashcards;
-    private ArrayList<Boolean> answerResults;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,20 +18,15 @@ public class ResultsActivity extends AppCompatActivity {
         TextView totalQuestionsText = findViewById(R.id.text_total_questions);
         TextView correctAnswersText = findViewById(R.id.text_correct_answers);
         TextView incorrectAnswersText = findViewById(R.id.text_incorrect_answers);
-        RecyclerView resultsRecyclerView = findViewById(R.id.recycler_results_list);
 
         Intent intent = getIntent();
         int totalQuestions = intent.getIntExtra("totalQuestions", 0);
         int correctAnswers = intent.getIntExtra("correctAnswers", 0);
         int incorrectAnswers = totalQuestions - correctAnswers;
 
-        totalQuestionsText.setText(String.format(Locale.US, "Total Questions: %d", totalQuestions));
-        correctAnswersText.setText(String.format(Locale.US, "Correct Answers: %d", correctAnswers));
-        incorrectAnswersText.setText(String.format(Locale.US, "Incorrect Answers: %d", incorrectAnswers));
-
-        resultsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        // Set up adapter to display question details with answers.
-        // resultsRecyclerView.setAdapter(new ResultSummaryAdapter(flashcards, answerResults));
+        totalQuestionsText.setText(getString(R.string.total_questions_format, totalQuestions));
+        correctAnswersText.setText(getString(R.string.correct_answers_format, correctAnswers));
+        incorrectAnswersText.setText(getString(R.string.incorrect_answers_format, incorrectAnswers));
 
         findViewById(R.id.button_retry).setOnClickListener(v -> {
             // Retry the quiz intent

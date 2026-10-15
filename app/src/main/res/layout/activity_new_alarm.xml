@@ -192,7 +192,7 @@
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:textSize="16sp"
-        app:backgroundTint="?attr/colorAccent"
+        app:backgroundTint="?attr/colorPrimary"
         app:cornerRadius="8dp"
         app:icon="@drawable/ic_ringtone"
         app:iconGravity="textStart"

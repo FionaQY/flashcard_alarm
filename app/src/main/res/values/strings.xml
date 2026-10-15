@@ -62,5 +62,10 @@
     <string name="skip_question">Skip Question</string>
     <string name="quiz_results">Quiz Results</string>
     <string name="try_again">Try Again</string>
-    <string name="back_to_lessons">Back to Lessons</string>
+    <string name="back_to_lessons">Close</string>
+    <string name="lesson_complete">Lesson complete</string>
+    <string name="lesson_complete_message">A little practice goes a long way. Nice work!</string>
+    <string name="total_questions_format">Total questions: %1$d</string>
+    <string name="correct_answers_format">Correct answers: %1$d</string>
+    <string name="incorrect_answers_format">Incorrect answers: %1$d</string>
 </resources>
